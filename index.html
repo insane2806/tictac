@@ -27,10 +27,19 @@
             color: white; padding: 6px; border-radius: 50%; cursor: pointer; font-size: 0.9rem;
         }
 
+        /* MENU ONLINE */
         .menu-online {
             position: absolute; top: 60px; background: rgba(10, 10, 20, 0.98);
             padding: 15px; border-radius: 15px; border: 1px solid #6200ee;
             width: 260px; text-align: center; display: none; z-index: 101;
+        }
+
+        /* CAIXA DE PEDIDO (MODAL) */
+        #painelPedido {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #1e2030; border: 2px solid #6200ee; padding: 20px;
+            border-radius: 20px; text-align: center; z-index: 200; display: none;
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
         }
 
         #idDisplay { color: #10b981; font-family: monospace; font-size: 1.3rem; font-weight: bold; background: #000; padding: 5px; border-radius: 8px; margin: 10px 0; display: block; }
@@ -50,24 +59,22 @@
             display: grid; grid-template-columns: repeat(3, 90px); gap: 12px;
             background: rgba(255, 255, 255, 0.02); padding: 15px; border-radius: 20px;
             border: 1px solid rgba(255,255,255,0.05);
-            transition: background 0.5s ease;
+            transition: all 0.3s ease;
         }
 
-        /* ANIMAÇÃO DE IMPACTO SECO E COR DE PERDIÇÃO */
+        /* ANIMAÇÃO VELHA DE PERDIÇÃO */
         .impacto-velha { 
             animation: impactQuick 0.4s ease-out forwards; 
             background: rgba(80, 0, 0, 0.9) !important;
             border-color: #550000 !important;
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
         }
 
         @keyframes impactQuick {
             0% { transform: scale(1); }
-            15% { transform: scale(1.08) translate(8px, -8px); }
-            30% { transform: translate(-8px, 8px); }
-            45% { transform: translate(8px, 8px); }
-            60% { transform: translate(-8px, -8px); }
-            75% { transform: scale(1) translate(0, 0); }
+            20% { transform: scale(1.1) translate(10px, -10px); }
+            40% { transform: translate(-10px, 10px); }
+            60% { transform: translate(10px, 10px); }
+            80% { transform: translate(-10px, -10px); }
             100% { transform: scale(1); }
         }
 
@@ -82,6 +89,11 @@
 
         .status { margin-top: 20px; font-weight: bold; font-size: 1.2rem; height: 30px; text-align: center; }
 
+        button.btn-acao {
+            padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer; font-weight: bold; margin: 5px;
+        }
+        .btn-aceitar { background: #10b981; color: white; }
+        .btn-recusar { background: #f43f5e; color: white; }
         button.principal {
             margin-top: 20px; background: #6200ee; color: white; border: none;
             padding: 14px 35px; border-radius: 50px; font-weight: bold; cursor: pointer;
@@ -95,11 +107,17 @@
         <button class="btn-online-toggle" onclick="toggleOnlineMenu()">🌐</button>
     </div>
 
+    <div id="painelPedido">
+        <p id="msgPedido">Alguém quer jogar!</p>
+        <button class="btn-acao btn-aceitar" onclick="repostaPedido(true)">ACEITAR</button>
+        <button class="btn-acao btn-recusar" onclick="repostaPedido(false)">RECUSAR</button>
+    </div>
+
     <div class="menu-online" id="menuOnline">
         <small>Seu Código Multiplayer:</small>
         <span id="idDisplay">...</span>
         <input type="text" id="idAmigo" style="width:85%; background:#000; color:white; border:1px solid #333; padding:8px; border-radius:8px; margin-bottom:10px" placeholder="Código do amigo" maxlength="5">
-        <button style="background:#10b981; border:none; color:white; padding:10px; border-radius:8px; width:100%; font-weight:bold; cursor:pointer;" onclick="conectar()">Conectar Agora</button>
+        <button style="background:#6200ee; border:none; color:white; padding:10px; border-radius:8px; width:100%; font-weight:bold; cursor:pointer;" onclick="conectar()">Conectar</button>
     </div>
 
     <div class="setup-nomes">
@@ -139,26 +157,51 @@
         const statusTxt = document.getElementById('status');
         const tab = document.getElementById('tabuleiro');
         let jAtual = "X", ativo = true, estado = ["","","","","","","","",""];
-        let pX = 0, pO = 0, nX = "X", nO = "O", online = false, minhaVez = true, meuSimbolo = "X", conn;
+        let pX = 0, pO = 0, nX = "X", nO = "O", online = false, minhaVez = true, meuSimbolo = "X", conn, tempConn;
 
         const cod = Math.floor(10000 + Math.random() * 90000).toString();
         const peer = new Peer(cod);
+
         peer.on('open', id => document.getElementById('idDisplay').innerText = id);
-        peer.on('connection', c => { 
-            conn = c; online = true; meuSimbolo = "X"; minhaVez = true; 
-            setupConn(); statusTxt.innerText = "Sua Vez!"; 
-            document.getElementById('menuOnline').style.display="none"; 
+
+        // RECEBENDO PEDIDO DE CONEXÃO
+        peer.on('connection', c => {
+            tempConn = c;
+            tocarSom(600, 'sine', 0.3); // Som de aviso
+            document.getElementById('msgPedido').innerText = `O código ${c.peer} quer jogar!`;
+            document.getElementById('painelPedido').style.display = 'block';
         });
+
+        function repostaPedido(aceitou) {
+            document.getElementById('painelPedido').style.display = 'none';
+            if(aceitou) {
+                conn = tempConn;
+                online = true; meuSimbolo = "X"; minhaVez = true;
+                setupConn();
+                statusTxt.innerText = "Sua Vez!";
+                document.getElementById('menuOnline').style.display="none";
+                conn.send({t: 'aceito'}); // Avisa que aceitou
+            } else {
+                tempConn.send({t: 'recusado'});
+                setTimeout(() => tempConn.close(), 500);
+            }
+        }
 
         function conectar() {
             const id = document.getElementById('idAmigo').value;
-            conn = peer.connect(id); online = true; meuSimbolo = "O"; minhaVez = false; 
-            setupConn(); statusTxt.innerText = "Aguardando X..."; 
-            document.getElementById('menuOnline').style.display="none";
+            statusTxt.innerText = "Pedindo permissão...";
+            conn = peer.connect(id);
+            setupConn();
         }
 
         function setupConn() {
             conn.on('data', d => { 
+                if(d.t==='aceito') { 
+                    online = true; meuSimbolo = "O"; minhaVez = false; 
+                    statusTxt.innerText = "Aguardando X..."; 
+                    document.getElementById('menuOnline').style.display="none";
+                }
+                if(d.t==='recusado') { statusTxt.innerText = "Pedido Recusado!"; online = false; }
                 if(d.t==='j'){ marcar(d.i, meuSimbolo==='X'?'O':'X'); minhaVez=true; statusTxt.innerText="Sua Vez!"; }
                 if(d.t==='r') resetLocal();
             });
@@ -207,8 +250,8 @@
             }
             if(!estado.includes("")) { 
                 statusTxt.innerText = "EMPATE!"; 
-                tocarSom(100, 'sawtooth', 0.6, 0.25); // Som Grave
-                tab.classList.add('impacto-velha'); // O "Tranco" imersivo
+                tocarSom(100, 'sawtooth', 0.6, 0.25); 
+                tab.classList.add('impacto-velha'); 
                 ativo = false; 
             }
         }
