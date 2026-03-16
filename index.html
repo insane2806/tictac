@@ -115,7 +115,8 @@
 
         .placar { display: flex; gap: 35px; margin-bottom: 45px; background: rgba(5, 5, 10, 0.9); padding: 12px 35px; border-radius: 50px; border: 1.5px solid rgba(255,255,255,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.7); font-size: 0.95rem; font-weight: 700; align-items: center; backdrop-filter: blur(5px); }
         
-        .x-player, .o-player { position: relative; } 
+        .x-player, .o-player { position: relative; display: flex; align-items: center; justify-content: center; } 
+        
         .x-player span:first-child, .o-player span:first-child { font-weight: normal; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
         .x-player span:last-child { color: var(--neon-red); font-size: 1.3rem; margin-left: 8px; text-shadow: 0 0 12px var(--neon-red), 0 0 20px var(--neon-red); }
         .o-player span:last-child { color: var(--neon-cyan); font-size: 1.3rem; margin-left: 8px; text-shadow: 0 0 12px var(--neon-cyan), 0 0 20px var(--neon-cyan); }
@@ -149,10 +150,14 @@
         .btn-reacao:hover { transform: scale(1.2); box-shadow: 0 0 15px var(--neon-cyan); background: rgba(5, 217, 232, 0.2); }
         
         .reacao-flutuante {
-            position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
-            font-size: 2.5rem; pointer-events: none; animation: floatUpAndFade 2s ease-out forwards; z-index: 9999;
+            position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+            font-size: 2rem; pointer-events: none; animation: floatUpAndFade 2s ease-out forwards; z-index: 9999;
         }
-        @keyframes floatUpAndFade { 0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); } 15% { opacity: 1; transform: translate(-50%, -20px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -80px) scale(1); } }
+        @keyframes floatUpAndFade { 
+            0% { opacity: 0; transform: translate(-50%, 10px) scale(0.5); } 
+            15% { opacity: 1; transform: translate(-50%, -10px) scale(1.2); } 
+            100% { opacity: 0; transform: translate(-50%, -60px) scale(1); } 
+        }
 
         /* RODAPÉ E CRÉDITOS */
         .credito-footer { position: absolute; bottom: 25px; display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 0.8; transition: opacity 0.3s; }
@@ -234,7 +239,7 @@
         </div>
 
         <div id="setupGlobal">
-            <h3 id="statusGlobal" style="color:var(--neon-cyan); text-transform:uppercase; letter-spacing:2px; text-shadow: 0 0 10px var(--neon-cyan); text-align:center;">Procurando Oponente...</h3>
+            <h3 id="statusGlobal" style="color:var(--neon-cyan); text-transform:uppercase; letter-spacing:2px; text-shadow: 0 0 10px var(--neon-cyan); text-align:center;">Procurando Partida...</h3>
             <div class="loader-global"></div>
             <button class="btn-menu btn-recusar" style="width:200px;" onclick="cancelarGlobal()">Cancelar</button>
         </div>
@@ -322,8 +327,11 @@
 
         // --- SISTEMA DE REAÇÕES FLUTUANTES NO NICK ---
         function enviarReacao(emoji) { mostrarReacao(emoji, meuSimbolo); if(online && conn) conn.send({t: 'react', e: emoji}); }
+        
         function mostrarReacao(emoji, origem) {
-            const el = document.createElement('div'); el.innerText = emoji; el.className = 'reacao-flutuante';
+            const el = document.createElement('div'); 
+            el.innerText = emoji; 
+            el.className = 'reacao-flutuante';
             const container = origem === 'X' ? document.querySelector('.x-player') : document.querySelector('.o-player');
             if (container) container.appendChild(el); else document.body.appendChild(el);
             setTimeout(() => el.remove(), 2000);
@@ -333,6 +341,7 @@
         let nomeX = "X", nomeO = "O", jAtual = "X", quemComeca = "X", ativo = true, estado = ["","","","","","","","",""];
         let pX = 0, pO = 0, online = false, minhaVez = true, meuSimbolo = "X", conn, connProvisoria = null;
         let contraIA = false, dificuldadeIA = 'ultra', buscandoGlobal = false, salaGlobalAlvo = "";
+        let globalRoomIndex = 1;
         let meuStream = null, micAtivo = false, amigoMutado = false;
         
         let peer;
@@ -342,36 +351,51 @@
             peer = new Peer(id);
             
             peer.on('open', currentId => {
-                document.getElementById('meuId').innerText = currentId;
-                if(buscandoGlobal) {
-                    document.getElementById('statusGlobal').innerText = "Sala Criada! Aguardando jogador...";
+                document.getElementById('meuId').innerText = currentId.startsWith("NeonGlb") ? "GLOBAL" : currentId;
+                if(buscandoGlobal && currentId.startsWith("NeonGlb")) {
+                    document.getElementById('statusGlobal').innerText = "AGUARDANDO JOGADOR...";
                 }
             });
             
             peer.on('connection', c => {
-                if (online || contraIA || document.getElementById('modalConvite').style.display === 'flex') {
-                    c.on('open', () => { c.send({t: 'rej_ocupado'}); setTimeout(() => c.close(), 500); });
-                    return;
-                }
-                connProvisoria = c;
+                c.on('open', () => {
+                    if (online || contraIA || document.getElementById('modalConvite').style.display === 'flex' || (!buscandoGlobal && !online)) {
+                        c.send({t: 'rej_ocupado'}); setTimeout(() => c.close(), 500);
+                        return;
+                    }
+                });
+
                 c.on('data', d => {
                     if(d.t === 'req') {
+                        connProvisoria = c;
                         document.getElementById('textoConvite').innerText = `O jogador ${d.nome || 'Desconhecido'} quer jogar com você!`;
                         document.getElementById('nomeConvite').value = document.getElementById('nomeOnlineGeral').value.trim();
                         document.getElementById('erroConvite').style.display = 'none';
                         document.getElementById('modalConvite').style.display = 'flex';
                         nomeX = d.nome || "Adversário"; 
-                    } else if(d.t === 'req_global' && buscandoGlobal) {
-                        // Alguém achou minha sala global!
-                        conn = connProvisoria;
-                        nomeO = d.nome || "Oponente";
-                        nomeX = document.getElementById('nomeOnlineGeral').value.trim();
-                        conn.send({t: 'acc_global', nome: nomeX});
-                        
-                        online = true; contraIA = false; meuSimbolo = "X"; minhaVez = true; // Eu criei a sala, sou o Host (X)
-                        buscandoGlobal = false;
-                        setupConn();
-                        iniciarJogo('online');
+                    } else if(d.t === 'req_global') {
+                        if (buscandoGlobal) {
+                            conn = c;
+                            nomeO = d.nome || "Oponente";
+                            nomeX = document.getElementById('nomeOnlineGeral').value.trim();
+                            conn.send({t: 'acc_global', nome: nomeX});
+                            
+                            online = true; contraIA = false; meuSimbolo = "X"; minhaVez = true; 
+                            buscandoGlobal = false;
+                            
+                            document.getElementById('statusGlobal').innerText = "PARTIDA ENCONTRADA!";
+                            document.getElementById('statusGlobal').style.color = "var(--neon-green)";
+                            document.getElementById('statusGlobal').style.textShadow = "0 0 10px var(--neon-green)";
+                            
+                            setTimeout(() => {
+                                document.getElementById('statusGlobal').style.color = "var(--neon-cyan)";
+                                document.getElementById('statusGlobal').style.textShadow = "0 0 10px var(--neon-cyan)";
+                                setupConn();
+                                iniciarJogo('online');
+                            }, 800);
+                        } else {
+                            c.send({t: 'rej_ocupado'});
+                        }
                     }
                 });
             });
@@ -384,19 +408,23 @@
             peer.on('error', err => {
                 if(err.type === 'peer-unavailable') {
                     if(buscandoGlobal) {
-                        // Ninguém na sala global alvo. Eu assumo a sala e viro o Host!
+                        document.getElementById('statusGlobal').innerText = "Procurando Partida...";
                         peer.destroy();
                         setTimeout(() => { iniciarPeer(salaGlobalAlvo); }, 500);
                     } else {
-                        document.getElementById('btnConectar').innerText = "Conectar";
-                        document.getElementById('erroOnline').innerText = "Jogador não encontrado!";
-                        document.getElementById('erroOnline').style.display = 'block';
+                        const btn = document.getElementById('btnConectar');
+                        const erroOnline = document.getElementById('erroOnlineAmigo');
+                        if (btn) btn.innerText = "Conectar";
+                        if (erroOnline) {
+                            erroOnline.innerText = "Jogador não encontrado!";
+                            erroOnline.style.display = 'block';
+                        }
                     }
                 }
             });
         }
         
-        iniciarPeer(meuIDOriginal); // Inicializa o peer normal na abertura
+        iniciarPeer(meuIDOriginal); 
 
         // MICROFONE
         async function toggleMic() {
@@ -467,29 +495,42 @@
         function abrirGlobal() {
             if(!validarNomeGeral()) return;
             buscandoGlobal = true;
+            globalRoomIndex = 1;
             mostrarSetup('global');
             buscarOponenteGlobal();
         }
 
         function buscarOponenteGlobal() {
-            document.getElementById('statusGlobal').innerText = "Rastreando Universo...";
-            let roomNum = Math.floor(Math.random() * 5) + 1; // 1 a 5 para forçar encontros
-            salaGlobalAlvo = "NeonGlb_" + roomNum;
+            if(!buscandoGlobal) return;
+            document.getElementById('statusGlobal').innerText = "Procurando Partida... (" + globalRoomIndex + ")";
+            salaGlobalAlvo = "NeonGlb_" + globalRoomIndex;
 
             let tempConn = peer.connect(salaGlobalAlvo);
             tempConn.on('open', () => {
-                // Achou host
                 conn = tempConn;
                 const meuNome = document.getElementById('nomeOnlineGeral').value.trim();
                 conn.send({t: 'req_global', nome: meuNome});
+                
                 conn.on('data', d => {
                     if (d.t === 'acc_global') {
                         nomeO = meuNome; nomeX = d.nome || "Adversário";
                         online = true; contraIA = false; meuSimbolo = "O"; minhaVez = false; 
                         buscandoGlobal = false;
-                        setupConn(); iniciarJogo('online');
+                        
+                        document.getElementById('statusGlobal').innerText = "PARTIDA ENCONTRADA!";
+                        document.getElementById('statusGlobal').style.color = "var(--neon-green)";
+                        document.getElementById('statusGlobal').style.textShadow = "0 0 10px var(--neon-green)";
+                        
+                        setTimeout(() => {
+                            document.getElementById('statusGlobal').style.color = "var(--neon-cyan)";
+                            document.getElementById('statusGlobal').style.textShadow = "0 0 10px var(--neon-cyan)";
+                            setupConn(); iniciarJogo('online');
+                        }, 800);
+                        
                     } else if (d.t === 'rej_ocupado') {
-                        buscarOponenteGlobal(); // Tenta outra
+                        globalRoomIndex++;
+                        if(globalRoomIndex > 20) globalRoomIndex = 1; 
+                        buscarOponenteGlobal();
                     }
                 });
             });
@@ -497,8 +538,11 @@
 
         function cancelarGlobal() {
             buscandoGlobal = false;
-            peer.destroy(); // Destroi a sala global se eu for host
-            setTimeout(() => { iniciarPeer(meuIDOriginal); mostrarSetup('onlineMenu'); }, 500);
+            if(peer && peer.id && peer.id.startsWith("NeonGlb_")) {
+                peer.destroy(); 
+                setTimeout(() => { iniciarPeer(Math.floor(10000 + Math.random() * 89999).toString()); }, 500);
+            }
+            mostrarSetup('onlineMenu');
         }
 
         function setupConn() {
@@ -540,14 +584,21 @@
             document.getElementById('telaJogo').style.display = 'none';
             document.getElementById('telaInicial').style.display = 'flex';
             
-            mostrarSetup('menuPrincipal');
+            mostrarSetup('menuPrincipal'); 
             document.getElementById('botoesMenu').style.display = 'flex';
             
             document.getElementById('btnAudio').style.display = 'flex';
             document.getElementById('btnMic').style.display = 'none';
             document.getElementById('btnMutarAmigo').style.display = 'none';
 
+            buscandoGlobal = false;
+
             if(conn) { conn.close(); online = false; }
+            
+            if(peer && peer.id && peer.id.startsWith("NeonGlb_")) {
+                peer.destroy();
+                setTimeout(() => { iniciarPeer(Math.floor(10000 + Math.random() * 89999).toString()); }, 500);
+            }
             
             if(meuStream) {
                 meuStream.getTracks().forEach(t => t.stop());
@@ -668,13 +719,15 @@
             return movimentos[melhorMovimento];
         }
 
-        document.querySelectorAll('.celula').forEach(c => c.addEventListener('click', e => {
-            const i = e.target.dataset.index;
-            if(estado[i] !== "" || !ativo || (online && !minhaVez) || (contraIA && jAtual === 'O')) return;
-            marcar(i, online ? meuSimbolo : jAtual);
-            if(online) { conn.send({t:'j', i:i}); minhaVez = false; atualizarStatus(); }
-            else { jAtual = jAtual === 'X' ? 'O' : 'X'; atualizarStatus(); if (contraIA && ativo && jAtual === 'O') jogadaIA(); }
-        }));
+        document.querySelectorAll('.celula').forEach(c => {
+            c.addEventListener('click', e => {
+                const i = e.target.dataset.index;
+                if(estado[i] !== "" || !ativo || (online && !minhaVez) || (contraIA && jAtual === 'O')) return;
+                marcar(i, online ? meuSimbolo : jAtual);
+                if(online) { conn.send({t:'j', i:i}); minhaVez = false; atualizarStatus(); }
+                else { jAtual = jAtual === 'X' ? 'O' : 'X'; atualizarStatus(); if (contraIA && ativo && jAtual === 'O') jogadaIA(); }
+            });
+        });
         
         function marcar(i, s) {
             som(600, 0.1); estado[i] = s;
@@ -735,9 +788,14 @@
             const tabuleiro = document.getElementById('tabuleiro');
             tabuleiro.classList.remove('shake-empate', 'board-win-x', 'board-win-o');
             document.body.classList.remove('flash-red', 'flash-win-x', 'flash-win-o');
-            document.getElementById('status').style.color = "#fff"; document.getElementById('status').classList.remove('status-vitoria');
+            
+            const statusEl = document.getElementById('status');
+            statusEl.style.color = "#fff";
+            statusEl.classList.remove('status-vitoria');
+            
             document.getElementById('btnNovaPartida').style.display = 'none';
             atualizarStatus(); 
+
             if (contraIA && jAtual === 'O') jogadaIA();
         }
     </script>
