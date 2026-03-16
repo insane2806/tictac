@@ -149,11 +149,11 @@
         .x-player { color: var(--neon-red); text-shadow: 0 0 15px var(--neon-red), 0 0 25px var(--neon-red), 0 0 35px rgba(255, 42, 109, 0.5); }
         .o-player { color: var(--neon-cyan); text-shadow: 0 0 15px var(--neon-cyan), 0 0 25px var(--neon-cyan), 0 0 35px rgba(5, 217, 232, 0.5); }
         
-        #status { margin-top: 35px; font-weight: 700; font-size: 1.3rem; color: #fff; text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 0 10px rgba(255,255,255,0.5); transition: color 0.3s, transform 0.3s; text-align: center; }
+        #status { margin-top: 35px; font-weight: 700; font-size: 1.2rem; color: #fff; text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 0 10px rgba(255,255,255,0.5); transition: color 0.3s, transform 0.3s; text-align: center; }
         .status-vitoria { animation: pulseStatus 0.6s infinite alternate; }
         @keyframes pulseStatus { 0% { transform: scale(1); filter: brightness(1); } 100% { transform: scale(1.15); filter: brightness(1.5); } }
 
-        /* SISTEMA DE REAÇÕES (EMOJIS) MENORES NO NICK */
+        /* SISTEMA DE REAÇÕES FLUTUANTES NO NICK */
         #barraReacoes { display: none; justify-content: center; gap: 15px; margin-top: 20px; }
         .btn-reacao { background: rgba(255,255,255,0.1); border: 1px solid var(--neon-cyan); border-radius: 50%; width: 45px; height: 45px; font-size: 1.5rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(5, 217, 232, 0.2); }
         .btn-reacao:hover { transform: scale(1.2); box-shadow: 0 0 15px var(--neon-cyan); background: rgba(5, 217, 232, 0.2); }
@@ -161,7 +161,7 @@
         .reacao-flutuante {
             position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
             font-size: 2.2rem !important; 
-            pointer-events: none; animation: floatUpAndFade 2s ease-out forwards; z-index: 9999;
+            pointer-events: none; animation: floatUpAndFade 2.5s ease-out forwards; z-index: 9999;
         }
         @keyframes floatUpAndFade { 
             0% { opacity: 0; transform: translate(-50%, 10px) scale(0.5); } 
@@ -337,6 +337,13 @@
             }
         }
 
+        document.body.addEventListener('click', function autoIniciaSom() {
+            if (document.getElementById('telaJogo').style.display !== 'flex' && !musicaAtiva && elemMusica.paused) {
+                toggleAudio();
+                document.body.removeEventListener('click', autoIniciaSom);
+            }
+        }, { once: true });
+
         // --- EFEITOS SONOROS SYNTHWAVE ---
         function som(f, d) {
             try {
@@ -437,14 +444,13 @@
         let heartbeatTimer;
         let lastPong = Date.now();
 
-        let peer;
-        
-        // Função para gerar um ID numérico limpo
+        // O ID é gerado FIXO no início 
         function gerarID() {
             return Math.floor(10000 + Math.random() * 89999).toString();
         }
 
-        const meuIDOriginal = gerarID();
+        let meuIDOriginal = gerarID();
+        let peer;
 
         function iniciarPeer(idToUse) {
             peer = new Peer(idToUse);
@@ -460,8 +466,9 @@
             
             peer.on('connection', c => {
                 c.on('open', () => {
-                    // Impede intrusos se você já estiver jogando ou buscando partida global
-                    if (online || contraIA || document.getElementById('modalConvite').style.display === 'flex' || buscandoGlobal) {
+                    let isBusy = online || contraIA || document.getElementById('modalConvite').style.display === 'flex';
+                    
+                    if (isBusy || (buscandoGlobal && !peer.id.startsWith("NeonGlb"))) {
                         c.send({t: 'rej_ocupado'});
                         setTimeout(() => c.close(), 500);
                         return;
@@ -529,7 +536,6 @@
                         }
                     }
                 } else if (err.type === 'unavailable-id') {
-                    // Alguém pegou a sala global milissegundos antes
                     if(buscandoGlobal) {
                         buscarOponenteGlobal();
                     }
@@ -537,7 +543,6 @@
             });
         }
 
-        // Inicia com o ID fixo gerado
         iniciarPeer(meuIDOriginal);
 
         // --- MICROFONE ---
@@ -659,16 +664,14 @@
         function abrirGlobal() {
             if(!validarNomeGeral()) return;
             buscandoGlobal = true;
-            
-            // Escolhe uma sala aleatória entre 1 e 10 para aumentar as chances de bater
-            globalRoomIndex = Math.floor(Math.random() * 10) + 1;
+            globalRoomIndex = 1;
             mostrarSetup('global');
             buscarOponenteGlobal();
         }
 
         function buscarOponenteGlobal() {
             if(!buscandoGlobal) return;
-            document.getElementById('statusGlobal').innerText = "Procurando Partida...";
+            document.getElementById('statusGlobal').innerText = "Procurando Partida... (" + globalRoomIndex + ")";
             salaGlobalAlvo = "NeonGlb_" + globalRoomIndex;
 
             let tempConn = peer.connect(salaGlobalAlvo);
@@ -700,7 +703,7 @@
                         
                     } else if (d.t === 'rej_ocupado') {
                         globalRoomIndex++;
-                        if(globalRoomIndex > 10) globalRoomIndex = 1; 
+                        if(globalRoomIndex > 20) globalRoomIndex = 1; 
                         buscarOponenteGlobal();
                     }
                 });
@@ -711,12 +714,12 @@
             buscandoGlobal = false;
             if(peer && peer.id && peer.id.startsWith("NeonGlb_")) {
                 peer.destroy(); 
-                setTimeout(() => { iniciarPeer(gerarID()); }, 500);
+                setTimeout(() => { iniciarPeer(meuIDOriginal); }, 500);
             }
             mostrarSetup('onlineMenu');
         }
 
-        // --- SISTEMA DE PING E DESCONEXÃO ---
+        // --- SISTEMA DE PING E DESCONEXÃO (CORRIGIDO E SEGURO) ---
         function setupConn() {
             conn.on('data', d => {
                 if(d.t === 'j') { 
@@ -776,32 +779,52 @@
             if(!ativo || !online) return; 
             
             ativo = false;
-            online = false;
+            online = false; // Desliga a rede para não enviar mais pacotes
             document.getElementById('alertaWifi').style.display = 'none';
             
-            const statusEl = document.getElementById('status');
-            statusEl.innerText = "ADVERSÁRIO FUGIU! VOCÊ VENCEU!";
-            statusEl.style.color = "var(--neon-green)";
-            statusEl.classList.add('status-vitoria');
+            // Efeito visual profundo da vitória
+            document.body.style.animation = "none";
+            void document.body.offsetWidth;
+            document.body.style.animation = "flashWinX 0.6s ease-out"; // Brilha a tela
+            document.getElementById('tabuleiro').classList.add(meuSimbolo === 'X' ? 'board-win-x' : 'board-win-o');
             
             meuSimbolo === 'X' ? pX++ : pO++;
             document.getElementById('sX').innerText = pX; 
             document.getElementById('sO').innerText = pO;
             
-            winSound();
-            document.getElementById('btnNovaPartida').style.display = 'none';
+            somVitoria(); // Chama o som correto
+            document.getElementById('btnNovaPartida').style.display = 'none'; // Some o botão de nova partida
+            
+            const statusEl = document.getElementById('status');
+            statusEl.style.color = "var(--neon-green)";
+            statusEl.classList.add('status-vitoria');
+            
+            // Contagem regressiva para quitar
+            let segundos = 5;
+            statusEl.innerText = `FUGIU! VITÓRIA!\nSAINDO EM ${segundos}...`;
+            
+            let contagem = setInterval(() => {
+                segundos--;
+                if(segundos > 0) {
+                    statusEl.innerText = `FUGIU! VITÓRIA!\nSAINDO EM ${segundos}...`;
+                } else {
+                    clearInterval(contagem);
+                    sairDaPartida(); // Quita a partida automaticamente para o lobby sem bugs
+                }
+            }, 1000);
         }
 
         function sairDaPartida() {
+            clearInterval(heartbeatTimer);
             if (online && conn && conn.open) {
                 try { conn.send({t: 'left'}); } catch(e) {}
             }
             
             document.getElementById('telaJogo').style.display = 'none';
             document.getElementById('telaInicial').style.display = 'flex';
-            document.getElementById('botoesMenu').style.display = 'flex';
             
-            ['setupLocal','setupOnlineMenu','setupOnlineAmigo','setupGlobal','setupIA'].forEach(id => document.getElementById(id).style.display = 'none');
+            mostrarSetup('menuPrincipal');
+            document.getElementById('botoesMenu').style.display = 'flex';
             
             document.getElementById('btnAudio').style.display = 'flex';
             document.getElementById('btnMic').style.display = 'none';
@@ -818,10 +841,12 @@
             buscandoGlobal = false;
             if(conn) { conn.close(); }
             online = false;
+            ativo = false;
             
             if(peer) {
                 peer.destroy();
-                setTimeout(() => { iniciarPeer(gerarID()); }, 500); // Gera um novo ID limpo
+                meuIDOriginal = gerarID();
+                setTimeout(() => { iniciarPeer(meuIDOriginal); }, 500); 
             }
             
             if(meuStream) {
@@ -832,6 +857,15 @@
                 document.getElementById('iconeMicOff').style.display = 'block';
             }
 
+            // Limpa tudo pro próximo jogo não bugar
+            document.body.style.animation = "";
+            document.body.classList.remove('flash-red', 'flash-win-x', 'flash-win-o');
+            document.getElementById('tabuleiro').classList.remove('shake-empate', 'board-win-x', 'board-win-o');
+            const statusEl = document.getElementById('status');
+            statusEl.style.color = "#fff";
+            statusEl.classList.remove('status-vitoria');
+            statusEl.innerText = "SUA VEZ!";
+            
             resetLocal(); 
             pX = 0; pO = 0;
             document.getElementById('sX').innerText = pX; 
