@@ -12,6 +12,7 @@
             --neon-cyan: #05d9e8;
             --neon-purple: #9d4edd;
             --neon-green: #00ff7f;
+            --neon-yellow: #f1c40f;
             --bg-dark: #020205; 
         }
         
@@ -27,7 +28,7 @@
             transition: background-color 0.1s; 
         }
 
-        /* Efeitos Flash */
+        /* Efeitos Flash na Tela Inteira */
         .flash-red { animation: flashShock 0.4s ease-in-out; }
         @keyframes flashShock {
             0%, 100% { background-color: transparent; }
@@ -38,10 +39,18 @@
         }
 
         .flash-win-x { animation: flashWinX 0.6s ease-out; }
-        @keyframes flashWinX { 0%, 100% { background-color: transparent; } 20% { background-color: rgba(255, 42, 109, 0.4); } 80% { background-color: transparent; } }
+        @keyframes flashWinX {
+            0%, 100% { background-color: transparent; }
+            20% { background-color: rgba(255, 42, 109, 0.4); }
+            80% { background-color: transparent; }
+        }
 
         .flash-win-o { animation: flashWinO 0.6s ease-out; }
-        @keyframes flashWinO { 0%, 100% { background-color: transparent; } 20% { background-color: rgba(5, 217, 232, 0.4); } 80% { background-color: transparent; } }
+        @keyframes flashWinO {
+            0%, 100% { background-color: transparent; }
+            20% { background-color: rgba(5, 217, 232, 0.4); }
+            80% { background-color: transparent; }
+        }
 
         /* Fundo Dinâmico Galáxia */
         .background-animated {
@@ -59,7 +68,11 @@
             background-size: 300px 300px, 200px 200px, 100px 100px; background-position: 0 0, 50px 50px, 120px 120px;
             opacity: 0.7; animation: moveStars 40s linear infinite; 
         }
-        @keyframes moveStars { from { transform: translateY(0) translateX(0); } to { transform: translateY(300px) translateX(150px); } }
+
+        @keyframes moveStars {
+            from { transform: translateY(0) translateX(0); }
+            to { transform: translateY(300px) translateX(150px); }
+        }
 
         .background-animated::after {
             content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -67,16 +80,26 @@
                         radial-gradient(circle at 30% 70%, rgba(5, 217, 232, 0.1) 0%, transparent 60%);
             filter: blur(60px); animation: pulseNebula 15s ease-in-out infinite alternate;
         }
+
         @keyframes pulseNebula { 0% { opacity: 0.6; transform: scale(1); } 100% { opacity: 1; transform: scale(1.05); } }
 
-        /* Botão de Música */
-        .btn-audio {
+        /* Botões Canto Superior (Música, Mic, e Mutar Amigo) */
+        .btn-top-corner {
             position: absolute; top: 12px; right: 15px; background: rgba(5, 5, 10, 0.6);
             border: 1px solid var(--neon-cyan); border-radius: 50%; width: 36px; height: 36px;
             display: flex; align-items: center; justify-content: center; cursor: pointer;
             box-shadow: 0 0 10px rgba(5, 217, 232, 0.3); transition: 0.3s; z-index: 100;
         }
-        .btn-audio:hover { background: rgba(5, 217, 232, 0.2); box-shadow: 0 0 15px var(--neon-cyan); transform: scale(1.05); }
+        .btn-top-corner:hover { background: rgba(5, 217, 232, 0.2); box-shadow: 0 0 15px var(--neon-cyan); transform: scale(1.05); }
+        
+        .btn-top-corner-2 {
+            position: absolute; top: 12px; right: 60px; background: rgba(5, 5, 10, 0.6);
+            border: 1px solid var(--neon-cyan); border-radius: 50%; width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            box-shadow: 0 0 10px rgba(5, 217, 232, 0.3); transition: 0.3s; z-index: 100;
+        }
+        .btn-top-corner-2:hover { background: rgba(5, 217, 232, 0.2); box-shadow: 0 0 15px var(--neon-cyan); transform: scale(1.05); }
+
         .icone-som { width: 18px; height: 18px; fill: var(--neon-cyan); }
 
         /* Telas e Menus */
@@ -84,29 +107,64 @@
         #telaJogo { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; }
         
         .logo-container { margin-bottom: 40px; position: relative; text-align: center; }
-        .logo { font-size: 4.5rem; font-weight: 900; font-style: italic; letter-spacing: -3px; color: white; text-shadow: 0 0 15px rgba(255,255,255,0.9), 0 0 25px var(--neon-cyan), 0 0 35px var(--neon-cyan), 0 0 45px var(--neon-cyan); display: flex; align-items: center; justify-content: center; }
+        .logo { 
+            font-size: 4.5rem; font-weight: 900; font-style: italic; letter-spacing: -3px; color: white;
+            text-shadow: 0 0 15px rgba(255,255,255,0.9), 0 0 25px var(--neon-cyan), 0 0 35px var(--neon-cyan), 0 0 45px var(--neon-cyan);
+            display: flex; align-items: center; justify-content: center;
+        }
         .logo span { color: white; }
-        .sub { color: var(--neon-cyan); font-size: 0.8rem; letter-spacing: 5px; text-transform: uppercase; font-weight: 700; border: 1.5px solid var(--neon-cyan); border-radius: 20px; padding: 6px 18px; display: inline-block; margin-top: -12px; box-shadow: 0 0 15px rgba(5, 217, 232, 0.6), inset 0 0 7px rgba(5, 217, 232, 0.6); background: rgba(0, 0, 0, 0.6); }
+        .sub { 
+            color: var(--neon-cyan); font-size: 0.8rem; letter-spacing: 5px; text-transform: uppercase; font-weight: 700;
+            border: 1.5px solid var(--neon-cyan); border-radius: 20px; padding: 6px 18px; display: inline-block; margin-top: -12px;
+            box-shadow: 0 0 15px rgba(5, 217, 232, 0.6), inset 0 0 7px rgba(5, 217, 232, 0.6); background: rgba(0, 0, 0, 0.6);
+        }
 
         #botoesMenu { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 15px; }
         
-        .btn-menu, .btn-acao { width: 300px; padding: 18px; border-radius: 40px; border: none; font-weight: 700; cursor: pointer; font-size: 1.1rem; transition: 0.4s; text-transform: uppercase; letter-spacing: 2px; color: white; position: relative; overflow: hidden; }
-        .btn-menu::before, .btn-acao::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: 0.5s; }
+        .btn-menu, .btn-acao { 
+            width: 300px; padding: 18px; border-radius: 40px; border: none; font-weight: 700; cursor: pointer; font-size: 1.1rem; transition: 0.4s; text-transform: uppercase; letter-spacing: 2px; color: white; position: relative; overflow: hidden;
+        }
+        .btn-menu::before, .btn-acao::before {
+            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: 0.5s;
+        }
         .btn-menu:hover::before, .btn-acao:hover::before { left: 100%; }
+        .btn-menu:hover, .btn-acao:hover { transform: scale(1.03); }
         
         .btn-local { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.25); backdrop-filter: blur(8px); }
-        .btn-local:hover { background: rgba(255, 255, 255, 0.15); border-color: rgba(255,255,255,0.4); }
-        
         .btn-online, .btn-acao { background: linear-gradient(90deg, #3d0a6b, #8a2be2, #3d0a6b); border: 2px solid var(--neon-purple); box-shadow: 0 0 20px var(--neon-purple), inset 0 0 12px rgba(157, 78, 221, 0.6); }
-        .btn-online:hover, .btn-acao:hover { box-shadow: 0 0 35px var(--neon-purple), inset 0 0 20px rgba(157, 78, 221, 0.9); transform: scale(1.03); }
-        
         .btn-ia { background: linear-gradient(90deg, #002244, #05d9e8, #002244); border: 2px solid var(--neon-cyan); box-shadow: 0 0 20px var(--neon-cyan), inset 0 0 12px rgba(5, 217, 232, 0.6); }
-        .btn-ia:hover { box-shadow: 0 0 35px var(--neon-cyan), inset 0 0 20px rgba(5, 217, 232, 0.9); transform: scale(1.03); }
         
+        /* Botões Dificuldade I.A. */
+        .btn-noob { background: rgba(0, 255, 127, 0.1); border: 2px solid var(--neon-green); color: var(--neon-green); margin-bottom: 10px; width: 260px; }
+        .btn-mestre { background: rgba(241, 196, 15, 0.1); border: 2px solid var(--neon-yellow); color: var(--neon-yellow); margin-bottom: 10px; width: 260px; }
+        .btn-ultra { background: rgba(255, 42, 109, 0.1); border: 2px solid var(--neon-red); color: var(--neon-red); margin-bottom: 10px; width: 260px; }
+
         .btn-acao { width: auto; padding: 18px 50px; margin-top: 30px; }
 
-        .input-nome { background: rgba(0,0,0,0.7); border: 1.5px solid rgba(255,255,255,0.15); color: white; padding: 18px; border-radius: 40px; width: 300px; text-align: center; font-size: 1rem; outline: none; margin-bottom: 15px; font-family: inherit; transition: 0.3s; }
+        .input-nome { 
+            background: rgba(0,0,0,0.7); border: 1.5px solid rgba(255,255,255,0.15); color: white; padding: 18px; border-radius: 40px; width: 300px; text-align: center; font-size: 1rem; outline: none; margin-bottom: 15px; font-family: inherit; transition: 0.3s;
+        }
         .input-nome:focus { border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(5, 217, 232, 0.4); background: rgba(0,0,0,0.8); }
+
+        /* Mensagens de Erro Neon */
+        .erro-input {
+            color: var(--neon-red);
+            font-size: 0.8rem;
+            margin-bottom: 15px;
+            margin-top: -5px;
+            display: none;
+            font-weight: bold;
+            text-shadow: 0 0 10px var(--neon-red);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: shakeErro 0.3s ease-in-out;
+        }
+        @keyframes shakeErro {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
 
         #setupOnline, #setupLocal, #setupIA { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; animation: fadeIn 0.4s ease forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -114,15 +172,19 @@
         /* Modal de Convite */
         #modalConvite { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(8px); animation: fadeIn 0.3s; }
         .modal-content { background: rgba(10,10,20,0.95); border: 2px solid var(--neon-cyan); padding: 40px 30px; border-radius: 25px; text-align: center; box-shadow: 0 0 40px rgba(5,217,232,0.3), inset 0 0 20px rgba(5,217,232,0.2); max-width: 90%; width: 350px; }
-        .btn-aceitar { background: linear-gradient(90deg, #004d26, #00ff7f, #004d26); border-color: var(--neon-green); box-shadow: 0 0 15px var(--neon-green); width: 100%; margin-bottom: 10px; }
+        .btn-aceitar { background: linear-gradient(90deg, #004d26, #00ff7f, #004d26); border-color: var(--neon-green); box-shadow: 0 0 15px var(--neon-green); width: 100%; margin-bottom: 10px; color: black; }
         .btn-recusar { background: linear-gradient(90deg, #4d0015, #ff2a6d, #4d0015); border-color: var(--neon-red); box-shadow: 0 0 15px var(--neon-red); width: 100%; }
 
-        .placar { display: flex; gap: 35px; margin-bottom: 45px; background: rgba(5, 5, 10, 0.9); padding: 12px 35px; border-radius: 50px; border: 1.5px solid rgba(255,255,255,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.7); font-size: 0.95rem; font-weight: 700; align-items: center; backdrop-filter: blur(5px); }
+        .placar { 
+            display: flex; gap: 35px; margin-bottom: 45px; background: rgba(5, 5, 10, 0.9); padding: 12px 35px; border-radius: 50px; border: 1.5px solid rgba(255,255,255,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.7); font-size: 0.95rem; font-weight: 700; align-items: center; backdrop-filter: blur(5px);
+        }
         .x-player span:first-child, .o-player span:first-child { font-weight: normal; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
         .x-player span:last-child { color: var(--neon-red); font-size: 1.3rem; margin-left: 8px; text-shadow: 0 0 12px var(--neon-red), 0 0 20px var(--neon-red); }
         .o-player span:last-child { color: var(--neon-cyan); font-size: 1.3rem; margin-left: 8px; text-shadow: 0 0 12px var(--neon-cyan), 0 0 20px var(--neon-cyan); }
         
-        .tabuleiro { display: grid; grid-template-columns: repeat(3, 95px); gap: 5px; background: rgba(5, 217, 232, 0.5); padding: 5px; border-radius: 22px; border: 2.5px solid var(--neon-cyan); box-shadow: 0 0 30px rgba(5, 217, 232, 0.5), inset 0 0 25px rgba(5, 217, 232, 0.4); position: relative; transition: border-color 0.3s, box-shadow 0.3s, background 0.3s; }
+        .tabuleiro { 
+            display: grid; grid-template-columns: repeat(3, 95px); gap: 5px; background: rgba(5, 217, 232, 0.5); padding: 5px; border-radius: 22px; border: 2.5px solid var(--neon-cyan); box-shadow: 0 0 30px rgba(5, 217, 232, 0.5), inset 0 0 25px rgba(5, 217, 232, 0.4); position: relative; transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
+        }
         
         .board-win-x { border-color: var(--neon-red) !important; box-shadow: 0 0 50px var(--neon-red), inset 0 0 30px var(--neon-red) !important; background: rgba(255, 42, 109, 0.3) !important; }
         .board-win-o { border-color: var(--neon-cyan) !important; box-shadow: 0 0 50px var(--neon-cyan), inset 0 0 30px var(--neon-cyan) !important; background: rgba(5, 217, 232, 0.3) !important; }
@@ -145,15 +207,31 @@
         .status-vitoria { animation: pulseStatus 0.6s infinite alternate; }
         @keyframes pulseStatus { 0% { transform: scale(1); filter: brightness(1); } 100% { transform: scale(1.15); filter: brightness(1.5); } }
 
+        /* SISTEMA DE REAÇÕES (EMOJIS) */
+        #barraReacoes { display: none; justify-content: center; gap: 15px; margin-top: 20px; }
+        .btn-reacao { background: rgba(255,255,255,0.1); border: 1px solid var(--neon-cyan); border-radius: 50%; width: 45px; height: 45px; font-size: 1.5rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(5, 217, 232, 0.2); }
+        .btn-reacao:hover { transform: scale(1.2); box-shadow: 0 0 15px var(--neon-cyan); background: rgba(5, 217, 232, 0.2); }
+        
+        .reacao-flutuante {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-size: 6rem; pointer-events: none; animation: floatUpAndFade 2s ease-out forwards; z-index: 9999;
+        }
+        @keyframes floatUpAndFade {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            15% { opacity: 1; transform: translate(-50%, -60%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -200%) scale(1); }
+        }
+
+        /* RODAPÉ E CRÉDITOS */
         .credito-footer { position: absolute; bottom: 25px; display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 0.8; transition: opacity 0.3s; }
         .credito-footer:hover { opacity: 1; }
         .credito-texto { font-size: 0.75rem; color: #ccc; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; text-shadow: 0 0 5px rgba(255,255,255,0.3); }
-        .icone-insta { width: 20px; height: 20px; fill: #aaa; margin-top: 0; transition: 0.3s; }
         
-        /* Efeito de hover no link do Instagram */
+        .link-axion { text-decoration: none; display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+        .icone-insta { width: 20px; height: 20px; fill: #aaa; transition: 0.3s; }
         .link-axion:hover .icone-insta { fill: white; transform: scale(1.1); }
         .link-axion:hover .texto-axion { color: white !important; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
-        
+
         .btn-texto { background: none; border: none; color: #aaa; margin-top: 18px; cursor: pointer; font-family: inherit; font-size: 0.95rem; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
         .btn-texto:hover { color: white; text-shadow: 0 0 8px rgba(255,255,255,0.6); }
     </style>
@@ -164,16 +242,30 @@
     <audio id="musicaFundo" loop preload="auto">
         <source src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=cyberpunk-2099-10701.mp3" type="audio/mpeg">
     </audio>
+    
+    <audio id="vozAmigo" autoplay></audio>
 
-    <button id="btnAudio" class="btn-audio" onclick="toggleAudio()" aria-label="Ligar/Desligar Música">
+    <button id="btnAudio" class="btn-top-corner" onclick="toggleAudio()" aria-label="Ligar/Desligar Música">
         <svg id="iconeSomOff" viewBox="0 0 24 24" class="icone-som"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
         <svg id="iconeSomOn" viewBox="0 0 24 24" class="icone-som" style="display:none;"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+    </button>
+
+    <button id="btnMic" class="btn-top-corner" onclick="toggleMic()" style="display:none;" aria-label="Ligar/Desligar Seu Microfone">
+        <svg id="iconeMicOn" viewBox="0 0 24 24" class="icone-som" style="display:none;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
+        <svg id="iconeMicOff" viewBox="0 0 24 24" class="icone-som" style="display:block; fill:var(--neon-red);"><path d="M19 11h-2c0 .91-.26 1.75-.69 2.48l1.46 1.46C18.54 13.82 19 12.46 19 11zM14.98 11.17c.02-.11.02-.23.02-.34V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6 6V11c0 1.66 1.34 3 3 3 .23 0 .44-.02.65-.08l1.87 1.87c-.73.43-1.57.69-2.48.69-2.76 0-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c.57-.08 1.12-.24 1.64-.46l5.09 5.09 1.27-1.27L4.27 3z"/></svg>
+    </button>
+
+    <button id="btnMutarAmigo" class="btn-top-corner-2" onclick="toggleMuteAmigo()" style="display:none;" aria-label="Silenciar Áudio do Amigo">
+        <svg id="iconeSpkOn" viewBox="0 0 24 24" class="icone-som"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+        <svg id="iconeSpkOff" viewBox="0 0 24 24" class="icone-som" style="display:none; fill:var(--neon-red);"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
     </button>
     
     <div id="modalConvite">
         <div class="modal-content">
             <h3 style="color:var(--neon-cyan); margin-bottom:10px; text-transform:uppercase; letter-spacing:2px; text-shadow: 0 0 10px var(--neon-cyan);">Novo Desafio!</h3>
-            <p id="textoConvite" style="margin-bottom:30px; color:#ddd; font-weight: bold;">Alguém quer jogar com você.</p>
+            <p id="textoConvite" style="margin-bottom:15px; color:#ddd; font-weight: bold;">Alguém quer jogar com você.</p>
+            <input type="text" id="nomeConvite" class="input-nome" placeholder="Seu Apelido" style="width:100%; margin-bottom:10px;">
+            <p id="erroConvite" class="erro-input">Por favor, digite seu apelido!</p>
             <button class="btn-menu btn-aceitar" onclick="aceitarConvite()">ACEITAR PARTIDA</button>
             <button class="btn-menu btn-recusar" onclick="recusarConvite()">RECUSAR</button>
         </div>
@@ -184,6 +276,7 @@
             <div class="logo">Tic<span>Tac</span></div>
             <div class="sub">Jogo da Velha</div>
         </div>
+        
         <div id="botoesMenu">
             <button class="btn-menu btn-local" onclick="mostrarSetup('local')">Duelo Local</button>
             <button class="btn-menu btn-online" onclick="mostrarSetup('online')">Jogar Online</button>
@@ -192,27 +285,35 @@
         
         <div id="setupIA">
             <input type="text" id="nomeJogadorIA" class="input-nome" placeholder="Seu Apelido" maxlength="10">
-            <button class="btn-menu btn-ia" onclick="iniciarJogo('ia')">Enfrentar Máquina</button>
+            <p id="erroIA" class="erro-input">Por favor, digite seu apelido!</p>
+            <p style="font-size:0.8rem; color:#aaa; margin-bottom:10px; text-transform: uppercase; letter-spacing: 2px;">Escolha o nível:</p>
+            <button class="btn-menu btn-noob" onclick="setDificuldade('noob')">NOOB</button>
+            <button class="btn-menu btn-mestre" onclick="setDificuldade('mestre')">MESTRE</button>
+            <button class="btn-menu btn-ultra" onclick="setDificuldade('ultra')">ULTRA INSTINTO</button>
             <button class="btn-texto" onclick="voltarMenu()">Voltar</button>
         </div>
 
         <div id="setupLocal">
             <input type="text" id="nomeLocalX" class="input-nome" placeholder="Jogador X" maxlength="10">
             <input type="text" id="nomeLocalO" class="input-nome" placeholder="Jogador O" maxlength="10">
+            <p id="erroLocal" class="erro-input">Por favor, preencha os dois nomes!</p>
             <button class="btn-menu btn-online" onclick="iniciarJogo('local')">Começar Partida</button>
             <button class="btn-texto" onclick="voltarMenu()">Voltar</button>
         </div>
+        
         <div id="setupOnline">
             <input type="text" id="nomeOnlineEu" class="input-nome" placeholder="Seu apelido" maxlength="10">
+            <p id="erroNomeOnline" class="erro-input">Preencha seu apelido antes de conectar!</p>
             <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">SEU ID: <span id="meuId" style="color:var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan);">...</span></p>
             <input type="number" id="idAmigo" class="input-nome" placeholder="ID do Amigo" inputmode="numeric" pattern="[0-9]*">
             <button id="btnConectar" class="btn-menu btn-online" onclick="conectar()">Conectar</button>
             <p id="erroOnline" style="color:var(--neon-red); font-size:0.85rem; margin-top:12px; display:none; font-weight:bold; text-shadow: 0 0 10px var(--neon-red);">Código inexistente!</p>
             <button class="btn-texto" onclick="voltarMenu()">Voltar</button>
         </div>
+        
         <div class="credito-footer">
-            <div class="credito-texto">Developer ThalisonDev</div>
-            <a href="https://www.instagram.com/axionsollutions?igsh=MXduMjA3YWhwaGh6OQ%3D%3D&utm_source=qr" target="_blank" aria-label="Instagram" class="link-axion" style="text-decoration: none; display: flex; align-items: center; gap: 8px; margin-top: 6px;">
+            <div class="credito-texto">Developer DevThalison</div>
+            <a href="https://www.instagram.com/axionsollutions?igsh=MXduMjA3YWhwaGh6OQ%3D%3D&utm_source=qr" target="_blank" aria-label="Instagram" class="link-axion">
                 <svg class="icone-insta" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                 <span class="texto-axion" style="color: #aaa; font-size: 0.75rem; font-weight: bold; letter-spacing: 1px; transition: 0.3s;">Axion</span>
             </a>
@@ -231,14 +332,22 @@
             <div class="celula" data-index="6"></div><div class="celula" data-index="7"></div><div class="celula" data-index="8"></div>
         </div>
         <div id="status">Sua Vez</div>
+        
+        <div id="barraReacoes">
+            <button class="btn-reacao" onclick="enviarReacao('🤣')">🤣</button>
+            <button class="btn-reacao" onclick="enviarReacao('🤬')">🤬</button>
+            <button class="btn-reacao" onclick="enviarReacao('😭')">😭</button>
+            <button class="btn-reacao" onclick="enviarReacao('💀')">💀</button>
+        </div>
+
         <button id="btnNovaPartida" class="btn-acao" style="display:none;" onclick="reset()">Nova Partida</button>
-        <button class="btn-texto" style="margin-top:25px;" onclick="location.reload()">Sair da Partida</button>
+        <button class="btn-texto" style="margin-top:25px;" onclick="voltarMenu()">Sair da Partida</button>
     </div>
 
     <script>
         const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
         
-        // SISTEMA DE ÁUDIO
+        // --- SISTEMA DE MÚSICA DE FUNDO ---
         const elemMusica = document.getElementById('musicaFundo');
         let musicaAtiva = false;
 
@@ -273,7 +382,8 @@
             }
         }, { once: true });
 
-        // EFEITOS SONOROS
+
+        // --- EFEITOS SONOROS (OSCILADORES SYNTHWAVE) ---
         function som(f, d) { try { const o = ctxAudio.createOscillator(); const g = ctxAudio.createGain(); o.frequency.value = f; g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + d); o.connect(g); g.connect(ctxAudio.destination); o.start(); o.stop(ctxAudio.currentTime + d); } catch(e){} }
         
         function somVitoria() {
@@ -299,14 +409,71 @@
             } catch(e){}
         }
 
-        // LÓGICA DO JOGO E MULTIPLAYER
+        // --- SISTEMA DE REAÇÕES FLUTUANTES ---
+        function enviarReacao(emoji) {
+            mostrarReacao(emoji);
+            if(online && conn) conn.send({t: 'react', e: emoji});
+        }
+
+        function mostrarReacao(emoji) {
+            const el = document.createElement('div');
+            el.innerText = emoji;
+            el.className = 'reacao-flutuante';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 2000);
+        }
+
+
+        // --- LÓGICA DO JOGO, MULTIPLAYER E MICROFONE ---
         let nomeX = "X", nomeO = "O", jAtual = "X", quemComeca = "X", ativo = true, estado = ["","","","","","","","",""];
         let pX = 0, pO = 0, online = false, minhaVez = true, meuSimbolo = "X", conn;
         let connProvisoria = null;
         let contraIA = false;
+        let dificuldadeIA = 'ultra';
+        
+        let meuStream = null;
+        let micAtivo = false;
+        let amigoMutado = false;
 
         const peer = new Peer(Math.floor(10000 + Math.random() * 89999).toString());
         peer.on('open', id => document.getElementById('meuId').innerText = id);
+        
+        // Pede a permissão de voz APENAS ao clicar no microfone
+        async function toggleMic() {
+            if (!meuStream) {
+                try {
+                    meuStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                    micAtivo = true;
+                    document.getElementById('iconeMicOn').style.display = 'block';
+                    document.getElementById('iconeMicOff').style.display = 'none';
+                    
+                    // Se já estiver conectado, liga pro amigo e manda o áudio
+                    if (online && conn && conn.peer) {
+                        const call = peer.call(conn.peer, meuStream);
+                        call.on('stream', streamRemoto => {
+                            document.getElementById('vozAmigo').srcObject = streamRemoto;
+                        });
+                    }
+                } catch(err) {
+                    console.log("Microfone negado", err);
+                    alert("Você precisa permitir o microfone para usar o chat de voz.");
+                }
+            } else {
+                // Já tem a permissão, apenas muta e desmuta
+                micAtivo = !micAtivo;
+                meuStream.getAudioTracks()[0].enabled = micAtivo;
+                document.getElementById('iconeMicOn').style.display = micAtivo ? 'block' : 'none';
+                document.getElementById('iconeMicOff').style.display = micAtivo ? 'none' : 'block';
+            }
+        }
+
+        function toggleMuteAmigo() {
+            const audioAmigo = document.getElementById('vozAmigo');
+            amigoMutado = !amigoMutado;
+            audioAmigo.muted = amigoMutado;
+            document.getElementById('iconeSpkOn').style.display = amigoMutado ? 'none' : 'block';
+            document.getElementById('iconeSpkOff').style.display = amigoMutado ? 'block' : 'none';
+        }
         
         peer.on('connection', c => {
             if (online || contraIA || document.getElementById('modalConvite').style.display === 'flex') {
@@ -317,18 +484,35 @@
             c.on('data', d => {
                 if(d.t === 'req') {
                     document.getElementById('textoConvite').innerText = `O jogador ${d.nome || 'Desconhecido'} quer jogar com você!`;
+                    document.getElementById('nomeConvite').value = document.getElementById('nomeOnlineEu').value.trim();
+                    document.getElementById('erroConvite').style.display = 'none';
                     document.getElementById('modalConvite').style.display = 'flex';
                     nomeX = d.nome || "Adversário"; 
                 }
             });
         });
 
+        // Quando o amigo liga (após ele clicar no microfone)
+        peer.on('call', call => {
+            call.answer(meuStream); // Se eu não cliquei no mic, respondo sem áudio. Tranquilo!
+            call.on('stream', streamRemoto => {
+                document.getElementById('vozAmigo').srcObject = streamRemoto;
+            });
+        });
+
         function aceitarConvite() {
+            let meuNome = document.getElementById('nomeConvite').value.trim();
+            if(!meuNome) {
+                document.getElementById('erroConvite').style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('erroConvite').style.display = 'none';
             document.getElementById('modalConvite').style.display = 'none';
+            
             conn = connProvisoria;
-            const meuNome = document.getElementById('nomeOnlineEu').value || "Você";
             nomeO = meuNome;
-            conn.send({t: 'acc', nome: meuNome});
+            conn.send({t: 'acc', nome: nomeO});
             
             online = true; contraIA = false; meuSimbolo = "O"; minhaVez = false;
             setupConn();
@@ -344,20 +528,27 @@
         }
 
         function conectar() {
-            const id = document.getElementById('idAmigo').value;
+            const id = document.getElementById('idAmigo').value.trim();
             const btn = document.getElementById('btnConectar');
-            const erro = document.getElementById('erroOnline');
-            const meuNome = document.getElementById('nomeOnlineEu').value || "Você";
+            const erroOnline = document.getElementById('erroOnline');
+            const erroNomeOnline = document.getElementById('erroNomeOnline');
+            const meuNome = document.getElementById('nomeOnlineEu').value.trim();
             
+            if(!meuNome) {
+                erroNomeOnline.style.display = 'block';
+                return;
+            }
+            erroNomeOnline.style.display = 'none';
             if(!id) return;
+
+            erroOnline.style.display = 'none';
             btn.innerText = "Enviando Convite...";
-            erro.style.display = 'none';
-            
+
             conn = peer.connect(id);
             const timeout = setTimeout(() => {
                 btn.innerText = "Conectar";
-                erro.innerText = "Jogador não encontrado!";
-                erro.style.display = 'block';
+                erroOnline.innerText = "Jogador não encontrado!";
+                erroOnline.style.display = 'block';
             }, 6000);
 
             conn.on('open', () => {
@@ -374,8 +565,8 @@
                         iniciarJogo('online');
                     } else if (d.t === 'rej' || d.t === 'rej_ocupado') {
                         btn.innerText = "Conectar";
-                        erro.innerText = d.t === 'rej_ocupado' ? "Jogador Ocupado!" : "Pedido Recusado!";
-                        erro.style.display = 'block';
+                        erroOnline.innerText = d.t === 'rej_ocupado' ? "Jogador Ocupado!" : "Pedido Recusado!";
+                        erroOnline.style.display = 'block';
                         conn.close();
                     }
                 });
@@ -383,7 +574,7 @@
             conn.on('error', () => {
                 clearTimeout(timeout);
                 btn.innerText = "Conectar";
-                erro.style.display = 'block';
+                erroOnline.style.display = 'block';
             });
         }
 
@@ -391,14 +582,20 @@
             conn.on('data', d => {
                 if(d.t === 'j') { marcar(d.i, meuSimbolo === 'X' ? 'O' : 'X'); minhaVez = true; atualizarStatus(); }
                 if(d.t === 'r') resetLocal(); 
+                if(d.t === 'react') mostrarReacao(d.e); 
             });
         }
 
+        // --- SISTEMA DE MENUS ---
         function mostrarSetup(m) {
             document.getElementById('botoesMenu').style.display = 'none';
             document.getElementById('setupLocal').style.display = 'none';
             document.getElementById('setupOnline').style.display = 'none';
             document.getElementById('setupIA').style.display = 'none';
+            
+            document.getElementById('erroIA').style.display = 'none';
+            document.getElementById('erroLocal').style.display = 'none';
+            document.getElementById('erroNomeOnline').style.display = 'none';
             
             if(m === 'local') document.getElementById('setupLocal').style.display = 'flex';
             else if(m === 'online') document.getElementById('setupOnline').style.display = 'flex';
@@ -406,31 +603,87 @@
         }
 
         function voltarMenu() {
+            document.getElementById('telaJogo').style.display = 'none';
+            document.getElementById('telaInicial').style.display = 'flex';
+            
             document.getElementById('botoesMenu').style.display = 'flex';
             document.getElementById('setupLocal').style.display = 'none';
             document.getElementById('setupOnline').style.display = 'none';
             document.getElementById('setupIA').style.display = 'none';
             document.getElementById('erroOnline').style.display = 'none';
+            
+            document.getElementById('btnAudio').style.display = 'flex';
+            document.getElementById('btnMic').style.display = 'none';
+            document.getElementById('btnMutarAmigo').style.display = 'none';
+
             if (document.getElementById('btnConectar').innerText !== "Conectar") {
                 document.getElementById('btnConectar').innerText = "Conectar";
-                if(conn) conn.close();
             }
+            if(conn) {
+                conn.close();
+                online = false;
+            }
+            
+            // Desliga a câmera/mic e limpa quando sai da partida online
+            if(meuStream) {
+                meuStream.getTracks().forEach(t => t.stop());
+                meuStream = null;
+                micAtivo = false;
+                document.getElementById('iconeMicOn').style.display = 'none';
+                document.getElementById('iconeMicOff').style.display = 'block';
+            }
+
+            resetLocal(); 
+            pX = 0; pO = 0; 
         }
         
+        function setDificuldade(d) {
+            const nome = document.getElementById('nomeJogadorIA').value.trim();
+            const erroIA = document.getElementById('erroIA');
+            if(!nome) {
+                erroIA.style.display = 'block';
+                return;
+            }
+            erroIA.style.display = 'none';
+            dificuldadeIA = d;
+            iniciarJogo('ia');
+        }
+
         function iniciarJogo(m) {
-            pararMusicaImediatamente(); 
-
-            contraIA = false;
-
             if(m === 'local') {
-                nomeX = document.getElementById('nomeLocalX').value || "Jogador 1";
-                nomeO = document.getElementById('nomeLocalO').value || "Jogador 2";
+                nomeX = document.getElementById('nomeLocalX').value.trim();
+                nomeO = document.getElementById('nomeLocalO').value.trim();
+                const erroLocal = document.getElementById('erroLocal');
+                if(!nomeX || !nomeO) {
+                    erroLocal.style.display = 'block';
+                    return;
+                }
+                erroLocal.style.display = 'none';
                 online = false;
+                contraIA = false;
             } else if (m === 'ia') {
-                nomeX = document.getElementById('nomeJogadorIA').value || "Humano";
+                nomeX = document.getElementById('nomeJogadorIA').value.trim();
+                if(!nomeX) {
+                    document.getElementById('erroIA').style.display = 'block';
+                    return;
+                }
                 nomeO = "MÁQUINA";
                 online = false;
                 contraIA = true;
+            }
+
+            pararMusicaImediatamente(); 
+            document.getElementById('btnAudio').style.display = 'none';
+            
+            // Exclusivos do Multiplayer Online (Mic e Farpas)
+            document.getElementById('btnMic').style.display = 'none';
+            document.getElementById('btnMutarAmigo').style.display = 'none';
+            document.getElementById('barraReacoes').style.display = 'none';
+
+            if (m === 'online') {
+                document.getElementById('btnMic').style.display = 'flex';
+                document.getElementById('btnMutarAmigo').style.display = 'flex';
+                document.getElementById('barraReacoes').style.display = 'flex';
             }
             
             document.getElementById('telaInicial').style.display = 'none';
@@ -438,6 +691,10 @@
             
             document.getElementById('txtNomeX').innerText = nomeX.toUpperCase() + ":";
             document.getElementById('txtNomeO').innerText = nomeO.toUpperCase() + ":";
+            
+            document.getElementById('sX').innerText = pX; 
+            document.getElementById('sO').innerText = pO;
+
             atualizarStatus();
 
             if (contraIA && jAtual === 'O') {
@@ -445,8 +702,59 @@
             }
         }
 
-        // --- ALGORITMO MINIMAX PARA A I.A. ---
-        function checarVitoriaMinimax(b) {
+        // --- ALGORITMO I.A. REFINADO ---
+        function achaMovimentoCritico(jogador) {
+            for(let i = 0; i < 9; i++) {
+                if(estado[i] === "") {
+                    estado[i] = jogador;
+                    let venceu = checarVitoriaSimples(estado) === jogador;
+                    estado[i] = "";
+                    if(venceu) return i;
+                }
+            }
+            return -1;
+        }
+
+        function jogadaIA() {
+            if (!ativo || !contraIA) return;
+            const s = document.getElementById('status');
+            s.innerText = "MÁQUINA PENSANDO...";
+            
+            setTimeout(() => {
+                let index;
+                let vazios = estado.filter(x => x === "").length;
+                let disponiveis = estado.map((v, i) => v === "" ? i : null).filter(v => v !== null);
+
+                if (dificuldadeIA === 'noob') {
+                    index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+                } else if (dificuldadeIA === 'mestre') {
+                    let winMove = achaMovimentoCritico('O');
+                    let blockMove = achaMovimentoCritico('X');
+                    
+                    if (winMove !== -1) {
+                        index = winMove;
+                    } else if (blockMove !== -1) {
+                        index = blockMove;
+                    } else {
+                        if (Math.random() > 0.75) {
+                            index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+                        } else {
+                            if (vazios === 9) index = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
+                            else index = minimax(estado, 'O').index;
+                        }
+                    }
+                } else {
+                    if (vazios === 9) index = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
+                    else if (vazios === 8 && estado[4] === "") index = 4;
+                    else index = minimax(estado, 'O').index;
+                }
+
+                marcar(index, 'O');
+                if (ativo) { jAtual = 'X'; atualizarStatus(); }
+            }, 600);
+        }
+
+        function checarVitoriaSimples(b) {
             const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
             for(let p of w) {
                 if(b[p[0]] !== "" && b[p[0]] === b[p[1]] && b[p[0]] === b[p[2]]) return b[p[0]];
@@ -455,7 +763,7 @@
         }
 
         function minimax(novoEstado, jogadorAI) {
-            let v = checarVitoriaMinimax(novoEstado);
+            let v = checarVitoriaSimples(novoEstado);
             if (v === 'X') return { score: -10 }; 
             if (v === 'O') return { score: 10 };  
             if (!novoEstado.includes("")) return { score: 0 }; 
@@ -465,15 +773,7 @@
                 if (novoEstado[i] === "") {
                     let mov = { index: i };
                     novoEstado[i] = jogadorAI;
-                    
-                    if (jogadorAI === 'O') {
-                        let result = minimax(novoEstado, 'X');
-                        mov.score = result.score;
-                    } else {
-                        let result = minimax(novoEstado, 'O');
-                        mov.score = result.score;
-                    }
-                    
+                    mov.score = minimax(novoEstado, jogadorAI === 'O' ? 'X' : 'O').score;
                     novoEstado[i] = "";
                     movimentos.push(mov);
                 }
@@ -498,31 +798,6 @@
                 }
             }
             return movimentos[melhorMovimento];
-        }
-
-        function jogadaIA() {
-            if (!ativo || !contraIA) return;
-            const s = document.getElementById('status');
-            s.innerText = "MÁQUINA PENSANDO...";
-            
-            setTimeout(() => {
-                let vazios = estado.filter(x => x === "").length;
-                let melhorIndex = 4; 
-                
-                if (vazios === 9) {
-                    melhorIndex = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
-                } else if (vazios === 8 && estado[4] === "") {
-                    melhorIndex = 4;
-                } else {
-                    melhorIndex = minimax(estado, 'O').index;
-                }
-
-                marcar(melhorIndex, 'O');
-                if(ativo) {
-                    jAtual = 'X';
-                    atualizarStatus();
-                }
-            }, 500);
         }
 
         document.querySelectorAll('.celula').forEach(c => c.addEventListener('click', e => {
@@ -598,6 +873,8 @@
                     celulas[p[2]].classList.add('celula-vencedora');
 
                     somVitoria(); 
+                    if (navigator.vibrate) { navigator.vibrate([100, 50, 100, 50, 200]); }
+                    
                     document.getElementById('btnNovaPartida').style.display = 'block';
                     return; 
                 }
