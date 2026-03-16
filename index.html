@@ -82,7 +82,7 @@
         .logo span { color: white; }
         .sub { color: var(--neon-cyan); font-size: 0.8rem; letter-spacing: 5px; text-transform: uppercase; font-weight: 700; border: 1.5px solid var(--neon-cyan); border-radius: 20px; padding: 6px 18px; display: inline-block; margin-top: -12px; box-shadow: 0 0 15px rgba(5, 217, 232, 0.6), inset 0 0 7px rgba(5, 217, 232, 0.6); background: rgba(0, 0, 0, 0.6); }
 
-        /* NOVO CONTAINER CUSTOMIZADO DE RANK (SÓ NO ONLINE) */
+        /* CONTAINER DE RANK (ONLINE) */
         .rank-container-card {
             background: linear-gradient(135deg, rgba(20,20,35,0.8), rgba(5,5,15,0.9));
             border: 2px solid var(--neon-cyan);
@@ -235,8 +235,6 @@
         <div class="modal-content">
             <h3 style="color:var(--neon-cyan); margin-bottom:10px; text-transform:uppercase; letter-spacing:2px; text-shadow: 0 0 10px var(--neon-cyan);">Novo Desafio!</h3>
             <p id="textoConvite" style="margin-bottom:15px; color:#ddd; font-weight: bold;">Alguém quer jogar com você.</p>
-            <input type="text" id="nomeConvite" class="input-nome" placeholder="Seu Apelido" style="width:100%; margin-bottom:10px;">
-            <p id="erroConvite" class="erro-input">Por favor, digite seu apelido!</p>
             <button class="btn-menu btn-aceitar" onclick="aceitarConvite()">ACEITAR PARTIDA</button>
             <button class="btn-menu btn-recusar" onclick="recusarConvite()">RECUSAR</button>
         </div>
@@ -272,7 +270,8 @@
         <div id="setupOnlineAmigo">
             <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">SEU ID: <span id="meuId" style="color:var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan);">...</span></p>
             <button id="btnConvidarLink" class="btn-menu btn-local" onclick="gerarLinkConvite()" style="margin-bottom:15px; border-color:var(--neon-green); color:var(--neon-green);">🔗 Enviar Convite (Link)</button>
-            <div style="width: 100%; border-top: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px;"></div>
+            
+            <div id="divisoriaAmigo" style="width: 100%; border-top: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px;"></div>
             
             <input type="number" id="idAmigo" class="input-nome" placeholder="ID do Amigo" inputmode="numeric" pattern="[0-9]*">
             <button id="btnConectar" class="btn-menu btn-online" onclick="conectarAmigo()">Conectar</button>
@@ -696,8 +695,7 @@
                 c.on('data', d => {
                     if(d.t === 'req') {
                         connProvisoria = c;
-                        document.getElementById('textoConvite').innerText = `O jogador ${d.nome || 'Desconhecido'} quer jogar com você!`;
-                        document.getElementById('nomeConvite').value = document.getElementById('nomeOnlineGeral').value.trim();
+                        document.getElementById('textoConvite').innerText = `O jogador ${d.nome || 'Desconhecido'} quer entrar na sua sala!`;
                         document.getElementById('erroConvite').style.display = 'none';
                         document.getElementById('modalConvite').style.display = 'flex';
                         nomeX = d.nome || "Adversário"; 
@@ -796,6 +794,7 @@
             document.getElementById('iconeSpkOff').style.display = amigoMutado ? 'block' : 'none';
         }
 
+        // --- SISTEMA DE LINK E LOBBY REFINADOS ---
         function gerarLinkConvite() {
             let link = window.location.href + "?roomId=" + meuIDOriginal;
             try {
@@ -804,8 +803,23 @@
                 }
             } catch(e) {}
             navigator.clipboard.writeText(link).catch(e=>{});
-            document.getElementById('btnConvidarLink').innerText = "✅ Link Copiado!";
-            setTimeout(() => document.getElementById('btnConvidarLink').innerText = "🔗 Enviar Convite (Link)", 3000);
+            
+            const btn = document.getElementById('btnConvidarLink');
+            btn.innerHTML = "⏳ Aguardando Amigo...";
+            btn.style.borderColor = "var(--neon-yellow)";
+            btn.style.color = "var(--neon-yellow)";
+            btn.style.boxShadow = "0 0 15px rgba(241, 196, 15, 0.4)";
+            btn.classList.add("status-vitoria"); 
+            
+            document.getElementById('idAmigo').style.display = 'none';
+            document.getElementById('btnConectar').style.display = 'none';
+            document.getElementById('divisoriaAmigo').style.display = 'none'; 
+            
+            const msg = document.getElementById('erroOnlineAmigo');
+            msg.innerText = "Link copiado! Envie para o amigo e aguarde nesta tela.";
+            msg.style.color = "var(--neon-cyan)";
+            msg.style.textShadow = "0 0 10px var(--neon-cyan)";
+            msg.style.display = 'block';
         }
 
         window.addEventListener('load', () => {
@@ -813,8 +827,12 @@
             const rId = urlParams.get('roomId');
             if (rId) {
                 mostrarSetup('onlineMenu'); 
-                document.getElementById('nomeOnlineGeral').placeholder = "Apelido para entrar na sala...";
+                document.getElementById('nomeOnlineGeral').placeholder = "Seu Apelido para entrar...";
                 const btnAmigo = document.querySelector('button[onclick="abrirAmigo()"]');
+                btnAmigo.innerHTML = "🚀 Entrar na Sala do Link";
+                btnAmigo.style.background = "linear-gradient(90deg, #004d26, #00ff7f, #004d26)";
+                btnAmigo.style.borderColor = "var(--neon-green)";
+                btnAmigo.style.boxShadow = "0 0 20px var(--neon-green)";
                 btnAmigo.onclick = () => {
                     if(!validarNomeGeral()) return;
                     mostrarSetup('onlineAmigo');
@@ -825,11 +843,8 @@
         });
 
         function aceitarConvite() {
-            let meuNome = document.getElementById('nomeConvite').value.trim();
-            if(!meuNome) {
-                document.getElementById('erroConvite').style.display = 'block';
-                return;
-            }
+            let meuNome = document.getElementById('nomeOnlineGeral').value.trim();
+            if(!meuNome) meuNome = "Host";
             
             document.getElementById('erroConvite').style.display = 'none';
             document.getElementById('modalConvite').style.display = 'none';
@@ -1141,7 +1156,23 @@
             
             if(m === 'local') document.getElementById('setupLocal').style.display = 'flex';
             else if(m === 'onlineMenu') document.getElementById('setupOnlineMenu').style.display = 'flex';
-            else if(m === 'onlineAmigo') document.getElementById('setupOnlineAmigo').style.display = 'flex';
+            else if(m === 'onlineAmigo') {
+                // Reseta a UI do Lobby para garantir que não fique bugada se a pessoa voltar lá depois
+                const btn = document.getElementById('btnConvidarLink');
+                btn.innerHTML = "🔗 Enviar Convite (Link)";
+                btn.style.borderColor = "var(--neon-green)";
+                btn.style.color = "var(--neon-green)";
+                btn.style.boxShadow = "none";
+                btn.classList.remove("status-vitoria");
+                document.getElementById('idAmigo').style.display = 'inline-block';
+                document.getElementById('btnConectar').style.display = 'inline-block';
+                document.getElementById('divisoriaAmigo').style.display = 'block';
+                document.getElementById('erroOnlineAmigo').style.display = 'none';
+                document.getElementById('erroOnlineAmigo').style.color = "var(--neon-red)";
+                document.getElementById('erroOnlineAmigo').style.textShadow = "0 0 10px var(--neon-red)";
+                
+                document.getElementById('setupOnlineAmigo').style.display = 'flex';
+            }
             else if(m === 'global') document.getElementById('setupGlobal').style.display = 'flex';
             else if(m === 'ia') document.getElementById('setupIA').style.display = 'flex';
             else if(m === 'skins') document.getElementById('setupSkins').style.display = 'flex';
