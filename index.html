@@ -270,7 +270,6 @@
         <div id="setupOnlineAmigo">
             <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">SEU ID: <span id="meuId" style="color:var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan);">...</span></p>
             <button id="btnConvidarLink" class="btn-menu btn-local" onclick="gerarLinkConvite()" style="margin-bottom:15px; border-color:var(--neon-green); color:var(--neon-green);">🔗 Enviar Convite (Link)</button>
-            
             <div id="divisoriaAmigo" style="width: 100%; border-top: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px;"></div>
             
             <input type="number" id="idAmigo" class="input-nome" placeholder="ID do Amigo" inputmode="numeric" pattern="[0-9]*">
@@ -794,14 +793,18 @@
             document.getElementById('iconeSpkOff').style.display = amigoMutado ? 'block' : 'none';
         }
 
-        // --- SISTEMA DE LINK E LOBBY REFINADOS ---
+        // --- SISTEMA DE LINK REFINADO ---
         function gerarLinkConvite() {
-            let link = window.location.href + "?roomId=" + meuIDOriginal;
+            // URL limpa pra garantir que o link saia perfeito
+            let urlLimpa = window.location.origin + window.location.pathname;
+            let link = urlLimpa + "?roomId=" + meuIDOriginal;
+            
             try {
                 if (cgSdk && cgSdk.game && cgSdk.game.inviteLink) {
                     link = cgSdk.game.inviteLink({ roomId: meuIDOriginal });
                 }
             } catch(e) {}
+            
             navigator.clipboard.writeText(link).catch(e=>{});
             
             const btn = document.getElementById('btnConvidarLink');
