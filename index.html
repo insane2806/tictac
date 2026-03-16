@@ -125,6 +125,7 @@
         /* Placar e Tabuleiro */
         .placar { display: flex; gap: 35px; margin-bottom: 45px; background: rgba(5, 5, 10, 0.9); padding: 12px 35px; border-radius: 50px; border: 1.5px solid rgba(255,255,255,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.7); font-size: 0.95rem; font-weight: 700; align-items: center; backdrop-filter: blur(5px); }
         
+        .x-player, .o-player { position: relative; display: flex; align-items: center; justify-content: center; } 
         .x-player span:first-child, .o-player span:first-child { font-weight: normal; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
         .x-player span:last-child { color: var(--neon-red); font-size: 1.3rem; margin-left: 8px; text-shadow: 0 0 12px var(--neon-red), 0 0 20px var(--neon-red); }
         .o-player span:last-child { color: var(--neon-cyan); font-size: 1.3rem; margin-left: 8px; text-shadow: 0 0 12px var(--neon-cyan), 0 0 20px var(--neon-cyan); }
@@ -145,7 +146,6 @@
         .celula-vencedora { animation: glowWin 0.8s infinite alternate !important; z-index: 2; }
         @keyframes glowWin { 0% { background: rgba(255, 255, 255, 0.1); transform: scale(1); box-shadow: 0 0 10px rgba(255,255,255,0.2); } 100% { background: rgba(255, 255, 255, 0.25); transform: scale(1.08); box-shadow: 0 0 30px rgba(255,255,255,0.8), inset 0 0 15px rgba(255,255,255,0.5); } }
 
-        .x-player, .o-player { position: relative; display: flex; align-items: center; justify-content: center; } 
         .x-player { color: var(--neon-red); text-shadow: 0 0 15px var(--neon-red), 0 0 25px var(--neon-red), 0 0 35px rgba(255, 42, 109, 0.5); }
         .o-player { color: var(--neon-cyan); text-shadow: 0 0 15px var(--neon-cyan), 0 0 25px var(--neon-cyan), 0 0 35px rgba(5, 217, 232, 0.5); }
         
@@ -153,20 +153,20 @@
         .status-vitoria { animation: pulseStatus 0.6s infinite alternate; }
         @keyframes pulseStatus { 0% { transform: scale(1); filter: brightness(1); } 100% { transform: scale(1.15); filter: brightness(1.5); } }
 
-        /* SISTEMA DE REAÇÕES (EMOJIS) */
+        /* SISTEMA DE REAÇÕES (EMOJIS) MENORES NO NICK */
         #barraReacoes { display: none; justify-content: center; gap: 15px; margin-top: 20px; }
         .btn-reacao { background: rgba(255,255,255,0.1); border: 1px solid var(--neon-cyan); border-radius: 50%; width: 45px; height: 45px; font-size: 1.5rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(5, 217, 232, 0.2); }
         .btn-reacao:hover { transform: scale(1.2); box-shadow: 0 0 15px var(--neon-cyan); background: rgba(5, 217, 232, 0.2); }
         
         .reacao-flutuante {
-            position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
+            position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
             font-size: 2.2rem !important; 
-            pointer-events: none; animation: floatUpAndFade 2.5s ease-out forwards; z-index: 9999;
+            pointer-events: none; animation: floatUpAndFade 2s ease-out forwards; z-index: 9999;
         }
         @keyframes floatUpAndFade { 
             0% { opacity: 0; transform: translate(-50%, 10px) scale(0.5); } 
             15% { opacity: 1; transform: translate(-50%, -10px) scale(1.2); } 
-            100% { opacity: 0; transform: translate(-50%, -80px) scale(1); } 
+            100% { opacity: 0; transform: translate(-50%, -60px) scale(1); } 
         }
 
         /* RODAPÉ E CRÉDITOS */
@@ -337,8 +337,6 @@
             }
         }
 
-        // Sem auto-play no menu como você pediu!
-
         // --- EFEITOS SONOROS SYNTHWAVE ---
         function som(f, d) {
             try {
@@ -414,7 +412,7 @@
             if (container) {
                 container.appendChild(el);
             } else {
-                document.body.appendChild(el); 
+                document.body.appendChild(el);
             }
             
             setTimeout(() => el.remove(), 2000);
@@ -439,23 +437,30 @@
         let heartbeatTimer;
         let lastPong = Date.now();
 
-        const peer = new Peer(Math.floor(10000 + Math.random() * 89999).toString());
-        const meuIDOriginal = peer.id;
+        let peer;
+        
+        // Função para gerar um ID numérico limpo
+        function gerarID() {
+            return Math.floor(10000 + Math.random() * 89999).toString();
+        }
+
+        const meuIDOriginal = gerarID();
 
         function iniciarPeer(idToUse) {
             peer = new Peer(idToUse);
             
-            peer.on('open', idConectado => {
-                if(!idConectado.startsWith("NeonGlb")) {
-                    document.getElementById('meuId').innerText = idConectado;
+            peer.on('open', currentId => {
+                if(!currentId.startsWith("NeonGlb")) {
+                    document.getElementById('meuId').innerText = currentId;
                 }
-                if(buscandoGlobal && idConectado.startsWith("NeonGlb")) {
+                if(buscandoGlobal && currentId.startsWith("NeonGlb")) {
                     document.getElementById('statusGlobal').innerText = "AGUARDANDO JOGADOR...";
                 }
             });
             
             peer.on('connection', c => {
                 c.on('open', () => {
+                    // Impede intrusos se você já estiver jogando ou buscando partida global
                     if (online || contraIA || document.getElementById('modalConvite').style.display === 'flex' || buscandoGlobal) {
                         c.send({t: 'rej_ocupado'});
                         setTimeout(() => c.close(), 500);
@@ -522,6 +527,11 @@
                             erroOnline.innerText = "Jogador não encontrado!";
                             erroOnline.style.display = 'block';
                         }
+                    }
+                } else if (err.type === 'unavailable-id') {
+                    // Alguém pegou a sala global milissegundos antes
+                    if(buscandoGlobal) {
+                        buscarOponenteGlobal();
                     }
                 }
             });
@@ -649,14 +659,16 @@
         function abrirGlobal() {
             if(!validarNomeGeral()) return;
             buscandoGlobal = true;
-            globalRoomIndex = 1;
+            
+            // Escolhe uma sala aleatória entre 1 e 10 para aumentar as chances de bater
+            globalRoomIndex = Math.floor(Math.random() * 10) + 1;
             mostrarSetup('global');
             buscarOponenteGlobal();
         }
 
         function buscarOponenteGlobal() {
             if(!buscandoGlobal) return;
-            document.getElementById('statusGlobal').innerText = "Procurando Partida... (" + globalRoomIndex + ")";
+            document.getElementById('statusGlobal').innerText = "Procurando Partida...";
             salaGlobalAlvo = "NeonGlb_" + globalRoomIndex;
 
             let tempConn = peer.connect(salaGlobalAlvo);
@@ -688,7 +700,7 @@
                         
                     } else if (d.t === 'rej_ocupado') {
                         globalRoomIndex++;
-                        if(globalRoomIndex > 20) globalRoomIndex = 1; 
+                        if(globalRoomIndex > 10) globalRoomIndex = 1; 
                         buscarOponenteGlobal();
                     }
                 });
@@ -699,7 +711,7 @@
             buscandoGlobal = false;
             if(peer && peer.id && peer.id.startsWith("NeonGlb_")) {
                 peer.destroy(); 
-                setTimeout(() => { iniciarPeer(meuIDOriginal); }, 500);
+                setTimeout(() => { iniciarPeer(gerarID()); }, 500);
             }
             mostrarSetup('onlineMenu');
         }
@@ -783,10 +795,47 @@
         function sairDaPartida() {
             if (online && conn && conn.open) {
                 try { conn.send({t: 'left'}); } catch(e) {}
-                setTimeout(() => location.reload(), 200);
-            } else {
-                location.reload();
             }
+            
+            document.getElementById('telaJogo').style.display = 'none';
+            document.getElementById('telaInicial').style.display = 'flex';
+            document.getElementById('botoesMenu').style.display = 'flex';
+            
+            ['setupLocal','setupOnlineMenu','setupOnlineAmigo','setupGlobal','setupIA'].forEach(id => document.getElementById(id).style.display = 'none');
+            
+            document.getElementById('btnAudio').style.display = 'flex';
+            document.getElementById('btnMic').style.display = 'none';
+            document.getElementById('btnMutarAmigo').style.display = 'none';
+
+            if (musicaAtiva) {
+                elemMusica.play().catch(e=>{});
+            }
+
+            if (document.getElementById('btnConectar').innerText !== "Conectar") {
+                document.getElementById('btnConectar').innerText = "Conectar";
+            }
+            
+            buscandoGlobal = false;
+            if(conn) { conn.close(); }
+            online = false;
+            
+            if(peer) {
+                peer.destroy();
+                setTimeout(() => { iniciarPeer(gerarID()); }, 500); // Gera um novo ID limpo
+            }
+            
+            if(meuStream) {
+                meuStream.getTracks().forEach(t => t.stop());
+                meuStream = null;
+                micAtivo = false;
+                document.getElementById('iconeMicOn').style.display = 'none';
+                document.getElementById('iconeMicOff').style.display = 'block';
+            }
+
+            resetLocal(); 
+            pX = 0; pO = 0;
+            document.getElementById('sX').innerText = pX; 
+            document.getElementById('sO').innerText = pO;
         }
 
         // --- SISTEMA DE MENUS E INÍCIO ---
