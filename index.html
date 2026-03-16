@@ -178,6 +178,10 @@
         .placar { 
             display: flex; gap: 35px; margin-bottom: 45px; background: rgba(5, 5, 10, 0.9); padding: 12px 35px; border-radius: 50px; border: 1.5px solid rgba(255,255,255,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.7); font-size: 0.95rem; font-weight: 700; align-items: center; backdrop-filter: blur(5px);
         }
+        
+        /* Modificações para posicionar o Emoji Flutuante nos Nicks */
+        .x-player, .o-player { position: relative; } /* O emoji vai nascer dentro daqui */
+        
         .x-player span:first-child, .o-player span:first-child { font-weight: normal; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
         .x-player span:last-child { color: var(--neon-red); font-size: 1.3rem; margin-left: 8px; text-shadow: 0 0 12px var(--neon-red), 0 0 20px var(--neon-red); }
         .o-player span:last-child { color: var(--neon-cyan); font-size: 1.3rem; margin-left: 8px; text-shadow: 0 0 12px var(--neon-cyan), 0 0 20px var(--neon-cyan); }
@@ -207,19 +211,19 @@
         .status-vitoria { animation: pulseStatus 0.6s infinite alternate; }
         @keyframes pulseStatus { 0% { transform: scale(1); filter: brightness(1); } 100% { transform: scale(1.15); filter: brightness(1.5); } }
 
-        /* SISTEMA DE REAÇÕES (EMOJIS) */
+        /* SISTEMA DE REAÇÕES (EMOJIS) MENORES SAINDO DO NICK */
         #barraReacoes { display: none; justify-content: center; gap: 15px; margin-top: 20px; }
         .btn-reacao { background: rgba(255,255,255,0.1); border: 1px solid var(--neon-cyan); border-radius: 50%; width: 45px; height: 45px; font-size: 1.5rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(5, 217, 232, 0.2); }
         .btn-reacao:hover { transform: scale(1.2); box-shadow: 0 0 15px var(--neon-cyan); background: rgba(5, 217, 232, 0.2); }
         
         .reacao-flutuante {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            font-size: 6rem; pointer-events: none; animation: floatUpAndFade 2s ease-out forwards; z-index: 9999;
+            position: absolute; top: -10px; left: 50%; transform: translateX(-50%);
+            font-size: 2.5rem; pointer-events: none; animation: floatUpAndFade 2s ease-out forwards; z-index: 9999;
         }
         @keyframes floatUpAndFade {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-            15% { opacity: 1; transform: translate(-50%, -60%) scale(1.2); }
-            100% { opacity: 0; transform: translate(-50%, -200%) scale(1); }
+            0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
+            15% { opacity: 1; transform: translate(-50%, -20px) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -80px) scale(1); }
         }
 
         /* RODAPÉ E CRÉDITOS */
@@ -409,17 +413,26 @@
             } catch(e){}
         }
 
-        // --- SISTEMA DE REAÇÕES FLUTUANTES ---
+        // --- SISTEMA DE REAÇÕES FLUTUANTES NO NICK ---
         function enviarReacao(emoji) {
-            mostrarReacao(emoji);
+            mostrarReacao(emoji, meuSimbolo);
             if(online && conn) conn.send({t: 'react', e: emoji});
         }
 
-        function mostrarReacao(emoji) {
+        function mostrarReacao(emoji, origem) {
             const el = document.createElement('div');
             el.innerText = emoji;
             el.className = 'reacao-flutuante';
-            document.body.appendChild(el);
+            
+            // Verifica de onde saiu a reação para anexar no jogador certo
+            const container = origem === 'X' ? document.querySelector('.x-player') : document.querySelector('.o-player');
+            
+            if (container) {
+                container.appendChild(el);
+            } else {
+                document.body.appendChild(el); // Fallback de segurança
+            }
+            
             setTimeout(() => el.remove(), 2000);
         }
 
@@ -562,6 +575,7 @@
                         nomeO = d.nome || "Adversário";
                         online = true; contraIA = false; meuSimbolo = "X"; minhaVez = true;
                         setupConn();
+                        
                         iniciarJogo('online');
                     } else if (d.t === 'rej' || d.t === 'rej_ocupado') {
                         btn.innerText = "Conectar";
@@ -582,7 +596,7 @@
             conn.on('data', d => {
                 if(d.t === 'j') { marcar(d.i, meuSimbolo === 'X' ? 'O' : 'X'); minhaVez = true; atualizarStatus(); }
                 if(d.t === 'r') resetLocal(); 
-                if(d.t === 'react') mostrarReacao(d.e); 
+                if(d.t === 'react') mostrarReacao(d.e, meuSimbolo === 'X' ? 'O' : 'X'); 
             });
         }
 
@@ -689,8 +703,8 @@
             document.getElementById('telaInicial').style.display = 'none';
             document.getElementById('telaJogo').style.display = 'flex';
             
-            document.getElementById('txtNomeX').innerText = nomeX.toUpperCase() + ":";
-            document.getElementById('txtNomeO').innerText = nomeO.toUpperCase() + ":";
+            document.getElementById('txtNomeX').innerText = nomeX.toUpperCase();
+            document.getElementById('txtNomeO').innerText = nomeO.toUpperCase();
             
             document.getElementById('sX').innerText = pX; 
             document.getElementById('sO').innerText = pO;
