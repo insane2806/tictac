@@ -6,6 +6,10 @@
     <title>Jogo da Velha - Neon Galaxy Dinâmico</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,900;1,900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -73,8 +77,22 @@
         .btn-top-corner:hover, .btn-top-corner-2:hover { background: rgba(5, 217, 232, 0.2); box-shadow: 0 0 15px var(--neon-cyan); transform: scale(1.05); }
         .icone-som { width: 18px; height: 18px; fill: var(--neon-cyan); }
 
-        /* Telas e Menus */
-        #telaInicial { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; text-align: center; }
+        /* TELA DE LOGIN FIREBASE */
+        #telaLogin { 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            width: 100%; 
+            height: 100%; 
+            text-align: center; 
+            position: absolute;
+            background-color: transparent;
+            z-index: 3000;
+        }
+
+        /* Telas e Menus - TELA INICIAL AGORA COMEÇA ESCONDIDA */
+        #telaInicial { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; text-align: center; }
         #telaJogo { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; position: relative; }
         
         .logo-container { margin-bottom: 40px; position: relative; text-align: center; }
@@ -211,6 +229,22 @@
 <body>
     <div class="background-animated"></div> 
 
+    <div id="telaLogin">
+        <div class="logo-container">
+            <div class="logo">Tic<span>Tac</span></div>
+            <div class="sub" style="color: var(--neon-purple); border-color: var(--neon-purple); box-shadow: 0 0 15px rgba(157, 78, 221, 0.6), inset 0 0 7px rgba(157, 78, 221, 0.6);">LOGIN CLOUD</div>
+        </div>
+        
+        <input type="email" id="emailLogin" class="input-nome" placeholder="Seu E-mail">
+        <input type="password" id="senhaLogin" class="input-nome" placeholder="Sua Senha">
+        <p id="erroLogin" class="erro-input" style="display:none;"></p>
+        
+        <button class="btn-menu btn-online" onclick="entrarConta()" style="margin-bottom: 15px;">ENTRAR</button>
+        <button class="btn-menu btn-local" onclick="criarConta()" style="margin-bottom: 15px;">CRIAR CONTA</button>
+        
+        <button class="btn-texto" onclick="entrarComoConvidado()" style="color: var(--neon-cyan); text-shadow: 0 0 8px rgba(5, 217, 232, 0.5);">Entrar como Convidado</button>
+    </div>
+
     <audio id="musicaFundo" loop preload="auto">
         <source src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=cyberpunk-2099-10701.mp3" type="audio/mpeg">
     </audio>
@@ -251,6 +285,7 @@
             <button class="btn-menu btn-online" onclick="mostrarSetup('onlineMenu')">Jogar Online</button>
             <button class="btn-menu btn-loja" onclick="mostrarSetup('skins')">🛒 Loja de Skins</button>
             <button class="btn-menu btn-ia" onclick="mostrarSetup('ia')">Jogador vs Máquina</button>
+            <button class="btn-texto" onclick="sairDaConta()" style="color: var(--neon-red);">Sair da Conta (Logout)</button>
         </div>
         
         <div id="setupOnlineMenu">
@@ -527,7 +562,6 @@
         }
 
         carregarSkins();
-
 
         const elemMusica = document.getElementById('musicaFundo');
         let musicaAtiva = false;
@@ -1506,6 +1540,96 @@
             if (contraIA && jAtual === 'O') {
                 jogadaIA();
             }
+        }
+
+        // --- SISTEMA DE LOGIN FIREBASE ---
+        
+        // ATENÇÃO: Você precisará substituir isso pelas SUAS chaves do Firebase
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY_AQUI",
+            authDomain: "seu-projeto.firebaseapp.com",
+            projectId: "seu-projeto",
+            storageBucket: "seu-projeto.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef"
+        };
+
+        // Inicializa o Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Monitora se o usuário está logado ou não
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                // Usuário logado: esconde o login e mostra o menu principal
+                document.getElementById('telaLogin').style.display = 'none';
+                document.getElementById('telaInicial').style.display = 'flex';
+                
+                // Se for convidado, coloca o nome padrão. Se tiver e-mail, usa o e-mail.
+                if (user.isAnonymous) {
+                    document.getElementById('nomeOnlineGeral').value = "Convidado";
+                } else if (user.email) {
+                    document.getElementById('nomeOnlineGeral').value = user.email.split('@')[0];
+                }
+            } else {
+                // Ninguém logado: mostra a tela de login
+                document.getElementById('telaLogin').style.display = 'flex';
+                document.getElementById('telaInicial').style.display = 'none';
+            }
+        });
+
+        function mostrarErroLogin(msg) {
+            const erroEl = document.getElementById('erroLogin');
+            erroEl.innerText = msg;
+            erroEl.style.display = 'block';
+            setTimeout(() => erroEl.style.display = 'none', 3000);
+        }
+
+        function criarConta() {
+            const email = document.getElementById('emailLogin').value;
+            const senha = document.getElementById('senhaLogin').value;
+            
+            if(!email || !senha) return mostrarErroLogin("Preencha e-mail e senha!");
+
+            auth.createUserWithEmailAndPassword(email, senha)
+                .then((userCredential) => {
+                    console.log("Conta criada com sucesso!");
+                })
+                .catch((error) => {
+                    if(error.code === 'auth/email-already-in-use') mostrarErroLogin("Este e-mail já existe!");
+                    else if(error.code === 'auth/weak-password') mostrarErroLogin("A senha deve ter no mínimo 6 caracteres.");
+                    else mostrarErroLogin("Erro ao criar conta.");
+                });
+        }
+
+        function entrarConta() {
+            const email = document.getElementById('emailLogin').value;
+            const senha = document.getElementById('senhaLogin').value;
+
+            if(!email || !senha) return mostrarErroLogin("Preencha e-mail e senha!");
+
+            auth.signInWithEmailAndPassword(email, senha)
+                .then((userCredential) => {
+                    console.log("Logado com sucesso!");
+                })
+                .catch((error) => {
+                    mostrarErroLogin("E-mail ou senha incorretos!");
+                });
+        }
+
+        // NOVO: Função para entrar sem senha
+        function entrarComoConvidado() {
+            auth.signInAnonymously()
+                .then(() => {
+                    console.log("Logado como convidado!");
+                })
+                .catch((error) => {
+                    mostrarErroLogin("Erro ao entrar como convidado.");
+                });
+        }
+
+        function sairDaConta() {
+            auth.signOut();
         }
     </script>
 </body>
