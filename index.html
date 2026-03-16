@@ -82,6 +82,26 @@
         .logo span { color: white; }
         .sub { color: var(--neon-cyan); font-size: 0.8rem; letter-spacing: 5px; text-transform: uppercase; font-weight: 700; border: 1.5px solid var(--neon-cyan); border-radius: 20px; padding: 6px 18px; display: inline-block; margin-top: -12px; box-shadow: 0 0 15px rgba(5, 217, 232, 0.6), inset 0 0 7px rgba(5, 217, 232, 0.6); background: rgba(0, 0, 0, 0.6); }
 
+        /* NOVO CONTAINER CUSTOMIZADO DE RANK (SÓ NO ONLINE) */
+        .rank-container-card {
+            background: linear-gradient(135deg, rgba(20,20,35,0.8), rgba(5,5,15,0.9));
+            border: 2px solid var(--neon-cyan);
+            border-radius: 25px;
+            padding: 15px 30px;
+            width: 300px;
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            box-shadow: 0 0 20px rgba(5, 217, 232, 0.3), inset 0 0 15px rgba(5, 217, 232, 0.2);
+            backdrop-filter: blur(10px);
+            transition: 0.3s;
+        }
+        .rank-container-card:hover { transform: scale(1.02); box-shadow: 0 0 25px rgba(5, 217, 232, 0.5), inset 0 0 20px rgba(5, 217, 232, 0.3); }
+        .rank-title { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 3px; font-weight: 700; }
+        .rank-value { font-size: 1.4rem; font-weight: 900; letter-spacing: 1px; text-shadow: 0 0 12px currentColor; }
+        .pdl-value { font-size: 0.8rem; color: #ddd; font-weight: bold; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 15px; align-self: center; margin-top: 5px; border: 1px solid rgba(255,255,255,0.2); }
+
         #botoesMenu { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 15px; }
         
         .btn-menu, .btn-acao { width: 300px; padding: 18px; border-radius: 40px; border: none; font-weight: 700; cursor: pointer; font-size: 1.1rem; transition: 0.4s; text-transform: uppercase; letter-spacing: 2px; color: white; position: relative; overflow: hidden; }
@@ -141,9 +161,13 @@
         
         .board-win-x { border-color: var(--neon-red) !important; box-shadow: 0 0 40px var(--neon-red), inset 0 0 20px var(--neon-red) !important; background: color-mix(in srgb, var(--neon-red) 25%, transparent) !important; }
         .board-win-o { border-color: var(--neon-cyan) !important; box-shadow: 0 0 40px var(--neon-cyan), inset 0 0 20px var(--neon-cyan) !important; background: color-mix(in srgb, var(--neon-cyan) 25%, transparent) !important; }
-        .shake-empate { animation: shakeBoard 0.5s cubic-bezier(.36,.07,.19,.97) both; border-color: var(--neon-red) !important; box-shadow: 0 0 30px var(--neon-red), inset 0 0 20px var(--neon-red) !important; background: color-mix(in srgb, var(--neon-red) 25%, transparent) !important; }
         
+        /* AS TREMIDINHAS */
+        .shake-empate { animation: shakeBoard 0.5s cubic-bezier(.36,.07,.19,.97) both; border-color: var(--neon-red) !important; box-shadow: 0 0 30px var(--neon-red), inset 0 0 20px var(--neon-red) !important; background: color-mix(in srgb, var(--neon-red) 25%, transparent) !important; }
         @keyframes shakeBoard { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-8px, 2px, 0); } 40%, 60% { transform: translate3d(8px, -2px, 0); } }
+
+        .shake-vitoria { animation: shakeWin 0.4s ease-in-out both; }
+        @keyframes shakeWin { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-3px, 1px, 0); } 40%, 60% { transform: translate3d(3px, -1px, 0); } }
 
         .celula { width: 95px; height: 95px; background: #05060a; display: flex; align-items: center; justify-content: center; font-size: 3.8rem; font-weight: 900; font-family: 'Montserrat', sans-serif; cursor: pointer; transition: background 0.2s, transform 0.2s, box-shadow 0.2s; position: relative; }
         .celula[data-index="0"] { border-top-left-radius: 18px; } .celula[data-index="2"] { border-top-right-radius: 18px; }
@@ -232,6 +256,12 @@
         </div>
         
         <div id="setupOnlineMenu">
+            <div class="rank-container-card">
+                <span class="rank-title">Seu Nível Competitivo</span>
+                <span id="txtRank" class="rank-value" style="color: var(--neon-yellow);">🥈 PRATA</span>
+                <span id="txtElo" class="pdl-value">1000 PDL</span>
+            </div>
+
             <input type="text" id="nomeOnlineGeral" class="input-nome" placeholder="Seu Apelido" maxlength="10">
             <p id="erroNomeGeral" class="erro-input">Preencha seu apelido!</p>
             <button class="btn-menu btn-ia" onclick="abrirGlobal()" style="margin-bottom:15px;">🌍 Partida Global</button>
@@ -317,8 +347,48 @@
     </div>
 
     <script>
+        // --- DESTRAVA DE ÁUDIO NO MOBILE (Primeiro Toque) ---
         const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
         
+        document.body.addEventListener('click', () => {
+            if (ctxAudio.state === 'suspended') {
+                ctxAudio.resume();
+            }
+        });
+        
+        // --- SISTEMA DE RANK / ELO ONLINE ---
+        let meuElo = parseInt(localStorage.getItem('ticTacElo')) || 1000;
+
+        function getRankObj(elo) {
+            if(elo < 1100) return { nome: "🥉 BRONZE", cor: "#cd7f32" };
+            if(elo < 1300) return { nome: "🥈 PRATA", cor: "#bdc3c7" };
+            if(elo < 1500) return { nome: "🥇 OURO", cor: "#f1c40f" };
+            if(elo < 1800) return { nome: "💎 DIAMANTE", cor: "#05d9e8" };
+            return { nome: "👑 MESTRE", cor: "#9d4edd" };
+        }
+
+        function atualizarDisplayElo() {
+            const r = getRankObj(meuElo);
+            const elRank = document.getElementById('txtRank');
+            const elElo = document.getElementById('txtElo');
+            if(elRank && elElo) {
+                elRank.innerText = r.nome;
+                elRank.style.color = r.cor;
+                elElo.innerText = `${meuElo} PDL`;
+            }
+        }
+
+        function updateElo(resultado) {
+            if(!online) return;
+            if(resultado === 'vitoria') meuElo += 25;
+            else if(resultado === 'derrota') meuElo = Math.max(0, meuElo - 25);
+            else if(resultado === 'empate') meuElo += 5;
+            
+            localStorage.setItem('ticTacElo', meuElo);
+            atualizarDisplayElo();
+        }
+
+        // --- SISTEMA SKINS CRAZYGAMES ---
         let cgSdk = null;
         
         const skinsDB = [
@@ -361,6 +431,7 @@
             
             aplicarCoresDaSkin();
             renderizarMenuSkins();
+            atualizarDisplayElo(); 
         }
 
         function renderizarMenuSkins() {
@@ -407,7 +478,6 @@
             });
         }
 
-        // REDE DE SEGURANÇA NOS ANÚNCIOS AQUI
         function assistirAnuncioSkin(id) {
             const acionarFallback = () => {
                 let conf = confirm("Modo Teste: Como o jogo ainda não está rodando dentro do site da CrazyGames, não conseguimos mostrar o anúncio real. Deseja simular a visualização e liberar a skin?");
@@ -493,8 +563,10 @@
             }
         }, { once: true });
 
+        // --- OS EFEITOS SONOROS MANTIDOS IDÊNTICOS ---
         function som(f, d) {
             try {
+                if (ctxAudio.state === 'suspended') ctxAudio.resume(); 
                 const o = ctxAudio.createOscillator();
                 const g = ctxAudio.createGain();
                 o.frequency.value = f;
@@ -508,6 +580,7 @@
 
         function somVitoria() {
             try {
+                if (ctxAudio.state === 'suspended') ctxAudio.resume();
                 const o = ctxAudio.createOscillator();
                 const g = ctxAudio.createGain();
                 o.type = 'square';
@@ -537,6 +610,7 @@
 
         function somDerrota() {
             try {
+                if (ctxAudio.state === 'suspended') ctxAudio.resume();
                 const o = ctxAudio.createOscillator();
                 const g = ctxAudio.createGain();
                 o.type = 'sawtooth';
@@ -959,7 +1033,8 @@
             document.getElementById('sX').innerText = pX; 
             document.getElementById('sO').innerText = pO;
             
-            somVitoria(); 
+            somVitoria();
+            updateElo('vitoria'); 
             document.getElementById('btnNovaPartida').style.display = 'none'; 
             
             const statusEl = document.getElementById('status');
@@ -989,7 +1064,6 @@
             document.getElementById('telaJogo').style.display = 'none';
             document.getElementById('telaInicial').style.display = 'flex';
             
-            // REDE DE SEGURANÇA: Fecha a partida no SDK sem crashar
             try { if(cgSdk && cgSdk.game) cgSdk.game.gameplayStop(); } catch(e){}
 
             mostrarSetup('menuPrincipal');
@@ -1028,7 +1102,7 @@
 
             document.body.style.animation = "";
             document.body.classList.remove('flash-red', 'flash-win-x', 'flash-win-o');
-            document.getElementById('tabuleiro').classList.remove('shake-empate', 'board-win-x', 'board-win-o');
+            document.getElementById('tabuleiro').classList.remove('shake-empate', 'board-win-x', 'board-win-o', 'shake-vitoria');
             const statusEl = document.getElementById('status');
             statusEl.style.color = "#fff";
             statusEl.classList.remove('status-vitoria');
@@ -1115,7 +1189,6 @@
                 contraIA = true;
             }
 
-            // REDE DE SEGURANÇA: Inicia partida no SDK sem crashar
             try { if(cgSdk && cgSdk.game) cgSdk.game.gameplayStart(); } catch(e){}
 
             pararMusicaImediatamente(); 
@@ -1301,6 +1374,11 @@
                     const vencedor = estado[p[0]];
                     const nomeVencedor = vencedor === 'X' ? nomeX : nomeO;
                     
+                    if (online) {
+                        if (vencedor === meuSimbolo) updateElo('vitoria');
+                        else updateElo('derrota');
+                    }
+                    
                     const statusEl = document.getElementById('status');
                     statusEl.innerText = `${nomeVencedor} VENCEU!`;
                     statusEl.style.color = vencedor === 'X' ? 'var(--neon-red)' : 'var(--neon-cyan)';
@@ -1318,6 +1396,7 @@
                         document.body.classList.add('flash-win-o');
                         tabuleiro.classList.add('board-win-o');
                     }
+                    tabuleiro.classList.add('shake-vitoria');
 
                     const celulas = document.querySelectorAll('.celula');
                     celulas[p[0]].classList.add('celula-vencedora');
@@ -1326,7 +1405,6 @@
 
                     somVitoria(); 
                     
-                    // REDE DE SEGURANÇA: Chama evento do SDK sem crashar
                     try { if(cgSdk && cgSdk.game) cgSdk.game.happytime(); } catch(e){}
                     
                     if (navigator.vibrate) { navigator.vibrate([100, 50, 100, 50, 200]); }
@@ -1338,6 +1416,8 @@
 
             if(!temVencedor && !estado.includes("")) { 
                 ativo = false; 
+                
+                if (online) updateElo('empate');
                 
                 const statusEl = document.getElementById('status');
                 statusEl.innerText = "DEU VELHA!";
@@ -1380,7 +1460,7 @@
             });
             
             const tabuleiro = document.getElementById('tabuleiro');
-            tabuleiro.classList.remove('shake-empate', 'board-win-x', 'board-win-o');
+            tabuleiro.classList.remove('shake-empate', 'board-win-x', 'board-win-o', 'shake-vitoria');
             document.body.classList.remove('flash-red', 'flash-win-x', 'flash-win-o');
             
             const statusEl = document.getElementById('status');
