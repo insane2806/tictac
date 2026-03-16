@@ -99,12 +99,16 @@
         
         .btn-online, .btn-acao { background: linear-gradient(90deg, #3d0a6b, #8a2be2, #3d0a6b); border: 2px solid var(--neon-purple); box-shadow: 0 0 20px var(--neon-purple), inset 0 0 12px rgba(157, 78, 221, 0.6); }
         .btn-online:hover, .btn-acao:hover { box-shadow: 0 0 35px var(--neon-purple), inset 0 0 20px rgba(157, 78, 221, 0.9); transform: scale(1.03); }
+        
+        .btn-ia { background: linear-gradient(90deg, #002244, #05d9e8, #002244); border: 2px solid var(--neon-cyan); box-shadow: 0 0 20px var(--neon-cyan), inset 0 0 12px rgba(5, 217, 232, 0.6); }
+        .btn-ia:hover { box-shadow: 0 0 35px var(--neon-cyan), inset 0 0 20px rgba(5, 217, 232, 0.9); transform: scale(1.03); }
+        
         .btn-acao { width: auto; padding: 18px 50px; margin-top: 30px; }
 
         .input-nome { background: rgba(0,0,0,0.7); border: 1.5px solid rgba(255,255,255,0.15); color: white; padding: 18px; border-radius: 40px; width: 300px; text-align: center; font-size: 1rem; outline: none; margin-bottom: 15px; font-family: inherit; transition: 0.3s; }
         .input-nome:focus { border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(5, 217, 232, 0.4); background: rgba(0,0,0,0.8); }
 
-        #setupOnline, #setupLocal { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; animation: fadeIn 0.4s ease forwards; }
+        #setupOnline, #setupLocal, #setupIA { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; animation: fadeIn 0.4s ease forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Modal de Convite */
@@ -144,9 +148,12 @@
         .credito-footer { position: absolute; bottom: 25px; display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 0.8; transition: opacity 0.3s; }
         .credito-footer:hover { opacity: 1; }
         .credito-texto { font-size: 0.75rem; color: #ccc; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; text-shadow: 0 0 5px rgba(255,255,255,0.3); }
-        .credito-sub { font-size: 0.65rem; color: #999; }
-        .icone-insta { width: 20px; height: 20px; fill: #aaa; margin-top: 3px; transition: 0.3s; }
-        .icone-insta:hover { fill: white; transform: scale(1.1); }
+        .icone-insta { width: 20px; height: 20px; fill: #aaa; margin-top: 0; transition: 0.3s; }
+        
+        /* Efeito de hover no link do Instagram */
+        .link-axion:hover .icone-insta { fill: white; transform: scale(1.1); }
+        .link-axion:hover .texto-axion { color: white !important; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+        
         .btn-texto { background: none; border: none; color: #aaa; margin-top: 18px; cursor: pointer; font-family: inherit; font-size: 0.95rem; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
         .btn-texto:hover { color: white; text-shadow: 0 0 8px rgba(255,255,255,0.6); }
     </style>
@@ -180,7 +187,15 @@
         <div id="botoesMenu">
             <button class="btn-menu btn-local" onclick="mostrarSetup('local')">Duelo Local</button>
             <button class="btn-menu btn-online" onclick="mostrarSetup('online')">Jogar Online</button>
+            <button class="btn-menu btn-ia" onclick="mostrarSetup('ia')">Jogador vs Máquina</button>
         </div>
+        
+        <div id="setupIA">
+            <input type="text" id="nomeJogadorIA" class="input-nome" placeholder="Seu Apelido" maxlength="10">
+            <button class="btn-menu btn-ia" onclick="iniciarJogo('ia')">Enfrentar Máquina</button>
+            <button class="btn-texto" onclick="voltarMenu()">Voltar</button>
+        </div>
+
         <div id="setupLocal">
             <input type="text" id="nomeLocalX" class="input-nome" placeholder="Jogador X" maxlength="10">
             <input type="text" id="nomeLocalO" class="input-nome" placeholder="Jogador O" maxlength="10">
@@ -196,10 +211,10 @@
             <button class="btn-texto" onclick="voltarMenu()">Voltar</button>
         </div>
         <div class="credito-footer">
-            <div class="credito-texto">Desenvolvido by DEV THALISON</div>
-            <div class="credito-sub">Siga minhas redes sociais</div>
-            <a href="#" aria-label="Instagram">
+            <div class="credito-texto">Developer ThalisonDev</div>
+            <a href="https://www.instagram.com/axionsollutions?igsh=MXduMjA3YWhwaGh6OQ%3D%3D&utm_source=qr" target="_blank" aria-label="Instagram" class="link-axion" style="text-decoration: none; display: flex; align-items: center; gap: 8px; margin-top: 6px;">
                 <svg class="icone-insta" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                <span class="texto-axion" style="color: #aaa; font-size: 0.75rem; font-weight: bold; letter-spacing: 1px; transition: 0.3s;">Axion</span>
             </a>
         </div>
     </div>
@@ -285,16 +300,16 @@
         }
 
         // LÓGICA DO JOGO E MULTIPLAYER
-        // ADICIONADA: Variável quemComeca para alternar os turnos a cada partida
         let nomeX = "X", nomeO = "O", jAtual = "X", quemComeca = "X", ativo = true, estado = ["","","","","","","","",""];
         let pX = 0, pO = 0, online = false, minhaVez = true, meuSimbolo = "X", conn;
         let connProvisoria = null;
+        let contraIA = false;
 
         const peer = new Peer(Math.floor(10000 + Math.random() * 89999).toString());
         peer.on('open', id => document.getElementById('meuId').innerText = id);
         
         peer.on('connection', c => {
-            if (online || document.getElementById('modalConvite').style.display === 'flex') {
+            if (online || contraIA || document.getElementById('modalConvite').style.display === 'flex') {
                 c.on('open', () => { c.send({t: 'rej_ocupado'}); setTimeout(() => c.close(), 500); });
                 return;
             }
@@ -315,7 +330,7 @@
             nomeO = meuNome;
             conn.send({t: 'acc', nome: meuNome});
             
-            online = true; meuSimbolo = "O"; minhaVez = false;
+            online = true; contraIA = false; meuSimbolo = "O"; minhaVez = false;
             setupConn();
             iniciarJogo('online');
         }
@@ -354,7 +369,7 @@
                     if (d.t === 'acc') {
                         nomeX = meuNome;
                         nomeO = d.nome || "Adversário";
-                        online = true; meuSimbolo = "X"; minhaVez = true;
+                        online = true; contraIA = false; meuSimbolo = "X"; minhaVez = true;
                         setupConn();
                         iniciarJogo('online');
                     } else if (d.t === 'rej' || d.t === 'rej_ocupado') {
@@ -375,18 +390,26 @@
         function setupConn() {
             conn.on('data', d => {
                 if(d.t === 'j') { marcar(d.i, meuSimbolo === 'X' ? 'O' : 'X'); minhaVez = true; atualizarStatus(); }
-                if(d.t === 'r') resetLocal(); // Recebe o reset e reveza a jogada junto!
+                if(d.t === 'r') resetLocal(); 
             });
         }
 
         function mostrarSetup(m) {
             document.getElementById('botoesMenu').style.display = 'none';
-            document.getElementById(m === 'local' ? 'setupLocal' : 'setupOnline').style.display = 'flex';
+            document.getElementById('setupLocal').style.display = 'none';
+            document.getElementById('setupOnline').style.display = 'none';
+            document.getElementById('setupIA').style.display = 'none';
+            
+            if(m === 'local') document.getElementById('setupLocal').style.display = 'flex';
+            else if(m === 'online') document.getElementById('setupOnline').style.display = 'flex';
+            else if(m === 'ia') document.getElementById('setupIA').style.display = 'flex';
         }
+
         function voltarMenu() {
             document.getElementById('botoesMenu').style.display = 'flex';
             document.getElementById('setupLocal').style.display = 'none';
             document.getElementById('setupOnline').style.display = 'none';
+            document.getElementById('setupIA').style.display = 'none';
             document.getElementById('erroOnline').style.display = 'none';
             if (document.getElementById('btnConectar').innerText !== "Conectar") {
                 document.getElementById('btnConectar').innerText = "Conectar";
@@ -397,10 +420,17 @@
         function iniciarJogo(m) {
             pararMusicaImediatamente(); 
 
+            contraIA = false;
+
             if(m === 'local') {
                 nomeX = document.getElementById('nomeLocalX').value || "Jogador 1";
                 nomeO = document.getElementById('nomeLocalO').value || "Jogador 2";
                 online = false;
+            } else if (m === 'ia') {
+                nomeX = document.getElementById('nomeJogadorIA').value || "Humano";
+                nomeO = "MÁQUINA";
+                online = false;
+                contraIA = true;
             }
             
             document.getElementById('telaInicial').style.display = 'none';
@@ -409,14 +439,107 @@
             document.getElementById('txtNomeX').innerText = nomeX.toUpperCase() + ":";
             document.getElementById('txtNomeO').innerText = nomeO.toUpperCase() + ":";
             atualizarStatus();
+
+            if (contraIA && jAtual === 'O') {
+                jogadaIA();
+            }
+        }
+
+        // --- ALGORITMO MINIMAX PARA A I.A. ---
+        function checarVitoriaMinimax(b) {
+            const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+            for(let p of w) {
+                if(b[p[0]] !== "" && b[p[0]] === b[p[1]] && b[p[0]] === b[p[2]]) return b[p[0]];
+            }
+            return null;
+        }
+
+        function minimax(novoEstado, jogadorAI) {
+            let v = checarVitoriaMinimax(novoEstado);
+            if (v === 'X') return { score: -10 }; 
+            if (v === 'O') return { score: 10 };  
+            if (!novoEstado.includes("")) return { score: 0 }; 
+
+            let movimentos = [];
+            for (let i = 0; i < 9; i++) {
+                if (novoEstado[i] === "") {
+                    let mov = { index: i };
+                    novoEstado[i] = jogadorAI;
+                    
+                    if (jogadorAI === 'O') {
+                        let result = minimax(novoEstado, 'X');
+                        mov.score = result.score;
+                    } else {
+                        let result = minimax(novoEstado, 'O');
+                        mov.score = result.score;
+                    }
+                    
+                    novoEstado[i] = "";
+                    movimentos.push(mov);
+                }
+            }
+            
+            let melhorMovimento;
+            if (jogadorAI === 'O') {
+                let bestScore = -Infinity;
+                for (let i = 0; i < movimentos.length; i++) {
+                    if (movimentos[i].score > bestScore) {
+                        bestScore = movimentos[i].score;
+                        melhorMovimento = i;
+                    }
+                }
+            } else {
+                let bestScore = Infinity;
+                for (let i = 0; i < movimentos.length; i++) {
+                    if (movimentos[i].score < bestScore) {
+                        bestScore = movimentos[i].score;
+                        melhorMovimento = i;
+                    }
+                }
+            }
+            return movimentos[melhorMovimento];
+        }
+
+        function jogadaIA() {
+            if (!ativo || !contraIA) return;
+            const s = document.getElementById('status');
+            s.innerText = "MÁQUINA PENSANDO...";
+            
+            setTimeout(() => {
+                let vazios = estado.filter(x => x === "").length;
+                let melhorIndex = 4; 
+                
+                if (vazios === 9) {
+                    melhorIndex = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
+                } else if (vazios === 8 && estado[4] === "") {
+                    melhorIndex = 4;
+                } else {
+                    melhorIndex = minimax(estado, 'O').index;
+                }
+
+                marcar(melhorIndex, 'O');
+                if(ativo) {
+                    jAtual = 'X';
+                    atualizarStatus();
+                }
+            }, 500);
         }
 
         document.querySelectorAll('.celula').forEach(c => c.addEventListener('click', e => {
             const i = e.target.dataset.index;
-            if(estado[i] !== "" || !ativo || (online && !minhaVez)) return;
+            if(estado[i] !== "" || !ativo || (online && !minhaVez) || (contraIA && jAtual === 'O')) return;
+            
             marcar(i, online ? meuSimbolo : jAtual);
-            if(online) { conn.send({t:'j', i:i}); minhaVez = false; atualizarStatus(); }
-            else { jAtual = jAtual === 'X' ? 'O' : 'X'; atualizarStatus(); }
+            
+            if(online) { 
+                conn.send({t:'j', i:i}); minhaVez = false; atualizarStatus(); 
+            } else { 
+                jAtual = jAtual === 'X' ? 'O' : 'X'; 
+                atualizarStatus(); 
+                if (contraIA && ativo && jAtual === 'O') {
+                    jogadaIA();
+                }
+            }
         }));
         
         function marcar(i, s) {
@@ -433,7 +556,6 @@
             s.style.color = "#fff"; 
             s.classList.remove('status-vitoria');
             if(online) {
-                // Mensagem atualizada para o online
                 s.innerText = minhaVez ? "SUA VEZ!" : "AGUARDE O ADVERSÁRIO...";
             } else {
                 s.innerText = `VEZ DE ${jAtual === 'X' ? nomeX : nomeO}`;
@@ -476,8 +598,6 @@
                     celulas[p[2]].classList.add('celula-vencedora');
 
                     somVitoria(); 
-                    
-                    // Libera o botão "Nova Partida" para todos (local e online)
                     document.getElementById('btnNovaPartida').style.display = 'block';
                     return; 
                 }
@@ -497,14 +617,13 @@
                 somDerrota();
                 if (navigator.vibrate) { navigator.vibrate([100, 50, 100, 50, 200]); }
                 
-                // Libera o botão "Nova Partida" para todos (local e online)
                 document.getElementById('btnNovaPartida').style.display = 'block'; 
             }
         }
         
         function reset() { 
             if(!ativo) {
-                if(online) conn.send({t:'r'}); // Avisa o outro jogador para resetar junto
+                if(online) conn.send({t:'r'}); 
                 resetLocal(); 
             }
         }
@@ -513,11 +632,9 @@
             estado.fill(""); 
             ativo = true; 
             
-            // ALTERAÇÃO: Alterna quem começa a partida
             quemComeca = quemComeca === "X" ? "O" : "X";
             jAtual = quemComeca;
             
-            // Se for online, a "minha vez" inverte dependendo de quem é o novo a começar
             if(online) {
                 minhaVez = (meuSimbolo === quemComeca);
             }
@@ -536,7 +653,11 @@
             statusEl.classList.remove('status-vitoria');
             
             document.getElementById('btnNovaPartida').style.display = 'none';
-            atualizarStatus(); // Mostra de quem é a vez certinho
+            atualizarStatus(); 
+
+            if (contraIA && jAtual === 'O') {
+                jogadaIA();
+            }
         }
     </script>
 </body>
