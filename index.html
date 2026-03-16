@@ -336,11 +336,11 @@
                 if(window.CrazyGames && window.CrazyGames.SDK) {
                     cgSdk = window.CrazyGames.SDK;
                     await cgSdk.init();
-                    cgSdk.game.sdkGameLoadingStart();
-                    setTimeout(() => cgSdk.game.sdkGameLoadingStop(), 1000); 
+                    try { cgSdk.game.sdkGameLoadingStart(); } catch(e){}
+                    setTimeout(() => { try { cgSdk.game.sdkGameLoadingStop(); } catch(e){} }, 1000); 
                 }
             } catch (e) {
-                console.warn("SDK não detectado");
+                console.warn("SDK não detectado corretamente");
             }
         }
         initCrazyGames();
@@ -407,17 +407,27 @@
             });
         }
 
+        // REDE DE SEGURANÇA NOS ANÚNCIOS AQUI
         function assistirAnuncioSkin(id) {
-            if (cgSdk && cgSdk.ad) {
-                const callbacks = {
-                    adStarted: () => { pararMusicaImediatamente(); },
-                    adFinished: () => { liberarSkin(id); seMusicaTavaTocandoVolte(); },
-                    adError: (error) => { alert("Erro ao carregar anúncio."); seMusicaTavaTocandoVolte(); },
-                };
-                cgSdk.ad.requestAd('rewarded', callbacks);
-            } else {
-                let conf = confirm("Assistir anúncio e liberar skin?");
+            const acionarFallback = () => {
+                let conf = confirm("Modo Teste: Como o jogo ainda não está rodando dentro do site da CrazyGames, não conseguimos mostrar o anúncio real. Deseja simular a visualização e liberar a skin?");
                 if(conf) liberarSkin(id);
+                seMusicaTavaTocandoVolte();
+            };
+
+            try {
+                if (cgSdk && cgSdk.ad) {
+                    const callbacks = {
+                        adStarted: () => { pararMusicaImediatamente(); },
+                        adFinished: () => { liberarSkin(id); seMusicaTavaTocandoVolte(); },
+                        adError: (error) => { acionarFallback(); },
+                    };
+                    cgSdk.ad.requestAd('rewarded', callbacks);
+                } else {
+                    acionarFallback();
+                }
+            } catch (e) {
+                acionarFallback();
             }
         }
 
@@ -713,7 +723,12 @@
         }
 
         function gerarLinkConvite() {
-            const link = (cgSdk && cgSdk.game && cgSdk.game.inviteLink) ? cgSdk.game.inviteLink({ roomId: meuIDOriginal }) : window.location.href + "?roomId=" + meuIDOriginal;
+            let link = window.location.href + "?roomId=" + meuIDOriginal;
+            try {
+                if (cgSdk && cgSdk.game && cgSdk.game.inviteLink) {
+                    link = cgSdk.game.inviteLink({ roomId: meuIDOriginal });
+                }
+            } catch(e) {}
             navigator.clipboard.writeText(link).catch(e=>{});
             document.getElementById('btnConvidarLink').innerText = "✅ Link Copiado!";
             setTimeout(() => document.getElementById('btnConvidarLink').innerText = "🔗 Enviar Convite (Link)", 3000);
@@ -974,6 +989,9 @@
             document.getElementById('telaJogo').style.display = 'none';
             document.getElementById('telaInicial').style.display = 'flex';
             
+            // REDE DE SEGURANÇA: Fecha a partida no SDK sem crashar
+            try { if(cgSdk && cgSdk.game) cgSdk.game.gameplayStop(); } catch(e){}
+
             mostrarSetup('menuPrincipal');
             document.getElementById('botoesMenu').style.display = 'flex';
             
@@ -1097,7 +1115,8 @@
                 contraIA = true;
             }
 
-            if(cgSdk && cgSdk.game) cgSdk.game.gameplayStart();
+            // REDE DE SEGURANÇA: Inicia partida no SDK sem crashar
+            try { if(cgSdk && cgSdk.game) cgSdk.game.gameplayStart(); } catch(e){}
 
             pararMusicaImediatamente(); 
             document.getElementById('btnAudio').style.display = 'none';
@@ -1306,7 +1325,10 @@
                     celulas[p[2]].classList.add('celula-vencedora');
 
                     somVitoria(); 
-                    if(cgSdk && cgSdk.game) cgSdk.game.happytime();
+                    
+                    // REDE DE SEGURANÇA: Chama evento do SDK sem crashar
+                    try { if(cgSdk && cgSdk.game) cgSdk.game.happytime(); } catch(e){}
+                    
                     if (navigator.vibrate) { navigator.vibrate([100, 50, 100, 50, 200]); }
                     
                     document.getElementById('btnNovaPartida').style.display = 'block';
