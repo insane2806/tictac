@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Jogo da Velha - Neon Galaxy Dinâmico</title>
+    
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
     <script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
     
@@ -77,21 +78,14 @@
         .btn-top-corner:hover, .btn-top-corner-2:hover { background: rgba(5, 217, 232, 0.2); box-shadow: 0 0 15px var(--neon-cyan); transform: scale(1.05); }
         .icone-som { width: 18px; height: 18px; fill: var(--neon-cyan); }
 
-        /* TELA DE LOGIN FIREBASE */
+        /* TELA DE LOGIN FIREBASE (Nova) */
         #telaLogin { 
-            display: flex; 
-            flex-direction: column; 
-            align-items: center; 
-            justify-content: center; 
-            width: 100%; 
-            height: 100%; 
-            text-align: center; 
-            position: absolute;
-            background-color: transparent;
-            z-index: 3000;
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            width: 100%; height: 100%; text-align: center; position: absolute;
+            background-color: transparent; z-index: 3000;
         }
 
-        /* Telas e Menus - TELA INICIAL AGORA COMEÇA ESCONDIDA */
+        /* Telas e Menus (Modificado display inicial para none) */
         #telaInicial { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; text-align: center; }
         #telaJogo { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; position: relative; }
         
@@ -1542,16 +1536,16 @@
             }
         }
 
-        // --- SISTEMA DE LOGIN FIREBASE ---
+        // --- SISTEMA DE LOGIN FIREBASE (CONFIGURADO COM SUAS CHAVES REAIS) ---
         
-        // ATENÇÃO: Você precisará substituir isso pelas SUAS chaves do Firebase
         const firebaseConfig = {
-            apiKey: "SUA_API_KEY_AQUI",
-            authDomain: "seu-projeto.firebaseapp.com",
-            projectId: "seu-projeto",
-            storageBucket: "seu-projeto.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef"
+            apiKey: "AIzaSyDv64s-6JctziIGcyDfogeVJHnvGf6pDRc",
+            authDomain: "jogo-da-velha-000.firebaseapp.com",
+            projectId: "jogo-da-velha-000",
+            storageBucket: "jogo-da-velha-000.firebasestorage.app",
+            messagingSenderId: "175809267928",
+            appId: "1:175809267928:web:7d18bbd870a82482daafad",
+            measurementId: "G-F2NSRKELGL"
         };
 
         // Inicializa o Firebase
@@ -1617,14 +1611,14 @@
                 });
         }
 
-        // NOVO: Função para entrar sem senha
+        // Função para entrar sem senha
         function entrarComoConvidado() {
             auth.signInAnonymously()
                 .then(() => {
                     console.log("Logado como convidado!");
                 })
                 .catch((error) => {
-                    mostrarErroLogin("Erro ao entrar como convidado.");
+                    mostrarErroLogin("Erro ao entrar. O login anônimo está ativo no Firebase?");
                 });
         }
 
