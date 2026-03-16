@@ -11,6 +11,7 @@
             --neon-red: #ff2a6d;
             --neon-cyan: #05d9e8;
             --neon-purple: #9d4edd;
+            --neon-green: #00ff7f;
             --bg-dark: #020205; 
         }
         
@@ -26,7 +27,7 @@
             transition: background-color 0.1s; 
         }
 
-        /* Efeito Flash de Derrota/Velha */
+        /* Efeitos Flash */
         .flash-red { animation: flashShock 0.4s ease-in-out; }
         @keyframes flashShock {
             0%, 100% { background-color: transparent; }
@@ -36,20 +37,11 @@
             80% { background-color: transparent; }
         }
 
-        /* Efeitos Flash de Vitória (Sobrecarga de Energia) */
         .flash-win-x { animation: flashWinX 0.6s ease-out; }
-        @keyframes flashWinX {
-            0%, 100% { background-color: transparent; }
-            20% { background-color: rgba(255, 42, 109, 0.4); }
-            80% { background-color: transparent; }
-        }
+        @keyframes flashWinX { 0%, 100% { background-color: transparent; } 20% { background-color: rgba(255, 42, 109, 0.4); } 80% { background-color: transparent; } }
 
         .flash-win-o { animation: flashWinO 0.6s ease-out; }
-        @keyframes flashWinO {
-            0%, 100% { background-color: transparent; }
-            20% { background-color: rgba(5, 217, 232, 0.4); }
-            80% { background-color: transparent; }
-        }
+        @keyframes flashWinO { 0%, 100% { background-color: transparent; } 20% { background-color: rgba(5, 217, 232, 0.4); } 80% { background-color: transparent; } }
 
         /* Fundo Dinâmico Galáxia */
         .background-animated {
@@ -67,11 +59,7 @@
             background-size: 300px 300px, 200px 200px, 100px 100px; background-position: 0 0, 50px 50px, 120px 120px;
             opacity: 0.7; animation: moveStars 40s linear infinite; 
         }
-
-        @keyframes moveStars {
-            from { transform: translateY(0) translateX(0); }
-            to { transform: translateY(300px) translateX(150px); }
-        }
+        @keyframes moveStars { from { transform: translateY(0) translateX(0); } to { transform: translateY(300px) translateX(150px); } }
 
         .background-animated::after {
             content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
@@ -79,10 +67,9 @@
                         radial-gradient(circle at 30% 70%, rgba(5, 217, 232, 0.1) 0%, transparent 60%);
             filter: blur(60px); animation: pulseNebula 15s ease-in-out infinite alternate;
         }
-
         @keyframes pulseNebula { 0% { opacity: 0.6; transform: scale(1); } 100% { opacity: 1; transform: scale(1.05); } }
 
-        /* Botão de Música no Canto - Reduzido e mais para cima */
+        /* Botão de Música */
         .btn-audio {
             position: absolute; top: 12px; right: 15px; background: rgba(5, 5, 10, 0.6);
             border: 1px solid var(--neon-cyan); border-radius: 50%; width: 36px; height: 36px;
@@ -92,74 +79,55 @@
         .btn-audio:hover { background: rgba(5, 217, 232, 0.2); box-shadow: 0 0 15px var(--neon-cyan); transform: scale(1.05); }
         .icone-som { width: 18px; height: 18px; fill: var(--neon-cyan); }
 
+        /* Telas e Menus */
         #telaInicial { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; text-align: center; }
         #telaJogo { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; }
         
         .logo-container { margin-bottom: 40px; position: relative; text-align: center; }
-        .logo { 
-            font-size: 4.5rem; font-weight: 900; font-style: italic; letter-spacing: -3px; color: white;
-            text-shadow: 0 0 15px rgba(255,255,255,0.9), 0 0 25px var(--neon-cyan), 0 0 35px var(--neon-cyan), 0 0 45px var(--neon-cyan);
-            display: flex; align-items: center; justify-content: center;
-        }
+        .logo { font-size: 4.5rem; font-weight: 900; font-style: italic; letter-spacing: -3px; color: white; text-shadow: 0 0 15px rgba(255,255,255,0.9), 0 0 25px var(--neon-cyan), 0 0 35px var(--neon-cyan), 0 0 45px var(--neon-cyan); display: flex; align-items: center; justify-content: center; }
         .logo span { color: white; }
-        .sub { 
-            color: var(--neon-cyan); font-size: 0.8rem; letter-spacing: 5px; text-transform: uppercase; font-weight: 700;
-            border: 1.5px solid var(--neon-cyan); border-radius: 20px; padding: 6px 18px; display: inline-block; margin-top: -12px;
-            box-shadow: 0 0 15px rgba(5, 217, 232, 0.6), inset 0 0 7px rgba(5, 217, 232, 0.6); background: rgba(0, 0, 0, 0.6);
-        }
+        .sub { color: var(--neon-cyan); font-size: 0.8rem; letter-spacing: 5px; text-transform: uppercase; font-weight: 700; border: 1.5px solid var(--neon-cyan); border-radius: 20px; padding: 6px 18px; display: inline-block; margin-top: -12px; box-shadow: 0 0 15px rgba(5, 217, 232, 0.6), inset 0 0 7px rgba(5, 217, 232, 0.6); background: rgba(0, 0, 0, 0.6); }
 
         #botoesMenu { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 15px; }
         
-        .btn-menu, .btn-acao { 
-            width: 300px; padding: 18px; border-radius: 40px; border: none; font-weight: 700; cursor: pointer; font-size: 1.1rem; transition: 0.4s; text-transform: uppercase; letter-spacing: 2px; color: white; position: relative; overflow: hidden;
-        }
-        .btn-menu::before, .btn-acao::before {
-            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: 0.5s;
-        }
+        .btn-menu, .btn-acao { width: 300px; padding: 18px; border-radius: 40px; border: none; font-weight: 700; cursor: pointer; font-size: 1.1rem; transition: 0.4s; text-transform: uppercase; letter-spacing: 2px; color: white; position: relative; overflow: hidden; }
+        .btn-menu::before, .btn-acao::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: 0.5s; }
         .btn-menu:hover::before, .btn-acao:hover::before { left: 100%; }
         
         .btn-local { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.25); backdrop-filter: blur(8px); }
         .btn-local:hover { background: rgba(255, 255, 255, 0.15); border-color: rgba(255,255,255,0.4); }
         
-        .btn-online, .btn-acao { 
-            background: linear-gradient(90deg, #3d0a6b, #8a2be2, #3d0a6b); border: 2px solid var(--neon-purple);
-            box-shadow: 0 0 20px var(--neon-purple), inset 0 0 12px rgba(157, 78, 221, 0.6);
-        }
+        .btn-online, .btn-acao { background: linear-gradient(90deg, #3d0a6b, #8a2be2, #3d0a6b); border: 2px solid var(--neon-purple); box-shadow: 0 0 20px var(--neon-purple), inset 0 0 12px rgba(157, 78, 221, 0.6); }
         .btn-online:hover, .btn-acao:hover { box-shadow: 0 0 35px var(--neon-purple), inset 0 0 20px rgba(157, 78, 221, 0.9); transform: scale(1.03); }
         .btn-acao { width: auto; padding: 18px 50px; margin-top: 30px; }
 
-        .input-nome { 
-            background: rgba(0,0,0,0.7); border: 1.5px solid rgba(255,255,255,0.15); color: white; padding: 18px; border-radius: 40px; width: 300px; text-align: center; font-size: 1rem; outline: none; margin-bottom: 15px; font-family: inherit; transition: 0.3s;
-        }
+        .input-nome { background: rgba(0,0,0,0.7); border: 1.5px solid rgba(255,255,255,0.15); color: white; padding: 18px; border-radius: 40px; width: 300px; text-align: center; font-size: 1rem; outline: none; margin-bottom: 15px; font-family: inherit; transition: 0.3s; }
         .input-nome:focus { border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(5, 217, 232, 0.4); background: rgba(0,0,0,0.8); }
 
         #setupOnline, #setupLocal { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; animation: fadeIn 0.4s ease forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .placar { 
-            display: flex; gap: 35px; margin-bottom: 45px; background: rgba(5, 5, 10, 0.9); padding: 12px 35px; border-radius: 50px; border: 1.5px solid rgba(255,255,255,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.7); font-size: 0.95rem; font-weight: 700; align-items: center; backdrop-filter: blur(5px);
-        }
+        /* Modal de Convite */
+        #modalConvite { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(8px); animation: fadeIn 0.3s; }
+        .modal-content { background: rgba(10,10,20,0.95); border: 2px solid var(--neon-cyan); padding: 40px 30px; border-radius: 25px; text-align: center; box-shadow: 0 0 40px rgba(5,217,232,0.3), inset 0 0 20px rgba(5,217,232,0.2); max-width: 90%; width: 350px; }
+        .btn-aceitar { background: linear-gradient(90deg, #004d26, #00ff7f, #004d26); border-color: var(--neon-green); box-shadow: 0 0 15px var(--neon-green); width: 100%; margin-bottom: 10px; }
+        .btn-recusar { background: linear-gradient(90deg, #4d0015, #ff2a6d, #4d0015); border-color: var(--neon-red); box-shadow: 0 0 15px var(--neon-red); width: 100%; }
+
+        .placar { display: flex; gap: 35px; margin-bottom: 45px; background: rgba(5, 5, 10, 0.9); padding: 12px 35px; border-radius: 50px; border: 1.5px solid rgba(255,255,255,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.7); font-size: 0.95rem; font-weight: 700; align-items: center; backdrop-filter: blur(5px); }
         .x-player span:first-child, .o-player span:first-child { font-weight: normal; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
         .x-player span:last-child { color: var(--neon-red); font-size: 1.3rem; margin-left: 8px; text-shadow: 0 0 12px var(--neon-red), 0 0 20px var(--neon-red); }
         .o-player span:last-child { color: var(--neon-cyan); font-size: 1.3rem; margin-left: 8px; text-shadow: 0 0 12px var(--neon-cyan), 0 0 20px var(--neon-cyan); }
         
-        .tabuleiro { 
-            display: grid; grid-template-columns: repeat(3, 95px); gap: 5px; background: rgba(5, 217, 232, 0.5); padding: 5px; border-radius: 22px; border: 2.5px solid var(--neon-cyan); box-shadow: 0 0 30px rgba(5, 217, 232, 0.5), inset 0 0 25px rgba(5, 217, 232, 0.4); position: relative; transition: border-color 0.3s, box-shadow 0.3s, background 0.3s;
-        }
+        .tabuleiro { display: grid; grid-template-columns: repeat(3, 95px); gap: 5px; background: rgba(5, 217, 232, 0.5); padding: 5px; border-radius: 22px; border: 2.5px solid var(--neon-cyan); box-shadow: 0 0 30px rgba(5, 217, 232, 0.5), inset 0 0 25px rgba(5, 217, 232, 0.4); position: relative; transition: border-color 0.3s, box-shadow 0.3s, background 0.3s; }
         
-        /* Modificadores do Tabuleiro (Vitória e Empate) */
         .board-win-x { border-color: var(--neon-red) !important; box-shadow: 0 0 50px var(--neon-red), inset 0 0 30px var(--neon-red) !important; background: rgba(255, 42, 109, 0.3) !important; }
         .board-win-o { border-color: var(--neon-cyan) !important; box-shadow: 0 0 50px var(--neon-cyan), inset 0 0 30px var(--neon-cyan) !important; background: rgba(5, 217, 232, 0.3) !important; }
         .shake-empate { animation: shakeBoard 0.5s cubic-bezier(.36,.07,.19,.97) both; border-color: var(--neon-red) !important; box-shadow: 0 0 40px var(--neon-red), inset 0 0 30px var(--neon-red) !important; background: rgba(255, 42, 109, 0.3) !important; }
         @keyframes shakeBoard { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-8px, 2px, 0); } 40%, 60% { transform: translate3d(8px, -2px, 0); } }
 
-        .celula { 
-            width: 95px; height: 95px; background: #05060a; display: flex; align-items: center; justify-content: center; font-size: 3.8rem; font-weight: 900; font-family: 'Montserrat', sans-serif; cursor: pointer; transition: background 0.2s, transform 0.2s, box-shadow 0.2s; position: relative;
-        }
+        .celula { width: 95px; height: 95px; background: #05060a; display: flex; align-items: center; justify-content: center; font-size: 3.8rem; font-weight: 900; font-family: 'Montserrat', sans-serif; cursor: pointer; transition: background 0.2s, transform 0.2s, box-shadow 0.2s; position: relative; }
         .celula[data-index="0"] { border-top-left-radius: 18px; } .celula[data-index="2"] { border-top-right-radius: 18px; }
         .celula[data-index="6"] { border-bottom-left-radius: 18px; } .celula[data-index="8"] { border-bottom-right-radius: 18px; }
-        
         .celula:hover { background: rgba(255,255,255,0.08); }
         .celula:active { transform: scale(0.95); } 
 
@@ -195,6 +163,15 @@
         <svg id="iconeSomOn" viewBox="0 0 24 24" class="icone-som" style="display:none;"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
     </button>
     
+    <div id="modalConvite">
+        <div class="modal-content">
+            <h3 style="color:var(--neon-cyan); margin-bottom:10px; text-transform:uppercase; letter-spacing:2px; text-shadow: 0 0 10px var(--neon-cyan);">Novo Desafio!</h3>
+            <p id="textoConvite" style="margin-bottom:30px; color:#ddd; font-weight: bold;">Alguém quer jogar com você.</p>
+            <button class="btn-menu btn-aceitar" onclick="aceitarConvite()">ACEITAR PARTIDA</button>
+            <button class="btn-menu btn-recusar" onclick="recusarConvite()">RECUSAR</button>
+        </div>
+    </div>
+
     <div id="telaInicial">
         <div class="logo-container">
             <div class="logo">Tic<span>Tac</span></div>
@@ -229,9 +206,9 @@
     
     <div id="telaJogo">
         <div class="placar">
-            <div class="x-player">Jogador <span id="txtNomeX">X</span>: <span id="sX">0</span></div>
+            <div class="x-player"><span id="txtNomeX">X</span> <span id="sX">0</span></div>
             <div style="color: #444;">|</div>
-            <div class="o-player">Jogador <span id="txtNomeO">O</span>: <span id="sO">0</span></div>
+            <div class="o-player"><span id="txtNomeO">O</span> <span id="sO">0</span></div>
         </div>
         <div class="tabuleiro" id="tabuleiro">
             <div class="celula" data-index="0"></div><div class="celula" data-index="1"></div><div class="celula" data-index="2"></div>
@@ -246,7 +223,7 @@
     <script>
         const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
         
-        // --- SISTEMA DE CONTROLO DE MÚSICA ---
+        // SISTEMA DE ÁUDIO
         const elemMusica = document.getElementById('musicaFundo');
         let musicaAtiva = false;
 
@@ -264,7 +241,6 @@
             musicaAtiva = !musicaAtiva;
         }
 
-        // Nova função: Corta a música instantaneamente
         function pararMusicaImediatamente() {
             if (!elemMusica.paused) {
                 elemMusica.pause();
@@ -282,56 +258,126 @@
             }
         }, { once: true });
 
-
-        // --- EFEITOS SONOROS DO JOGO ---
+        // EFEITOS SONOROS
         function som(f, d) { try { const o = ctxAudio.createOscillator(); const g = ctxAudio.createGain(); o.frequency.value = f; g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + d); o.connect(g); g.connect(ctxAudio.destination); o.start(); o.stop(ctxAudio.currentTime + d); } catch(e){} }
         
         function somVitoria() {
             try {
-                const o = ctxAudio.createOscillator();
-                const g = ctxAudio.createGain();
-                o.type = 'square'; 
-                o.frequency.setValueAtTime(150, ctxAudio.currentTime);
-                o.frequency.exponentialRampToValueAtTime(800, ctxAudio.currentTime + 0.4);
-                g.gain.setValueAtTime(0, ctxAudio.currentTime);
-                g.gain.linearRampToValueAtTime(0.15, ctxAudio.currentTime + 0.1);
-                g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + 0.6);
-                o.connect(g); g.connect(ctxAudio.destination);
-                o.start(); o.stop(ctxAudio.currentTime + 0.6);
+                const o = ctxAudio.createOscillator(); const g = ctxAudio.createGain(); o.type = 'square'; 
+                o.frequency.setValueAtTime(150, ctxAudio.currentTime); o.frequency.exponentialRampToValueAtTime(800, ctxAudio.currentTime + 0.4);
+                g.gain.setValueAtTime(0, ctxAudio.currentTime); g.gain.linearRampToValueAtTime(0.15, ctxAudio.currentTime + 0.1); g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + 0.6);
+                o.connect(g); g.connect(ctxAudio.destination); o.start(); o.stop(ctxAudio.currentTime + 0.6);
 
-                const o2 = ctxAudio.createOscillator();
-                const g2 = ctxAudio.createGain();
-                o2.type = 'sawtooth';
-                o2.frequency.setValueAtTime(400, ctxAudio.currentTime);
-                o2.frequency.linearRampToValueAtTime(1200, ctxAudio.currentTime + 0.3);
-                g2.gain.setValueAtTime(0.1, ctxAudio.currentTime);
-                g2.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + 0.5);
-                o2.connect(g2); g2.connect(ctxAudio.destination);
-                o2.start(); o2.stop(ctxAudio.currentTime + 0.5);
+                const o2 = ctxAudio.createOscillator(); const g2 = ctxAudio.createGain(); o2.type = 'sawtooth';
+                o2.frequency.setValueAtTime(400, ctxAudio.currentTime); o2.frequency.linearRampToValueAtTime(1200, ctxAudio.currentTime + 0.3);
+                g2.gain.setValueAtTime(0.1, ctxAudio.currentTime); g2.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + 0.5);
+                o2.connect(g2); g2.connect(ctxAudio.destination); o2.start(); o2.stop(ctxAudio.currentTime + 0.5);
             } catch(e){}
         }
 
         function somDerrota() {
             try {
-                const o = ctxAudio.createOscillator();
-                const g = ctxAudio.createGain();
-                o.type = 'sawtooth'; 
-                o.frequency.setValueAtTime(250, ctxAudio.currentTime);
-                o.frequency.exponentialRampToValueAtTime(50, ctxAudio.currentTime + 0.6);
-                g.gain.setValueAtTime(0.3, ctxAudio.currentTime);
-                g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + 0.6);
-                o.connect(g); g.connect(ctxAudio.destination);
-                o.start(); o.stop(ctxAudio.currentTime + 0.6);
+                const o = ctxAudio.createOscillator(); const g = ctxAudio.createGain(); o.type = 'sawtooth'; 
+                o.frequency.setValueAtTime(250, ctxAudio.currentTime); o.frequency.exponentialRampToValueAtTime(50, ctxAudio.currentTime + 0.6);
+                g.gain.setValueAtTime(0.3, ctxAudio.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + 0.6);
+                o.connect(g); g.connect(ctxAudio.destination); o.start(); o.stop(ctxAudio.currentTime + 0.6);
             } catch(e){}
         }
 
-        // --- LÓGICA DO JOGO ---
-        let nomeX = "X", nomeO = "O", jAtual = "X", ativo = true, estado = ["","","","","","","","",""];
+        // LÓGICA DO JOGO E MULTIPLAYER
+        // ADICIONADA: Variável quemComeca para alternar os turnos a cada partida
+        let nomeX = "X", nomeO = "O", jAtual = "X", quemComeca = "X", ativo = true, estado = ["","","","","","","","",""];
         let pX = 0, pO = 0, online = false, minhaVez = true, meuSimbolo = "X", conn;
+        let connProvisoria = null;
 
         const peer = new Peer(Math.floor(10000 + Math.random() * 89999).toString());
         peer.on('open', id => document.getElementById('meuId').innerText = id);
-        peer.on('connection', c => { conn = c; online = true; meuSimbolo = "X"; minhaVez = true; setupConn(); iniciarJogo('online'); });
+        
+        peer.on('connection', c => {
+            if (online || document.getElementById('modalConvite').style.display === 'flex') {
+                c.on('open', () => { c.send({t: 'rej_ocupado'}); setTimeout(() => c.close(), 500); });
+                return;
+            }
+            connProvisoria = c;
+            c.on('data', d => {
+                if(d.t === 'req') {
+                    document.getElementById('textoConvite').innerText = `O jogador ${d.nome || 'Desconhecido'} quer jogar com você!`;
+                    document.getElementById('modalConvite').style.display = 'flex';
+                    nomeX = d.nome || "Adversário"; 
+                }
+            });
+        });
+
+        function aceitarConvite() {
+            document.getElementById('modalConvite').style.display = 'none';
+            conn = connProvisoria;
+            const meuNome = document.getElementById('nomeOnlineEu').value || "Você";
+            nomeO = meuNome;
+            conn.send({t: 'acc', nome: meuNome});
+            
+            online = true; meuSimbolo = "O"; minhaVez = false;
+            setupConn();
+            iniciarJogo('online');
+        }
+
+        function recusarConvite() {
+            document.getElementById('modalConvite').style.display = 'none';
+            if(connProvisoria) {
+                connProvisoria.send({t: 'rej'});
+                setTimeout(() => connProvisoria.close(), 500);
+            }
+        }
+
+        function conectar() {
+            const id = document.getElementById('idAmigo').value;
+            const btn = document.getElementById('btnConectar');
+            const erro = document.getElementById('erroOnline');
+            const meuNome = document.getElementById('nomeOnlineEu').value || "Você";
+            
+            if(!id) return;
+            btn.innerText = "Enviando Convite...";
+            erro.style.display = 'none';
+            
+            conn = peer.connect(id);
+            const timeout = setTimeout(() => {
+                btn.innerText = "Conectar";
+                erro.innerText = "Jogador não encontrado!";
+                erro.style.display = 'block';
+            }, 6000);
+
+            conn.on('open', () => {
+                clearTimeout(timeout);
+                btn.innerText = "Aguardando Resposta...";
+                conn.send({t: 'req', nome: meuNome});
+                
+                conn.on('data', d => {
+                    if (d.t === 'acc') {
+                        nomeX = meuNome;
+                        nomeO = d.nome || "Adversário";
+                        online = true; meuSimbolo = "X"; minhaVez = true;
+                        setupConn();
+                        iniciarJogo('online');
+                    } else if (d.t === 'rej' || d.t === 'rej_ocupado') {
+                        btn.innerText = "Conectar";
+                        erro.innerText = d.t === 'rej_ocupado' ? "Jogador Ocupado!" : "Pedido Recusado!";
+                        erro.style.display = 'block';
+                        conn.close();
+                    }
+                });
+            });
+            conn.on('error', () => {
+                clearTimeout(timeout);
+                btn.innerText = "Conectar";
+                erro.style.display = 'block';
+            });
+        }
+
+        function setupConn() {
+            conn.on('data', d => {
+                if(d.t === 'j') { marcar(d.i, meuSimbolo === 'X' ? 'O' : 'X'); minhaVez = true; atualizarStatus(); }
+                if(d.t === 'r') resetLocal(); // Recebe o reset e reveza a jogada junto!
+            });
+        }
 
         function mostrarSetup(m) {
             document.getElementById('botoesMenu').style.display = 'none';
@@ -342,60 +388,29 @@
             document.getElementById('setupLocal').style.display = 'none';
             document.getElementById('setupOnline').style.display = 'none';
             document.getElementById('erroOnline').style.display = 'none';
+            if (document.getElementById('btnConectar').innerText !== "Conectar") {
+                document.getElementById('btnConectar').innerText = "Conectar";
+                if(conn) conn.close();
+            }
         }
         
         function iniciarJogo(m) {
-            // ---> A MÚSICA DESLIGA NA HORA AQUI <---
             pararMusicaImediatamente(); 
 
             if(m === 'local') {
-                nomeX = document.getElementById('nomeLocalX').value || "X";
-                nomeO = document.getElementById('nomeLocalO').value || "O";
+                nomeX = document.getElementById('nomeLocalX').value || "Jogador 1";
+                nomeO = document.getElementById('nomeLocalO').value || "Jogador 2";
                 online = false;
             }
+            
             document.getElementById('telaInicial').style.display = 'none';
             document.getElementById('telaJogo').style.display = 'flex';
-            document.getElementById('txtNomeX').innerText = nomeX;
-            document.getElementById('txtNomeO').innerText = nomeO;
+            
+            document.getElementById('txtNomeX').innerText = nomeX.toUpperCase() + ":";
+            document.getElementById('txtNomeO').innerText = nomeO.toUpperCase() + ":";
             atualizarStatus();
         }
 
-        function conectar() {
-            const id = document.getElementById('idAmigo').value;
-            const btn = document.getElementById('btnConectar');
-            const erro = document.getElementById('erroOnline');
-            if(!id) return;
-            btn.innerText = "Verificando...";
-            erro.style.display = 'none';
-            
-            conn = peer.connect(id);
-            const timeout = setTimeout(() => {
-                btn.innerText = "Conectar";
-                erro.innerText = "Código inexistente!";
-                erro.style.display = 'block';
-            }, 5000);
-
-            conn.on('open', () => {
-                clearTimeout(timeout);
-                btn.innerText = "Conectar";
-                online = true; meuSimbolo = "O"; minhaVez = false;
-                setupConn();
-                iniciarJogo('online');
-            });
-            conn.on('error', () => {
-                clearTimeout(timeout);
-                btn.innerText = "Conectar";
-                erro.style.display = 'block';
-            });
-        }
-        
-        function setupConn() {
-            conn.on('data', d => {
-                if(d.t === 'j') { marcar(d.i, meuSimbolo === 'X' ? 'O' : 'X'); minhaVez = true; atualizarStatus(); }
-                if(d.t === 'r') resetLocal();
-            });
-        }
-        
         document.querySelectorAll('.celula').forEach(c => c.addEventListener('click', e => {
             const i = e.target.dataset.index;
             if(estado[i] !== "" || !ativo || (online && !minhaVez)) return;
@@ -417,8 +432,12 @@
             const s = document.getElementById('status');
             s.style.color = "#fff"; 
             s.classList.remove('status-vitoria');
-            if(online) s.innerText = minhaVez ? "SUA VEZ!" : "AGUARDE...";
-            else s.innerText = `VEZ DE ${jAtual === 'X' ? nomeX : nomeO}`;
+            if(online) {
+                // Mensagem atualizada para o online
+                s.innerText = minhaVez ? "SUA VEZ!" : "AGUARDE O ADVERSÁRIO...";
+            } else {
+                s.innerText = `VEZ DE ${jAtual === 'X' ? nomeX : nomeO}`;
+            }
         }
         
         function checar() {
@@ -431,9 +450,10 @@
                     ativo = false; 
                     
                     const vencedor = estado[p[0]];
+                    const nomeVencedor = vencedor === 'X' ? nomeX : nomeO;
                     
                     const statusEl = document.getElementById('status');
-                    statusEl.innerText = `${vencedor} VENCEU!`;
+                    statusEl.innerText = `${nomeVencedor} VENCEU!`;
                     statusEl.style.color = vencedor === 'X' ? 'var(--neon-red)' : 'var(--neon-cyan)';
                     statusEl.classList.add('status-vitoria');
                     
@@ -457,7 +477,8 @@
 
                     somVitoria(); 
                     
-                    if(!online) document.getElementById('btnNovaPartida').style.display = 'block';
+                    // Libera o botão "Nova Partida" para todos (local e online)
+                    document.getElementById('btnNovaPartida').style.display = 'block';
                     return; 
                 }
             }
@@ -476,14 +497,30 @@
                 somDerrota();
                 if (navigator.vibrate) { navigator.vibrate([100, 50, 100, 50, 200]); }
                 
-                if(!online) document.getElementById('btnNovaPartida').style.display = 'block'; 
+                // Libera o botão "Nova Partida" para todos (local e online)
+                document.getElementById('btnNovaPartida').style.display = 'block'; 
             }
         }
         
-        function reset() { if(online) return; resetLocal(); }
+        function reset() { 
+            if(!ativo) {
+                if(online) conn.send({t:'r'}); // Avisa o outro jogador para resetar junto
+                resetLocal(); 
+            }
+        }
         
         function resetLocal() {
-            estado.fill(""); ativo = true; jAtual = "X";
+            estado.fill(""); 
+            ativo = true; 
+            
+            // ALTERAÇÃO: Alterna quem começa a partida
+            quemComeca = quemComeca === "X" ? "O" : "X";
+            jAtual = quemComeca;
+            
+            // Se for online, a "minha vez" inverte dependendo de quem é o novo a começar
+            if(online) {
+                minhaVez = (meuSimbolo === quemComeca);
+            }
             
             document.querySelectorAll('.celula').forEach(c => { 
                 c.innerText = ""; 
@@ -499,7 +536,7 @@
             statusEl.classList.remove('status-vitoria');
             
             document.getElementById('btnNovaPartida').style.display = 'none';
-            atualizarStatus();
+            atualizarStatus(); // Mostra de quem é a vez certinho
         }
     </script>
 </body>
