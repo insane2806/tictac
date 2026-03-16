@@ -161,7 +161,7 @@
         .reacao-flutuante {
             position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
             font-size: 2.2rem !important; 
-            pointer-events: none; animation: floatUpAndFade 2s ease-out forwards; z-index: 9999;
+            pointer-events: none; animation: floatUpAndFade 2.5s ease-out forwards; z-index: 9999;
         }
         @keyframes floatUpAndFade { 
             0% { opacity: 0; transform: translate(-50%, 10px) scale(0.5); } 
@@ -437,14 +437,13 @@
         let heartbeatTimer;
         let lastPong = Date.now();
 
-        let peer;
-        
-        // Função para gerar um ID numérico limpo
+        // O ID é gerado FIXO no início 
         function gerarID() {
             return Math.floor(10000 + Math.random() * 89999).toString();
         }
 
-        const meuIDOriginal = gerarID();
+        let meuIDOriginal = gerarID();
+        let peer;
 
         function iniciarPeer(idToUse) {
             peer = new Peer(idToUse);
@@ -460,8 +459,11 @@
             
             peer.on('connection', c => {
                 c.on('open', () => {
-                    // Impede intrusos se você já estiver jogando ou buscando partida global
-                    if (online || contraIA || document.getElementById('modalConvite').style.display === 'flex' || buscandoGlobal) {
+                    // Impede intrusos SE você estiver jogando OU buscando partida MAS o convite não for de amizade (ou vice versa).
+                    // Correção: Deixa o convite entrar, checamos pelo tipo de dado.
+                    let isBusy = online || contraIA || document.getElementById('modalConvite').style.display === 'flex';
+                    
+                    if (isBusy || (buscandoGlobal && !peer.id.startsWith("NeonGlb"))) {
                         c.send({t: 'rej_ocupado'});
                         setTimeout(() => c.close(), 500);
                         return;
@@ -537,7 +539,7 @@
             });
         }
 
-        // Inicia com o ID fixo gerado
+        // Inicia com o ID fixo
         iniciarPeer(meuIDOriginal);
 
         // --- MICROFONE ---
@@ -659,9 +661,7 @@
         function abrirGlobal() {
             if(!validarNomeGeral()) return;
             buscandoGlobal = true;
-            
-            // Escolhe uma sala aleatória entre 1 e 10 para aumentar as chances de bater
-            globalRoomIndex = Math.floor(Math.random() * 10) + 1;
+            globalRoomIndex = 1; // SEMPRE COMEÇA NA SALA 1 PARA NÃO SE PERDEREM
             mostrarSetup('global');
             buscarOponenteGlobal();
         }
@@ -700,7 +700,6 @@
                         
                     } else if (d.t === 'rej_ocupado') {
                         globalRoomIndex++;
-                        if(globalRoomIndex > 10) globalRoomIndex = 1; 
                         buscarOponenteGlobal();
                     }
                 });
@@ -711,7 +710,8 @@
             buscandoGlobal = false;
             if(peer && peer.id && peer.id.startsWith("NeonGlb_")) {
                 peer.destroy(); 
-                setTimeout(() => { iniciarPeer(gerarID()); }, 500);
+                meuIDOriginal = gerarID(); // Cria um ID novo limpo
+                setTimeout(() => { iniciarPeer(meuIDOriginal); }, 500);
             }
             mostrarSetup('onlineMenu');
         }
@@ -760,11 +760,11 @@
                     
                     let tempoSemResposta = Date.now() - lastPong;
                     
-                    if(tempoSemResposta > 4000 && tempoSemResposta <= 10000) {
+                    if(tempoSemResposta > 4000 && tempoSemResposta <= 8000) {
                         document.getElementById('alertaWifi').style.display = 'block';
                     }
                     
-                    if(tempoSemResposta > 10000) {
+                    if(tempoSemResposta > 8000) {
                         lidandoComFuga();
                     }
                 }, 2000);
@@ -797,16 +797,20 @@
                 try { conn.send({t: 'left'}); } catch(e) {}
             }
             
+            // Esconde jogo e limpa
             document.getElementById('telaJogo').style.display = 'none';
             document.getElementById('telaInicial').style.display = 'flex';
+            
+            // Retorna ao menu
+            mostrarSetup('menuPrincipal');
             document.getElementById('botoesMenu').style.display = 'flex';
             
-            ['setupLocal','setupOnlineMenu','setupOnlineAmigo','setupGlobal','setupIA'].forEach(id => document.getElementById(id).style.display = 'none');
-            
+            // Restaura botões
             document.getElementById('btnAudio').style.display = 'flex';
             document.getElementById('btnMic').style.display = 'none';
             document.getElementById('btnMutarAmigo').style.display = 'none';
 
+            // A MÚSICA SÓ TOCA SE ESTAVA LIGADA ANTES
             if (musicaAtiva) {
                 elemMusica.play().catch(e=>{});
             }
@@ -819,11 +823,14 @@
             if(conn) { conn.close(); }
             online = false;
             
+            // Limpa o peer e recria com ID limpo para não dar bug de desconexão
             if(peer) {
                 peer.destroy();
-                setTimeout(() => { iniciarPeer(gerarID()); }, 500); // Gera um novo ID limpo
+                meuIDOriginal = gerarID();
+                setTimeout(() => { iniciarPeer(meuIDOriginal); }, 500); 
             }
             
+            // Desliga a câmera/mic
             if(meuStream) {
                 meuStream.getTracks().forEach(t => t.stop());
                 meuStream = null;
