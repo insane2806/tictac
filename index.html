@@ -1067,7 +1067,6 @@
             try { if(cgSdk && cgSdk.game) cgSdk.game.gameplayStop(); } catch(e){}
 
             mostrarSetup('menuPrincipal');
-            document.getElementById('botoesMenu').style.display = 'flex';
             
             document.getElementById('btnAudio').style.display = 'flex';
             document.getElementById('btnMic').style.display = 'none';
@@ -1136,18 +1135,21 @@
             document.getElementById('erroIA').style.display = 'none';
             document.getElementById('erroLocal').style.display = 'none';
             document.getElementById('erroNomeGeral').style.display = 'none';
-            document.getElementById('creditosRodape').style.display = 'flex'; 
+            
+            // Esconde o rodapé por padrão em qualquer sub-tela
+            document.getElementById('creditosRodape').style.display = 'none'; 
             
             if(m === 'local') document.getElementById('setupLocal').style.display = 'flex';
             else if(m === 'onlineMenu') document.getElementById('setupOnlineMenu').style.display = 'flex';
             else if(m === 'onlineAmigo') document.getElementById('setupOnlineAmigo').style.display = 'flex';
             else if(m === 'global') document.getElementById('setupGlobal').style.display = 'flex';
             else if(m === 'ia') document.getElementById('setupIA').style.display = 'flex';
-            else if(m === 'skins') {
-                document.getElementById('setupSkins').style.display = 'flex';
-                document.getElementById('creditosRodape').style.display = 'none'; 
+            else if(m === 'skins') document.getElementById('setupSkins').style.display = 'flex';
+            else if(m === 'menuPrincipal') {
+                document.getElementById('botoesMenu').style.display = 'flex';
+                // Volta o rodapé SOMENTE no Menu Principal
+                document.getElementById('creditosRodape').style.display = 'flex'; 
             }
-            else if(m === 'menuPrincipal') document.getElementById('botoesMenu').style.display = 'flex';
         }
 
         function voltarMenu() {
