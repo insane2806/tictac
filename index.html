@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Jogo da Velha - Neon Galaxy Dinâmico</title>
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,900;1,900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -28,13 +29,13 @@
             transition: background-color 0.1s; 
         }
 
-        /* Efeitos Flash na Tela Inteira */
+        /* BRILHOS SUAVIZADOS */
         .flash-red { animation: flashShock 0.4s ease-in-out; }
         @keyframes flashShock { 0%, 100% { background-color: transparent; } 20% { background-color: rgba(255, 42, 109, 0.3); } 40% { background-color: transparent; } 60% { background-color: rgba(255, 42, 109, 0.4); } 80% { background-color: transparent; } }
         .flash-win-x { animation: flashWinX 0.6s ease-out; }
-        @keyframes flashWinX { 0%, 100% { background-color: transparent; } 20% { background-color: rgba(255, 42, 109, 0.4); } 80% { background-color: transparent; } }
+        @keyframes flashWinX { 0%, 100% { background-color: transparent; } 20% { background-color: color-mix(in srgb, var(--neon-red) 25%, transparent); } 80% { background-color: transparent; } }
         .flash-win-o { animation: flashWinO 0.6s ease-out; }
-        @keyframes flashWinO { 0%, 100% { background-color: transparent; } 20% { background-color: rgba(5, 217, 232, 0.4); } 80% { background-color: transparent; } }
+        @keyframes flashWinO { 0%, 100% { background-color: transparent; } 20% { background-color: color-mix(in srgb, var(--neon-cyan) 25%, transparent); } 80% { background-color: transparent; } }
 
         /* Fundo Dinâmico Galáxia */
         .background-animated {
@@ -91,6 +92,7 @@
         .btn-local { background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.25); backdrop-filter: blur(8px); }
         .btn-online, .btn-acao { background: linear-gradient(90deg, #3d0a6b, #8a2be2, #3d0a6b); border: 2px solid var(--neon-purple); box-shadow: 0 0 20px var(--neon-purple), inset 0 0 12px rgba(157, 78, 221, 0.6); }
         .btn-ia { background: linear-gradient(90deg, #002244, #05d9e8, #002244); border: 2px solid var(--neon-cyan); box-shadow: 0 0 20px var(--neon-cyan), inset 0 0 12px rgba(5, 217, 232, 0.6); }
+        .btn-loja { background: rgba(241, 196, 15, 0.1); border: 2px solid var(--neon-yellow); color: var(--neon-yellow); box-shadow: 0 0 15px rgba(241, 196, 15, 0.3); }
         
         .btn-noob { background: rgba(0, 255, 127, 0.1); border: 2px solid var(--neon-green); color: var(--neon-green); margin-bottom: 10px; width: 260px; }
         .btn-mestre { background: rgba(241, 196, 15, 0.1); border: 2px solid var(--neon-yellow); color: var(--neon-yellow); margin-bottom: 10px; width: 260px; }
@@ -103,7 +105,6 @@
         .erro-input { color: var(--neon-red); font-size: 0.8rem; margin-bottom: 15px; margin-top: -5px; display: none; font-weight: bold; text-shadow: 0 0 10px var(--neon-red); text-transform: uppercase; letter-spacing: 1px; animation: shakeErro 0.3s ease-in-out; }
         @keyframes shakeErro { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
 
-        /* ALERTA DE WI-FI FRACO */
         #alertaWifi {
             display: none; position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
             background: rgba(241, 196, 15, 0.15); border: 1px solid var(--neon-yellow); color: var(--neon-yellow); 
@@ -112,17 +113,22 @@
         }
         @keyframes blinkWifi { 0% { opacity: 0.5; box-shadow: 0 0 5px rgba(241, 196, 15, 0.2); } 100% { opacity: 1; box-shadow: 0 0 20px rgba(241, 196, 15, 0.8); } }
 
-        /* Containers de Setup */
-        #setupOnlineMenu, #setupOnlineAmigo, #setupGlobal, #setupLocal, #setupIA { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; animation: fadeIn 0.4s ease forwards; }
+        #setupOnlineMenu, #setupOnlineAmigo, #setupGlobal, #setupLocal, #setupIA, #setupSkins { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; animation: fadeIn 0.4s ease forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Modal de Convite */
+        #listaSkins { 
+            display: flex; flex-direction: column; gap: 10px; width: 320px; 
+            max-height: 45vh; overflow-y: auto; padding: 5px; margin-bottom: 20px;
+        }
+        #listaSkins::-webkit-scrollbar { width: 6px; }
+        #listaSkins::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
+        #listaSkins::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 10px; }
+
         #modalConvite { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(8px); animation: fadeIn 0.3s; }
         .modal-content { background: rgba(10,10,20,0.95); border: 2px solid var(--neon-cyan); padding: 40px 30px; border-radius: 25px; text-align: center; box-shadow: 0 0 40px rgba(5,217,232,0.3), inset 0 0 20px rgba(5,217,232,0.2); max-width: 90%; width: 350px; }
         .btn-aceitar { background: linear-gradient(90deg, #004d26, #00ff7f, #004d26); border-color: var(--neon-green); box-shadow: 0 0 15px var(--neon-green); width: 100%; margin-bottom: 10px; color: black; }
         .btn-recusar { background: linear-gradient(90deg, #4d0015, #ff2a6d, #4d0015); border-color: var(--neon-red); box-shadow: 0 0 15px var(--neon-red); width: 100%; }
 
-        /* Placar e Tabuleiro */
         .placar { display: flex; gap: 35px; margin-bottom: 45px; background: rgba(5, 5, 10, 0.9); padding: 12px 35px; border-radius: 50px; border: 1.5px solid rgba(255,255,255,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.7); font-size: 0.95rem; font-weight: 700; align-items: center; backdrop-filter: blur(5px); }
         
         .x-player, .o-player { position: relative; display: flex; align-items: center; justify-content: center; } 
@@ -130,11 +136,13 @@
         .x-player span:last-child { color: var(--neon-red); font-size: 1.3rem; margin-left: 8px; text-shadow: 0 0 12px var(--neon-red), 0 0 20px var(--neon-red); }
         .o-player span:last-child { color: var(--neon-cyan); font-size: 1.3rem; margin-left: 8px; text-shadow: 0 0 12px var(--neon-cyan), 0 0 20px var(--neon-cyan); }
         
-        .tabuleiro { display: grid; grid-template-columns: repeat(3, 95px); gap: 5px; background: rgba(5, 217, 232, 0.5); padding: 5px; border-radius: 22px; border: 2.5px solid var(--neon-cyan); box-shadow: 0 0 30px rgba(5, 217, 232, 0.5), inset 0 0 25px rgba(5, 217, 232, 0.4); position: relative; transition: border-color 0.3s, box-shadow 0.3s, background 0.3s; }
+        /* TABULEIRO E FUNDO SUAVIZADOS */
+        .tabuleiro { display: grid; grid-template-columns: repeat(3, 95px); gap: 5px; background: color-mix(in srgb, var(--neon-cyan) 15%, transparent); padding: 5px; border-radius: 22px; border: 2.5px solid var(--neon-cyan); box-shadow: 0 0 20px color-mix(in srgb, var(--neon-cyan) 40%, transparent), inset 0 0 15px color-mix(in srgb, var(--neon-cyan) 40%, transparent); position: relative; transition: border-color 0.3s, box-shadow 0.3s, background 0.3s; }
         
-        .board-win-x { border-color: var(--neon-red) !important; box-shadow: 0 0 50px var(--neon-red), inset 0 0 30px var(--neon-red) !important; background: rgba(255, 42, 109, 0.3) !important; }
-        .board-win-o { border-color: var(--neon-cyan) !important; box-shadow: 0 0 50px var(--neon-cyan), inset 0 0 30px var(--neon-cyan) !important; background: rgba(5, 217, 232, 0.3) !important; }
-        .shake-empate { animation: shakeBoard 0.5s cubic-bezier(.36,.07,.19,.97) both; border-color: var(--neon-red) !important; box-shadow: 0 0 40px var(--neon-red), inset 0 0 30px var(--neon-red) !important; background: rgba(255, 42, 109, 0.3) !important; }
+        .board-win-x { border-color: var(--neon-red) !important; box-shadow: 0 0 40px var(--neon-red), inset 0 0 20px var(--neon-red) !important; background: color-mix(in srgb, var(--neon-red) 25%, transparent) !important; }
+        .board-win-o { border-color: var(--neon-cyan) !important; box-shadow: 0 0 40px var(--neon-cyan), inset 0 0 20px var(--neon-cyan) !important; background: color-mix(in srgb, var(--neon-cyan) 25%, transparent) !important; }
+        .shake-empate { animation: shakeBoard 0.5s cubic-bezier(.36,.07,.19,.97) both; border-color: var(--neon-red) !important; box-shadow: 0 0 30px var(--neon-red), inset 0 0 20px var(--neon-red) !important; background: color-mix(in srgb, var(--neon-red) 25%, transparent) !important; }
+        
         @keyframes shakeBoard { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-8px, 2px, 0); } 40%, 60% { transform: translate3d(8px, -2px, 0); } }
 
         .celula { width: 95px; height: 95px; background: #05060a; display: flex; align-items: center; justify-content: center; font-size: 3.8rem; font-weight: 900; font-family: 'Montserrat', sans-serif; cursor: pointer; transition: background 0.2s, transform 0.2s, box-shadow 0.2s; position: relative; }
@@ -146,30 +154,21 @@
         .celula-vencedora { animation: glowWin 0.8s infinite alternate !important; z-index: 2; }
         @keyframes glowWin { 0% { background: rgba(255, 255, 255, 0.1); transform: scale(1); box-shadow: 0 0 10px rgba(255,255,255,0.2); } 100% { background: rgba(255, 255, 255, 0.25); transform: scale(1.08); box-shadow: 0 0 30px rgba(255,255,255,0.8), inset 0 0 15px rgba(255,255,255,0.5); } }
 
-        .x-player { color: var(--neon-red); text-shadow: 0 0 15px var(--neon-red), 0 0 25px var(--neon-red), 0 0 35px rgba(255, 42, 109, 0.5); }
-        .o-player { color: var(--neon-cyan); text-shadow: 0 0 15px var(--neon-cyan), 0 0 25px var(--neon-cyan), 0 0 35px rgba(5, 217, 232, 0.5); }
+        /* BRILHO DOS SÍMBOLOS REDUZIDOS (TEXT-SHADOW) */
+        .x-player { color: var(--neon-red); text-shadow: 0 0 10px var(--neon-red), 0 0 20px var(--neon-red), 0 0 30px color-mix(in srgb, var(--neon-red) 50%, transparent); }
+        .o-player { color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 30px color-mix(in srgb, var(--neon-cyan) 50%, transparent); }
         
         #status { margin-top: 35px; font-weight: 700; font-size: 1.2rem; color: #fff; text-transform: uppercase; letter-spacing: 3px; text-shadow: 0 0 10px rgba(255,255,255,0.5); transition: color 0.3s, transform 0.3s; text-align: center; }
         .status-vitoria { animation: pulseStatus 0.6s infinite alternate; }
         @keyframes pulseStatus { 0% { transform: scale(1); filter: brightness(1); } 100% { transform: scale(1.15); filter: brightness(1.5); } }
 
-        /* SISTEMA DE REAÇÕES FLUTUANTES NO NICK */
         #barraReacoes { display: none; justify-content: center; gap: 15px; margin-top: 20px; }
         .btn-reacao { background: rgba(255,255,255,0.1); border: 1px solid var(--neon-cyan); border-radius: 50%; width: 45px; height: 45px; font-size: 1.5rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(5, 217, 232, 0.2); }
         .btn-reacao:hover { transform: scale(1.2); box-shadow: 0 0 15px var(--neon-cyan); background: rgba(5, 217, 232, 0.2); }
         
-        .reacao-flutuante {
-            position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
-            font-size: 2.2rem !important; 
-            pointer-events: none; animation: floatUpAndFade 2.5s ease-out forwards; z-index: 9999;
-        }
-        @keyframes floatUpAndFade { 
-            0% { opacity: 0; transform: translate(-50%, 10px) scale(0.5); } 
-            15% { opacity: 1; transform: translate(-50%, -10px) scale(1.2); } 
-            100% { opacity: 0; transform: translate(-50%, -60px) scale(1); } 
-        }
+        .reacao-flutuante { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); font-size: 2.2rem !important; pointer-events: none; animation: floatUpAndFade 2.5s ease-out forwards; z-index: 9999; }
+        @keyframes floatUpAndFade { 0% { opacity: 0; transform: translate(-50%, 10px) scale(0.5); } 15% { opacity: 1; transform: translate(-50%, -10px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -60px) scale(1); } }
 
-        /* RODAPÉ E CRÉDITOS */
         .credito-footer { position: absolute; bottom: 25px; display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 0.8; transition: opacity 0.3s; }
         .credito-footer:hover { opacity: 1; }
         .credito-texto { font-size: 0.75rem; color: #ccc; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; text-shadow: 0 0 5px rgba(255,255,255,0.3); }
@@ -181,7 +180,6 @@
         .btn-texto { background: none; border: none; color: #aaa; margin-top: 18px; cursor: pointer; font-family: inherit; font-size: 0.95rem; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
         .btn-texto:hover { color: white; text-shadow: 0 0 8px rgba(255,255,255,0.6); }
 
-        /* PING GLOBAL */
         .loader-global { margin: 20px 0; width: 40px; height: 40px; border: 4px solid rgba(5, 217, 232, 0.2); border-left-color: var(--neon-cyan); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
@@ -229,6 +227,7 @@
         <div id="botoesMenu">
             <button class="btn-menu btn-local" onclick="mostrarSetup('local')">Duelo Local</button>
             <button class="btn-menu btn-online" onclick="mostrarSetup('onlineMenu')">Jogar Online</button>
+            <button class="btn-menu btn-loja" onclick="mostrarSetup('skins')">🛒 Loja de Skins</button>
             <button class="btn-menu btn-ia" onclick="mostrarSetup('ia')">Jogador vs Máquina</button>
         </div>
         
@@ -242,6 +241,9 @@
 
         <div id="setupOnlineAmigo">
             <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">SEU ID: <span id="meuId" style="color:var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan);">...</span></p>
+            <button id="btnConvidarLink" class="btn-menu btn-local" onclick="gerarLinkConvite()" style="margin-bottom:15px; border-color:var(--neon-green); color:var(--neon-green);">🔗 Enviar Convite (Link)</button>
+            <div style="width: 100%; border-top: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px;"></div>
+            
             <input type="number" id="idAmigo" class="input-nome" placeholder="ID do Amigo" inputmode="numeric" pattern="[0-9]*">
             <button id="btnConectar" class="btn-menu btn-online" onclick="conectarAmigo()">Conectar</button>
             <p id="erroOnlineAmigo" style="color:var(--neon-red); font-size:0.85rem; margin-top:12px; display:none; font-weight:bold; text-shadow: 0 0 10px var(--neon-red);">Código inexistente!</p>
@@ -271,8 +273,15 @@
             <button class="btn-menu btn-online" onclick="iniciarJogo('local')">Começar Partida</button>
             <button class="btn-texto" onclick="voltarMenu()">Voltar</button>
         </div>
+
+        <div id="setupSkins">
+            <h3 style="color:var(--neon-yellow); margin-bottom: 20px; text-transform:uppercase; letter-spacing:2px; text-shadow: 0 0 10px var(--neon-yellow);">SKINS PREMIUM</h3>
+            <div id="listaSkins">
+            </div>
+            <button class="btn-texto" onclick="voltarMenu()">Voltar</button>
+        </div>
         
-        <div class="credito-footer">
+        <div class="credito-footer" id="creditosRodape">
             <div class="credito-texto">Developer DevThalison</div>
             <a href="https://www.instagram.com/axionsollutions?igsh=MXduMjA3YWhwaGh6OQ%3D%3D&utm_source=qr" target="_blank" aria-label="Instagram" class="link-axion">
                 <svg class="icone-insta" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
@@ -310,7 +319,137 @@
     <script>
         const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
         
-        // --- ÁUDIO DE FUNDO ---
+        let cgSdk = null;
+        
+        const skinsDB = [
+            { id: 'default', nome: 'Clássico Neon', x: 'X', o: 'O', corX: '#ff2a6d', corO: '#05d9e8', unlocked: true },
+            { id: 'lapis', nome: 'Material Escolar', x: '✏️', o: '🍩', corX: '#f1c40f', corO: '#e67e22', unlocked: false },
+            { id: 'medieval', nome: 'Batalha Medieval', x: '⚔️', o: '🛡️', corX: '#bdc3c7', corO: '#f39c12', unlocked: false },
+            { id: 'galaxia', nome: 'Cosmos', x: '🪐', o: '⭐', corX: '#9d4edd', corO: '#00ff7f', unlocked: false },
+            { id: 'monstros', nome: 'Assustador', x: '🦇', o: '🎃', corX: '#2ecc71', corO: '#8e44ad', unlocked: false }
+        ];
+
+        let skinEquipada = 'default';
+
+        async function initCrazyGames() {
+            try {
+                if(window.CrazyGames && window.CrazyGames.SDK) {
+                    cgSdk = window.CrazyGames.SDK;
+                    await cgSdk.init();
+                    cgSdk.game.sdkGameLoadingStart();
+                    setTimeout(() => cgSdk.game.sdkGameLoadingStop(), 1000); 
+                }
+            } catch (e) {
+                console.warn("SDK não detectado");
+            }
+        }
+        initCrazyGames();
+
+        function aplicarCoresDaSkin() {
+            let skin = skinsDB.find(s => s.id === skinEquipada) || skinsDB[0];
+            document.documentElement.style.setProperty('--neon-red', skin.corX);
+            document.documentElement.style.setProperty('--neon-cyan', skin.corO);
+        }
+
+        function carregarSkins() {
+            const salvas = JSON.parse(localStorage.getItem('ticTacSkinsUnlocked')) || ['default'];
+            skinEquipada = localStorage.getItem('ticTacSkinEquipada') || 'default';
+
+            skinsDB.forEach(s => {
+                if (salvas.includes(s.id)) s.unlocked = true;
+            });
+            
+            aplicarCoresDaSkin();
+            renderizarMenuSkins();
+        }
+
+        function renderizarMenuSkins() {
+            const lista = document.getElementById('listaSkins');
+            if(!lista) return;
+            lista.innerHTML = '';
+
+            skinsDB.forEach(skin => {
+                const btn = document.createElement('button');
+                let textoStatus = skinEquipada === skin.id ? 'ATIVO' : (skin.unlocked ? 'USAR' : 'ABRIR');
+                
+                let borderCor = skinEquipada === skin.id ? skin.corO : (skin.unlocked ? skin.corX : '#444');
+                let opacidade = skin.unlocked ? '1' : '0.6';
+
+                btn.style.cssText = `
+                    width: 100%; border: 2px solid ${borderCor}; box-shadow: 0 0 10px ${borderCor}; 
+                    background: rgba(0,0,0,0.6); color: white; display: flex; align-items: center; 
+                    padding: 12px 20px; border-radius: 30px; margin-bottom: 5px; cursor: pointer;
+                    opacity: ${opacidade}; font-family: inherit; transition: 0.3s;
+                `;
+
+                btn.innerHTML = `
+                    <span style="font-size: 1.5rem; width: 60px; text-align: left; text-shadow: 0 0 10px ${skin.corX};">${skin.x} ${skin.o}</span>
+                    <span style="flex-grow: 1; text-align: left; font-size: 0.95rem; font-weight: bold; text-transform: uppercase;">${skin.nome}</span>
+                    <span style="font-size: 0.75rem; font-weight: bold; color: ${borderCor};">${textoStatus}</span>
+                `;
+
+                btn.onclick = () => {
+                    if (skin.unlocked) {
+                        skinEquipada = skin.id;
+                        localStorage.setItem('ticTacSkinEquipada', skin.id);
+                        aplicarCoresDaSkin();
+                        renderizarMenuSkins();
+                        som(800, 0.1); 
+                    } else {
+                        assistirAnuncioSkin(skin.id);
+                    }
+                };
+                
+                btn.onmouseover = () => { btn.style.transform = 'scale(1.02)'; }
+                btn.onmouseout = () => { btn.style.transform = 'scale(1)'; }
+                
+                lista.appendChild(btn);
+            });
+        }
+
+        function assistirAnuncioSkin(id) {
+            if (cgSdk && cgSdk.ad) {
+                const callbacks = {
+                    adStarted: () => { pararMusicaImediatamente(); },
+                    adFinished: () => { liberarSkin(id); seMusicaTavaTocandoVolte(); },
+                    adError: (error) => { alert("Erro ao carregar anúncio."); seMusicaTavaTocandoVolte(); },
+                };
+                cgSdk.ad.requestAd('rewarded', callbacks);
+            } else {
+                let conf = confirm("Assistir anúncio e liberar skin?");
+                if(conf) liberarSkin(id);
+            }
+        }
+
+        function seMusicaTavaTocandoVolte() {
+            if(document.getElementById('iconeSomOn').style.display === 'block') {
+                elemMusica.play().catch(e=>{});
+            }
+        }
+
+        function liberarSkin(id) {
+            let skin = skinsDB.find(s => s.id === id);
+            if(skin) {
+                skin.unlocked = true;
+                let salvas = JSON.parse(localStorage.getItem('ticTacSkinsUnlocked')) || ['default'];
+                if(!salvas.includes(id)) salvas.push(id);
+                localStorage.setItem('ticTacSkinsUnlocked', JSON.stringify(salvas));
+                skinEquipada = id;
+                localStorage.setItem('ticTacSkinEquipada', id);
+                aplicarCoresDaSkin();
+                renderizarMenuSkins();
+                somVitoria(); 
+            }
+        }
+
+        function getDisplaySkin(simbolo) {
+            let skin = skinsDB.find(s => s.id === skinEquipada) || skinsDB[0];
+            return simbolo === 'X' ? skin.x : skin.o;
+        }
+
+        carregarSkins();
+
+
         const elemMusica = document.getElementById('musicaFundo');
         let musicaAtiva = false;
 
@@ -344,7 +483,6 @@
             }
         }, { once: true });
 
-        // --- EFEITOS SONOROS SYNTHWAVE ---
         function som(f, d) {
             try {
                 const o = ctxAudio.createOscillator();
@@ -403,7 +541,6 @@
             } catch(e){}
         }
 
-        // --- SISTEMA DE REAÇÕES FLUTUANTES NO NICK ---
         function enviarReacao(emoji) {
             mostrarReacao(emoji, meuSimbolo);
             if(online && conn) conn.send({t: 'react', e: emoji});
@@ -425,7 +562,6 @@
             setTimeout(() => el.remove(), 2000);
         }
 
-        // --- VARIÁVEIS DO JOGO E REDE ---
         let nomeX = "X", nomeO = "O", jAtual = "X", quemComeca = "X", ativo = true, estado = ["","","","","","","","",""];
         let pX = 0, pO = 0, online = false, minhaVez = true, meuSimbolo = "X", conn;
         let connProvisoria = null;
@@ -440,11 +576,9 @@
         let micAtivo = false;
         let amigoMutado = false;
         
-        // --- SISTEMA DE PING / QUEDA DE CONEXÃO ---
         let heartbeatTimer;
         let lastPong = Date.now();
 
-        // O ID é gerado FIXO no início 
         function gerarID() {
             return Math.floor(10000 + Math.random() * 89999).toString();
         }
@@ -545,7 +679,6 @@
 
         iniciarPeer(meuIDOriginal);
 
-        // --- MICROFONE ---
         async function toggleMic() {
             if (!meuStream) {
                 try {
@@ -579,7 +712,29 @@
             document.getElementById('iconeSpkOff').style.display = amigoMutado ? 'block' : 'none';
         }
 
-        // --- AMIGO ---
+        function gerarLinkConvite() {
+            const link = (cgSdk && cgSdk.game && cgSdk.game.inviteLink) ? cgSdk.game.inviteLink({ roomId: meuIDOriginal }) : window.location.href + "?roomId=" + meuIDOriginal;
+            navigator.clipboard.writeText(link).catch(e=>{});
+            document.getElementById('btnConvidarLink').innerText = "✅ Link Copiado!";
+            setTimeout(() => document.getElementById('btnConvidarLink').innerText = "🔗 Enviar Convite (Link)", 3000);
+        }
+
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const rId = urlParams.get('roomId');
+            if (rId) {
+                mostrarSetup('onlineMenu'); 
+                document.getElementById('nomeOnlineGeral').placeholder = "Apelido para entrar na sala...";
+                const btnAmigo = document.querySelector('button[onclick="abrirAmigo()"]');
+                btnAmigo.onclick = () => {
+                    if(!validarNomeGeral()) return;
+                    mostrarSetup('onlineAmigo');
+                    document.getElementById('idAmigo').value = rId;
+                    conectarAmigo();
+                };
+            }
+        });
+
         function aceitarConvite() {
             let meuNome = document.getElementById('nomeConvite').value.trim();
             if(!meuNome) {
@@ -660,7 +815,6 @@
             });
         }
 
-        // --- GLOBAL MATCHMAKING ---
         function abrirGlobal() {
             if(!validarNomeGeral()) return;
             buscandoGlobal = true;
@@ -719,7 +873,6 @@
             mostrarSetup('onlineMenu');
         }
 
-        // --- SISTEMA DE PING E DESCONEXÃO (CORRIGIDO E SEGURO) ---
         function setupConn() {
             conn.on('data', d => {
                 if(d.t === 'j') { 
@@ -779,27 +932,25 @@
             if(!ativo || !online) return; 
             
             ativo = false;
-            online = false; // Desliga a rede para não enviar mais pacotes
+            online = false; 
             document.getElementById('alertaWifi').style.display = 'none';
             
-            // Efeito visual profundo da vitória
             document.body.style.animation = "none";
             void document.body.offsetWidth;
-            document.body.style.animation = "flashWinX 0.6s ease-out"; // Brilha a tela
+            document.body.style.animation = "flashWinX 0.6s ease-out"; 
             document.getElementById('tabuleiro').classList.add(meuSimbolo === 'X' ? 'board-win-x' : 'board-win-o');
             
             meuSimbolo === 'X' ? pX++ : pO++;
             document.getElementById('sX').innerText = pX; 
             document.getElementById('sO').innerText = pO;
             
-            somVitoria(); // Chama o som correto
-            document.getElementById('btnNovaPartida').style.display = 'none'; // Some o botão de nova partida
+            somVitoria(); 
+            document.getElementById('btnNovaPartida').style.display = 'none'; 
             
             const statusEl = document.getElementById('status');
             statusEl.style.color = "var(--neon-green)";
             statusEl.classList.add('status-vitoria');
             
-            // Contagem regressiva para quitar
             let segundos = 5;
             statusEl.innerText = `FUGIU! VITÓRIA!\nSAINDO EM ${segundos}...`;
             
@@ -809,7 +960,7 @@
                     statusEl.innerText = `FUGIU! VITÓRIA!\nSAINDO EM ${segundos}...`;
                 } else {
                     clearInterval(contagem);
-                    sairDaPartida(); // Quita a partida automaticamente para o lobby sem bugs
+                    sairDaPartida(); 
                 }
             }, 1000);
         }
@@ -857,7 +1008,6 @@
                 document.getElementById('iconeMicOff').style.display = 'block';
             }
 
-            // Limpa tudo pro próximo jogo não bugar
             document.body.style.animation = "";
             document.body.classList.remove('flash-red', 'flash-win-x', 'flash-win-o');
             document.getElementById('tabuleiro').classList.remove('shake-empate', 'board-win-x', 'board-win-o');
@@ -872,7 +1022,6 @@
             document.getElementById('sO').innerText = pO;
         }
 
-        // --- SISTEMA DE MENUS E INÍCIO ---
         function validarNomeGeral() {
             const n = document.getElementById('nomeOnlineGeral').value.trim();
             if(!n) { document.getElementById('erroNomeGeral').style.display = 'block'; return false; }
@@ -890,20 +1039,27 @@
             document.getElementById('setupOnlineAmigo').style.display = 'none';
             document.getElementById('setupGlobal').style.display = 'none';
             document.getElementById('setupIA').style.display = 'none';
+            document.getElementById('setupSkins').style.display = 'none';
             
             document.getElementById('erroIA').style.display = 'none';
             document.getElementById('erroLocal').style.display = 'none';
             document.getElementById('erroNomeGeral').style.display = 'none';
+            document.getElementById('creditosRodape').style.display = 'flex'; 
             
             if(m === 'local') document.getElementById('setupLocal').style.display = 'flex';
             else if(m === 'onlineMenu') document.getElementById('setupOnlineMenu').style.display = 'flex';
             else if(m === 'onlineAmigo') document.getElementById('setupOnlineAmigo').style.display = 'flex';
             else if(m === 'global') document.getElementById('setupGlobal').style.display = 'flex';
             else if(m === 'ia') document.getElementById('setupIA').style.display = 'flex';
+            else if(m === 'skins') {
+                document.getElementById('setupSkins').style.display = 'flex';
+                document.getElementById('creditosRodape').style.display = 'none'; 
+            }
+            else if(m === 'menuPrincipal') document.getElementById('botoesMenu').style.display = 'flex';
         }
 
         function voltarMenu() {
-            sairDaPartida();
+            mostrarSetup('menuPrincipal');
         }
         
         function setDificuldade(d) {
@@ -941,6 +1097,8 @@
                 contraIA = true;
             }
 
+            if(cgSdk && cgSdk.game) cgSdk.game.gameplayStart();
+
             pararMusicaImediatamente(); 
             document.getElementById('btnAudio').style.display = 'none';
             
@@ -971,7 +1129,6 @@
             }
         }
 
-        // --- ALGORITMO I.A. ---
         function achaMovimentoCritico(jogador) {
             for(let i = 0; i < 9; i++) {
                 if(estado[i] === "") {
@@ -1094,7 +1251,9 @@
             som(600, 0.1);
             estado[i] = s;
             const el = document.querySelectorAll('.celula')[i];
-            el.innerText = s; 
+            
+            el.innerText = getDisplaySkin(s); 
+            
             el.classList.add(s === 'X' ? 'x-player' : 'o-player');
             checar();
         }
@@ -1147,6 +1306,7 @@
                     celulas[p[2]].classList.add('celula-vencedora');
 
                     somVitoria(); 
+                    if(cgSdk && cgSdk.game) cgSdk.game.happytime();
                     if (navigator.vibrate) { navigator.vibrate([100, 50, 100, 50, 200]); }
                     
                     document.getElementById('btnNovaPartida').style.display = 'block';
