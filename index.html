@@ -145,6 +145,7 @@
         .celula-vencedora { animation: glowWin 0.8s infinite alternate !important; z-index: 2; }
         @keyframes glowWin { 0% { background: rgba(255, 255, 255, 0.1); transform: scale(1); box-shadow: 0 0 10px rgba(255,255,255,0.2); } 100% { background: rgba(255, 255, 255, 0.25); transform: scale(1.08); box-shadow: 0 0 30px rgba(255,255,255,0.8), inset 0 0 15px rgba(255,255,255,0.5); } }
 
+        .x-player, .o-player { position: relative; display: flex; align-items: center; justify-content: center; } 
         .x-player { color: var(--neon-red); text-shadow: 0 0 15px var(--neon-red), 0 0 25px var(--neon-red), 0 0 35px rgba(255, 42, 109, 0.5); }
         .o-player { color: var(--neon-cyan); text-shadow: 0 0 15px var(--neon-cyan), 0 0 25px var(--neon-cyan), 0 0 35px rgba(5, 217, 232, 0.5); }
         
@@ -152,26 +153,20 @@
         .status-vitoria { animation: pulseStatus 0.6s infinite alternate; }
         @keyframes pulseStatus { 0% { transform: scale(1); filter: brightness(1); } 100% { transform: scale(1.15); filter: brightness(1.5); } }
 
-        /* SISTEMA DE REAÇÕES - CORRIGIDO TAMANHO E POSIÇÃO */
+        /* SISTEMA DE REAÇÕES (EMOJIS) */
         #barraReacoes { display: none; justify-content: center; gap: 15px; margin-top: 20px; }
         .btn-reacao { background: rgba(255,255,255,0.1); border: 1px solid var(--neon-cyan); border-radius: 50%; width: 45px; height: 45px; font-size: 1.5rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(5, 217, 232, 0.2); }
         .btn-reacao:hover { transform: scale(1.2); box-shadow: 0 0 15px var(--neon-cyan); background: rgba(5, 217, 232, 0.2); }
         
         .reacao-flutuante {
-            position: fixed; /* Fixado para não bugar o flexbox */
-            font-size: 2.5rem;
-            pointer-events: none; 
-            animation: floatEmoji 2s ease-out forwards; 
-            z-index: 9999;
+            position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
+            font-size: 2.2rem !important; 
+            pointer-events: none; animation: floatUpAndFade 2.5s ease-out forwards; z-index: 9999;
         }
-        /* Posição baseada em quem mandou */
-        .reacao-x { left: 25%; bottom: 75%; }
-        .reacao-o { right: 25%; bottom: 75%; }
-        
-        @keyframes floatEmoji { 
-            0% { opacity: 0; transform: translateY(0) scale(0.5); } 
-            20% { opacity: 1; transform: translateY(-20px) scale(1.2); } 
-            100% { opacity: 0; transform: translateY(-100px) scale(1); } 
+        @keyframes floatUpAndFade { 
+            0% { opacity: 0; transform: translate(-50%, 10px) scale(0.5); } 
+            15% { opacity: 1; transform: translate(-50%, -10px) scale(1.2); } 
+            100% { opacity: 0; transform: translate(-50%, -80px) scale(1); } 
         }
 
         /* RODAPÉ E CRÉDITOS */
@@ -342,12 +337,7 @@
             }
         }
 
-        document.body.addEventListener('click', function autoIniciaSom() {
-            if (document.getElementById('telaJogo').style.display !== 'flex' && !musicaAtiva && elemMusica.paused) {
-                toggleAudio();
-                document.body.removeEventListener('click', autoIniciaSom);
-            }
-        }, { once: true });
+        // Sem auto-play no menu como você pediu!
 
         // --- EFEITOS SONOROS SYNTHWAVE ---
         function som(f, d) {
@@ -417,10 +407,16 @@
         function mostrarReacao(emoji, origem) {
             const el = document.createElement('div');
             el.innerText = emoji;
-            // Define a classe da animação fixa baseada na origem (X na esquerda, O na direita)
-            el.className = 'reacao-flutuante ' + (origem === 'X' ? 'reacao-x' : 'reacao-o');
+            el.className = 'reacao-flutuante';
             
-            document.body.appendChild(el);
+            const container = origem === 'X' ? document.querySelector('.x-player') : document.querySelector('.o-player');
+            
+            if (container) {
+                container.appendChild(el);
+            } else {
+                document.body.appendChild(el); 
+            }
+            
             setTimeout(() => el.remove(), 2000);
         }
 
@@ -443,9 +439,8 @@
         let heartbeatTimer;
         let lastPong = Date.now();
 
-        // O ID é gerado FIXO no início para não sumir nunca
-        const meuIDOriginal = Math.floor(10000 + Math.random() * 89999).toString();
-        let peer;
+        const peer = new Peer(Math.floor(10000 + Math.random() * 89999).toString());
+        const meuIDOriginal = peer.id;
 
         function iniciarPeer(idToUse) {
             peer = new Peer(idToUse);
@@ -461,7 +456,6 @@
             
             peer.on('connection', c => {
                 c.on('open', () => {
-                    // Impede intrusos se você já estiver jogando ou buscando partida global
                     if (online || contraIA || document.getElementById('modalConvite').style.display === 'flex' || buscandoGlobal) {
                         c.send({t: 'rej_ocupado'});
                         setTimeout(() => c.close(), 500);
@@ -486,7 +480,7 @@
                             
                             online = true;
                             contraIA = false;
-                            meuSimbolo = "X"; // Host da sala Global é o X
+                            meuSimbolo = "X";
                             minhaVez = true; 
                             buscandoGlobal = false;
                             
@@ -519,7 +513,7 @@
                     if(buscandoGlobal) {
                         document.getElementById('statusGlobal').innerText = "Procurando Partida...";
                         peer.destroy();
-                        setTimeout(() => { iniciarPeer(salaGlobalAlvo); }, 500); // Tenta ser o host da sala se ela não existe
+                        setTimeout(() => { iniciarPeer(salaGlobalAlvo); }, 500);
                     } else {
                         const btn = document.getElementById('btnConectar');
                         const erroOnline = document.getElementById('erroOnlineAmigo');
@@ -677,7 +671,7 @@
                         nomeX = d.nome || "Adversário";
                         online = true;
                         contraIA = false;
-                        meuSimbolo = "O"; // Visitante na sala global é o O
+                        meuSimbolo = "O";
                         minhaVez = false; 
                         buscandoGlobal = false;
                         
@@ -705,7 +699,7 @@
             buscandoGlobal = false;
             if(peer && peer.id && peer.id.startsWith("NeonGlb_")) {
                 peer.destroy(); 
-                setTimeout(() => { iniciarPeer(meuIDOriginal); }, 500); // Restaura o ID original
+                setTimeout(() => { iniciarPeer(meuIDOriginal); }, 500);
             }
             mostrarSetup('onlineMenu');
         }
@@ -721,7 +715,6 @@
                 if(d.t === 'r') resetLocal(); 
                 if(d.t === 'react') mostrarReacao(d.e, meuSimbolo === 'X' ? 'O' : 'X');
                 
-                // Sistema de Ping/Pong aprimorado com Try/Catch
                 if(d.t === 'ping') {
                     try { conn.send({t: 'pong'}); } catch(e) {}
                 }
@@ -751,17 +744,15 @@
                         if(conn && conn.open) {
                             conn.send({t: 'ping'});
                         }
-                    } catch(e) {} // Se o Wi-Fi cair, não dá erro no console, só conta o tempo
+                    } catch(e) {} 
                     
                     let tempoSemResposta = Date.now() - lastPong;
                     
-                    // Aviso de Wi-Fi Fraco (3 segundos sem resposta)
-                    if(tempoSemResposta > 3000 && tempoSemResposta <= 8000) {
+                    if(tempoSemResposta > 4000 && tempoSemResposta <= 10000) {
                         document.getElementById('alertaWifi').style.display = 'block';
                     }
                     
-                    // Desconexão total (8 segundos sem resposta)
-                    if(tempoSemResposta > 8000) {
+                    if(tempoSemResposta > 10000) {
                         lidandoComFuga();
                     }
                 }, 2000);
