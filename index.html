@@ -74,7 +74,8 @@
         .icone-som { width: 18px; height: 18px; fill: var(--neon-cyan); }
 
         /* Telas e Menus */
-        #telaInicial { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; text-align: center; }
+        #telaLogin { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; text-align: center; }
+        #telaInicial { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; text-align: center; }
         #telaJogo { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; position: relative; }
         
         .logo-container { margin-bottom: 40px; position: relative; text-align: center; }
@@ -82,7 +83,6 @@
         .logo span { color: white; }
         .sub { color: var(--neon-cyan); font-size: 0.8rem; letter-spacing: 5px; text-transform: uppercase; font-weight: 700; border: 1.5px solid var(--neon-cyan); border-radius: 20px; padding: 6px 18px; display: inline-block; margin-top: -12px; box-shadow: 0 0 15px rgba(5, 217, 232, 0.6), inset 0 0 7px rgba(5, 217, 232, 0.6); background: rgba(0, 0, 0, 0.6); }
 
-        /* CONTAINER DE RANK (ONLINE) */
         .rank-container-card {
             background: linear-gradient(135deg, rgba(20,20,35,0.8), rgba(5,5,15,0.9));
             border: 2px solid var(--neon-cyan);
@@ -97,12 +97,11 @@
             backdrop-filter: blur(10px);
             transition: 0.3s;
         }
-        .rank-container-card:hover { transform: scale(1.02); box-shadow: 0 0 25px rgba(5, 217, 232, 0.5), inset 0 0 20px rgba(5, 217, 232, 0.3); }
         .rank-title { font-size: 0.7rem; color: #aaa; text-transform: uppercase; letter-spacing: 3px; font-weight: 700; }
         .rank-value { font-size: 1.4rem; font-weight: 900; letter-spacing: 1px; text-shadow: 0 0 12px currentColor; }
         .pdl-value { font-size: 0.8rem; color: #ddd; font-weight: bold; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 15px; align-self: center; margin-top: 5px; border: 1px solid rgba(255,255,255,0.2); }
 
-        #botoesMenu { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 15px; }
+        #botoesMenu, #boxBotoesLogin, #boxBotoesCadastro { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 15px; }
         
         .btn-menu, .btn-acao { width: 300px; padding: 18px; border-radius: 40px; border: none; font-weight: 700; cursor: pointer; font-size: 1.1rem; transition: 0.4s; text-transform: uppercase; letter-spacing: 2px; color: white; position: relative; overflow: hidden; }
         .btn-menu::before, .btn-acao::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: 0.5s; }
@@ -216,27 +215,25 @@
     </audio>
     <audio id="vozAmigo" autoplay></audio>
 
-    <button id="btnAudio" class="btn-top-corner" onclick="toggleAudio()" aria-label="Ligar/Desligar Música">
-        <svg id="iconeSomOff" viewBox="0 0 24 24" class="icone-som"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
-        <svg id="iconeSomOn" viewBox="0 0 24 24" class="icone-som" style="display:none;"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-    </button>
+    <div id="telaLogin">
+        <div class="logo-container">
+            <div class="logo">Tic<span>Tac</span></div>
+            <div class="sub">Autenticação</div>
+        </div>
+        
+        <input type="text" id="loginUser" class="input-nome" placeholder="Seu Usuário" maxlength="12">
+        <input type="password" id="loginPass" class="input-nome" placeholder="Sua Senha" maxlength="12" style="display:none;">
+        <p id="erroLogin" class="erro-input">Usuário ou senha incorretos!</p>
+        
+        <div id="boxBotoesLogin">
+            <button class="btn-menu btn-online" onclick="tentarLogin()">Entrar</button>
+            <button class="btn-menu btn-ia" onclick="prepararCadastro()">Criar Conta Nova</button>
+            <button class="btn-menu btn-local" onclick="entrarConvidado()">Jogar como Convidado</button>
+        </div>
 
-    <button id="btnMic" class="btn-top-corner" onclick="toggleMic()" style="display:none;" aria-label="Ligar/Desligar Seu Microfone">
-        <svg id="iconeMicOn" viewBox="0 0 24 24" class="icone-som" style="display:none;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
-        <svg id="iconeMicOff" viewBox="0 0 24 24" class="icone-som" style="display:block; fill:var(--neon-red);"><path d="M19 11h-2c0 .91-.26 1.75-.69 2.48l1.46 1.46C18.54 13.82 19 12.46 19 11zM14.98 11.17c.02-.11.02-.23.02-.34V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6 6V11c0 1.66 1.34 3 3 3 .23 0 .44-.02.65-.08l1.87 1.87c-.73.43-1.57.69-2.48.69-2.76 0-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c.57-.08 1.12-.24 1.64-.46l5.09 5.09 1.27-1.27L4.27 3z"/></svg>
-    </button>
-
-    <button id="btnMutarAmigo" class="btn-top-corner-2" onclick="toggleMuteAmigo()" style="display:none;" aria-label="Silenciar Áudio do Amigo">
-        <svg id="iconeSpkOn" viewBox="0 0 24 24" class="icone-som"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-        <svg id="iconeSpkOff" viewBox="0 0 24 24" class="icone-som" style="display:none; fill:var(--neon-red);"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
-    </button>
-    
-    <div id="modalConvite">
-        <div class="modal-content">
-            <h3 style="color:var(--neon-cyan); margin-bottom:10px; text-transform:uppercase; letter-spacing:2px; text-shadow: 0 0 10px var(--neon-cyan);">Novo Desafio!</h3>
-            <p id="textoConvite" style="margin-bottom:15px; color:#ddd; font-weight: bold;">Alguém quer jogar com você.</p>
-            <button class="btn-menu btn-aceitar" onclick="aceitarConvite()">ACEITAR PARTIDA</button>
-            <button class="btn-menu btn-recusar" onclick="recusarConvite()">RECUSAR</button>
+        <div id="boxBotoesCadastro" style="display:none;">
+            <button class="btn-menu btn-ia" onclick="finalizarCadastro()">Confirmar Cadastro</button>
+            <button class="btn-texto" onclick="voltarTelaLogin()">Voltar</button>
         </div>
     </div>
 
@@ -269,9 +266,6 @@
 
         <div id="setupOnlineAmigo">
             <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">SEU ID: <span id="meuId" style="color:var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan);">...</span></p>
-            <button id="btnConvidarLink" class="btn-menu btn-local" onclick="gerarLinkConvite()" style="margin-bottom:15px; border-color:var(--neon-green); color:var(--neon-green);">🔗 Enviar Convite (Link)</button>
-            
-            <div id="divisoriaAmigo" style="width: 100%; border-top: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px;"></div>
             
             <input type="number" id="idAmigo" class="input-nome" placeholder="ID do Amigo" inputmode="numeric" pattern="[0-9]*">
             <button id="btnConectar" class="btn-menu btn-online" onclick="conectarAmigo()">Conectar</button>
@@ -310,7 +304,7 @@
             <button class="btn-texto" onclick="voltarMenu()">Voltar</button>
         </div>
         
-        <div class="credito-footer" id="creditosRodape">
+        <div class="credito-footer" id="creditosRodape" style="display:none;">
             <div class="credito-texto">Developer DevThalison</div>
             <a href="https://www.instagram.com/axionsollutions?igsh=MXduMjA3YWhwaGh6OQ%3D%3D&utm_source=qr" target="_blank" aria-label="Instagram" class="link-axion">
                 <svg class="icone-insta" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
@@ -346,6 +340,90 @@
     </div>
 
     <script>
+        // =====================================
+        // SISTEMA DE LOGIN E CADASTRO
+        // =====================================
+        let dbUsuarios = JSON.parse(localStorage.getItem('ticTacUsersDB')) || {};
+        let usuarioLogado = null;
+
+        function prepararCadastro() {
+            document.getElementById('loginPass').style.display = 'block';
+            document.getElementById('boxBotoesLogin').style.display = 'none';
+            document.getElementById('boxBotoesCadastro').style.display = 'flex';
+            document.getElementById('erroLogin').style.display = 'none';
+        }
+
+        function voltarTelaLogin() {
+            document.getElementById('loginPass').style.display = 'none';
+            document.getElementById('boxBotoesLogin').style.display = 'flex';
+            document.getElementById('boxBotoesCadastro').style.display = 'none';
+            document.getElementById('erroLogin').style.display = 'none';
+            document.getElementById('loginPass').value = '';
+        }
+
+        function tentarLogin() {
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            const erro = document.getElementById('erroLogin');
+
+            if(document.getElementById('loginPass').style.display === 'none') {
+                document.getElementById('loginPass').style.display = 'block';
+                return;
+            }
+
+            if(!user || !pass) {
+                erro.innerText = "Preencha usuário e senha!";
+                erro.style.display = 'block';
+                return;
+            }
+
+            if(dbUsuarios[user] && dbUsuarios[user] === pass) {
+                logarSucesso(user);
+            } else {
+                erro.innerText = "Usuário ou senha incorretos!";
+                erro.style.display = 'block';
+            }
+        }
+
+        function finalizarCadastro() {
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            const erro = document.getElementById('erroLogin');
+
+            if(!user || !pass) {
+                erro.innerText = "Preencha todos os campos!";
+                erro.style.display = 'block';
+                return;
+            }
+
+            if(dbUsuarios[user]) {
+                erro.innerText = "Esse usuário já existe!";
+                erro.style.display = 'block';
+                return;
+            }
+
+            dbUsuarios[user] = pass;
+            localStorage.setItem('ticTacUsersDB', JSON.stringify(dbUsuarios));
+            logarSucesso(user);
+        }
+
+        function entrarConvidado() {
+            logarSucesso("Convidado" + Math.floor(Math.random() * 1000));
+        }
+
+        function logarSucesso(nome) {
+            usuarioLogado = nome;
+            document.getElementById('telaLogin').style.display = 'none';
+            document.getElementById('telaInicial').style.display = 'flex';
+            document.getElementById('creditosRodape').style.display = 'flex';
+            
+            // Preenche o nome em todas as áreas necessárias para poupar tempo
+            document.getElementById('nomeOnlineGeral').value = usuarioLogado;
+            document.getElementById('nomeJogadorIA').value = usuarioLogado;
+            document.getElementById('nomeLocalX').value = usuarioLogado;
+        }
+
+
         // --- DESTRAVA DE ÁUDIO NO MOBILE (Primeiro Toque) ---
         const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
         
@@ -554,13 +632,6 @@
                 document.getElementById('iconeSomOff').style.display = 'block';
             }
         }
-
-        document.body.addEventListener('click', function autoIniciaSom() {
-            if (document.getElementById('telaJogo').style.display !== 'flex' && !musicaAtiva && elemMusica.paused) {
-                toggleAudio();
-                document.body.removeEventListener('click', autoIniciaSom);
-            }
-        }, { once: true });
 
         function som(f, d) {
             try {
@@ -793,59 +864,9 @@
             document.getElementById('iconeSpkOff').style.display = amigoMutado ? 'block' : 'none';
         }
 
-        function gerarLinkConvite() {
-            let urlLimpa = window.location.origin + window.location.pathname;
-            let link = urlLimpa + "?roomId=" + meuIDOriginal;
-            
-            try {
-                if (cgSdk && cgSdk.game && cgSdk.game.inviteLink) {
-                    link = cgSdk.game.inviteLink({ roomId: meuIDOriginal });
-                }
-            } catch(e) {}
-            
-            navigator.clipboard.writeText(link).catch(e=>{});
-            
-            const btn = document.getElementById('btnConvidarLink');
-            btn.innerHTML = "⏳ Aguardando Amigo...";
-            btn.style.borderColor = "var(--neon-yellow)";
-            btn.style.color = "var(--neon-yellow)";
-            btn.style.boxShadow = "0 0 15px rgba(241, 196, 15, 0.4)";
-            btn.classList.add("status-vitoria"); 
-            
-            document.getElementById('idAmigo').style.display = 'none';
-            document.getElementById('btnConectar').style.display = 'none';
-            document.getElementById('divisoriaAmigo').style.display = 'none'; 
-            
-            const msg = document.getElementById('erroOnlineAmigo');
-            msg.innerText = "Link copiado! Envie para o amigo e aguarde nesta tela.";
-            msg.style.color = "var(--neon-cyan)";
-            msg.style.textShadow = "0 0 10px var(--neon-cyan)";
-            msg.style.display = 'block';
-        }
-
-        window.addEventListener('load', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const rId = urlParams.get('roomId');
-            if (rId) {
-                mostrarSetup('onlineMenu'); 
-                document.getElementById('nomeOnlineGeral').placeholder = "Seu Apelido para entrar...";
-                const btnAmigo = document.querySelector('button[onclick="abrirAmigo()"]');
-                btnAmigo.innerHTML = "🚀 Entrar na Sala do Link";
-                btnAmigo.style.background = "linear-gradient(90deg, #004d26, #00ff7f, #004d26)";
-                btnAmigo.style.borderColor = "var(--neon-green)";
-                btnAmigo.style.boxShadow = "0 0 20px var(--neon-green)";
-                btnAmigo.onclick = () => {
-                    if(!validarNomeGeral()) return;
-                    mostrarSetup('onlineAmigo');
-                    document.getElementById('idAmigo').value = rId;
-                    conectarAmigo();
-                };
-            }
-        });
-
         function aceitarConvite() {
             let meuNome = document.getElementById('nomeOnlineGeral').value.trim();
-            if(!meuNome) meuNome = "Host";
+            if(!meuNome) meuNome = usuarioLogado || "Host";
             
             document.getElementById('erroConvite').style.display = 'none';
             document.getElementById('modalConvite').style.display = 'none';
@@ -875,7 +896,8 @@
             const id = document.getElementById('idAmigo').value.trim();
             const btn = document.getElementById('btnConectar');
             const erroOnline = document.getElementById('erroOnlineAmigo');
-            const meuNome = document.getElementById('nomeOnlineGeral').value.trim();
+            let meuNome = document.getElementById('nomeOnlineGeral').value.trim();
+            if(!meuNome) meuNome = usuarioLogado || "Convidado";
             
             if(!id) return;
 
@@ -1151,35 +1173,16 @@
             document.getElementById('erroIA').style.display = 'none';
             document.getElementById('erroLocal').style.display = 'none';
             document.getElementById('erroNomeGeral').style.display = 'none';
-            
-            // Esconde o rodapé por padrão em qualquer sub-tela
             document.getElementById('creditosRodape').style.display = 'none'; 
             
             if(m === 'local') document.getElementById('setupLocal').style.display = 'flex';
             else if(m === 'onlineMenu') document.getElementById('setupOnlineMenu').style.display = 'flex';
-            else if(m === 'onlineAmigo') {
-                // Reseta a UI do Lobby para garantir que não fique bugada se a pessoa voltar lá depois
-                const btn = document.getElementById('btnConvidarLink');
-                btn.innerHTML = "🔗 Enviar Convite (Link)";
-                btn.style.borderColor = "var(--neon-green)";
-                btn.style.color = "var(--neon-green)";
-                btn.style.boxShadow = "none";
-                btn.classList.remove("status-vitoria");
-                document.getElementById('idAmigo').style.display = 'inline-block';
-                document.getElementById('btnConectar').style.display = 'inline-block';
-                document.getElementById('divisoriaAmigo').style.display = 'block';
-                document.getElementById('erroOnlineAmigo').style.display = 'none';
-                document.getElementById('erroOnlineAmigo').style.color = "var(--neon-red)";
-                document.getElementById('erroOnlineAmigo').style.textShadow = "0 0 10px var(--neon-red)";
-                
-                document.getElementById('setupOnlineAmigo').style.display = 'flex';
-            }
+            else if(m === 'onlineAmigo') document.getElementById('setupOnlineAmigo').style.display = 'flex';
             else if(m === 'global') document.getElementById('setupGlobal').style.display = 'flex';
             else if(m === 'ia') document.getElementById('setupIA').style.display = 'flex';
             else if(m === 'skins') document.getElementById('setupSkins').style.display = 'flex';
             else if(m === 'menuPrincipal') {
                 document.getElementById('botoesMenu').style.display = 'flex';
-                // Volta o rodapé SOMENTE no Menu Principal
                 document.getElementById('creditosRodape').style.display = 'flex'; 
             }
         }
