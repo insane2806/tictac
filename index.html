@@ -479,879 +479,209 @@
         <button id="btnNovaPartida" class="btn-acao" style="display:none;" onclick="reset()">Nova Partida</button>
         <button class="btn-texto" style="margin-top:25px;" onclick="sairDaPartida()">Abandonar Partida</button>
     </div>
-    <script>
-    // --- DESTRAVA DE ÁUDIO (MOBILE FIX) ---
-    const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
-    document.body.addEventListener('click', () => { if (ctxAudio.state === 'suspended') ctxAudio.resume(); });
+    <script>// --- CONFIGURAÇÃO FIREBASE ---
+const firebaseConfig = {
+    apiKey: "AIzaSyDv64s-6JctziIGcyDfogeVJHnvGf6pDRc",
+    authDomain: "jogo-da-velha-000.firebaseapp.com",
+    projectId: "jogo-da-velha-000",
+    storageBucket: "jogo-da-velha-000.firebasestorage.app",
+    messagingSenderId: "175809267928",
+    appId: "1:175809267928:web:7d18bbd870a82482daafad",
+    measurementId: "G-F2NSRKELGL"
+};
 
-    // --- SISTEMA DE ÁUDIO E EFEITOS ---
-    const elemMusica = document.getElementById('musicaFundo'); 
-    let musicaAtiva = false;
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-    function toggleAudio() { 
-        if (musicaAtiva) { 
-            if(elemMusica) elemMusica.pause(); 
-            document.getElementById('iconeSomOn').style.display = 'none'; 
-            document.getElementById('iconeSomOff').style.display = 'block'; 
-        } else { 
-            if(elemMusica) { elemMusica.volume = 0.35; elemMusica.play().catch(e => {}); } 
-            document.getElementById('iconeSomOn').style.display = 'block'; 
-            document.getElementById('iconeSomOff').style.display = 'none'; 
-        } 
-        musicaAtiva = !musicaAtiva; 
+// --- VARIÁVEIS GLOBAIS ---
+let meuIDOriginal = "", peer, connGame = null, online = false, minhaVez = false, meuSimbolo = "X";
+let estado = ["","","","","","","","",""], ativo = true, pX = 0, pO = 0, nomeX = "X", nomeO = "O";
+let quemComeca = "X", jAtual = "X", contraIA = false, dificuldadeIA = 'ultra', iaPensando = false;
+let buscandoGlobal = false, globalRoomIndex = 1, salaGlobalAlvo = "", tempOpData = null, tempOpConn = null;
+let currentChatId = null, meuStream = null, micAtivo = false;
+let heartbeatTimer, lastPong = Date.now();
+
+// --- FUNÇÃO DA BOLHA (TOAST) ---
+function mostrarToast(msg) {
+    const toast = document.getElementById('toastNotificacao');
+    const toastMsg = document.getElementById('toastMsg');
+    if(!toast || !toastMsg) return;
+    toastMsg.innerText = msg;
+    toast.classList.add('toast-visivel');
+    setTimeout(() => { toast.classList.remove('toast-visivel'); }, 4000);
+}
+
+// --- LOGIN E PERFIL ---
+auth.onAuthStateChanged(user => {
+    if (user) {
+        document.getElementById('telaLogin').style.display = 'none';
+        document.getElementById('telaInicial').style.display = 'flex';
+        let hash = 0; for (let i = 0; i < user.uid.length; i++) hash = user.uid.charCodeAt(i) + ((hash << 5) - hash);
+        meuIDOriginal = Math.abs(hash % 90000 + 10000).toString();
+        document.getElementById('meuId').innerText = meuIDOriginal;
+        if (peer) peer.destroy();
+        iniciarPeer(meuIDOriginal);
+        let n = user.isAnonymous ? "Convidado" : user.email.split('@')[0];
+        document.getElementById('nomeOnlineGeral').value = n;
+        document.getElementById('displayNomePerfil').innerText = n;
+        iniciarEscutaPedidos();
+    } else {
+        document.getElementById('telaLogin').style.display = 'flex';
+        document.getElementById('telaInicial').style.display = 'none';
     }
+});
 
-    function som(f, d) { 
-        try { 
-            const o = ctxAudio.createOscillator(); const g = ctxAudio.createGain(); 
-            o.frequency.value = f; g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + d); 
-            o.connect(g); g.connect(ctxAudio.destination); o.start(); o.stop(ctxAudio.currentTime + d); 
-        } catch(e){} 
-    }
+function entrarComoConvidado() { auth.signInAnonymously(); }
+function entrarConta() { auth.signInWithEmailAndPassword(document.getElementById('emailLogin').value, document.getElementById('senhaLogin').value); }
+function criarConta() { auth.createUserWithEmailAndPassword(document.getElementById('emailLogin').value, document.getElementById('senhaLogin').value); }
+function sairDaConta() { auth.signOut(); }
 
-    function somVitoria() { 
-        try { 
-            const o = ctxAudio.createOscillator(); const g = ctxAudio.createGain(); 
-            o.type = 'square'; o.frequency.setValueAtTime(150, ctxAudio.currentTime); 
-            o.frequency.exponentialRampToValueAtTime(800, ctxAudio.currentTime + 0.4); 
-            g.gain.setValueAtTime(0, ctxAudio.currentTime); g.gain.linearRampToValueAtTime(0.15, ctxAudio.currentTime + 0.1); 
-            g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + 0.6); 
-            o.connect(g); g.connect(ctxAudio.destination); o.start(); o.stop(ctxAudio.currentTime + 0.6); 
-        } catch(e){} 
-    }
+// --- SKINS (LOJA) ---
+const skinsDB = [
+    { id: 'default', nome: 'Clássico Neon', x: 'X', o: 'O', corX: '#ff2a6d', corO: '#05d9e8', unlocked: true },
+    { id: 'lapis', nome: 'Material Escolar', x: '✏️', o: '🍩', corX: '#f1c40f', corO: '#e67e22', unlocked: false },
+    { id: 'medieval', nome: 'Batalha Medieval', x: '⚔️', o: '🛡️', corX: '#bdc3c7', corO: '#f39c12', unlocked: false }
+];
+let skinEquipada = 'default';
 
-    // --- CONFIGURAÇÃO FIREBASE ---
-    const firebaseConfig = {
-        apiKey: "AIzaSyDv64s-6JctziIGcyDfogeVJHnvGf6pDRc",
-        authDomain: "jogo-da-velha-000.firebaseapp.com",
-        projectId: "jogo-da-velha-000",
-        storageBucket: "jogo-da-velha-000.firebasestorage.app",
-        messagingSenderId: "175809267928",
-        appId: "1:175809267928:web:7d18bbd870a82482daafad"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+function carregarSkins() {
+    const salvas = JSON.parse(localStorage.getItem('ticTacSkinsUnlocked')) || ['default'];
+    skinEquipada = localStorage.getItem('ticTacSkinEquipada') || 'default';
+    skinsDB.forEach(s => { if (salvas.includes(s.id)) s.unlocked = true; });
+    aplicarCoresDaSkin(); renderizarMenuSkins();
+}
 
-    // --- VARIÁVEIS DE ESTADO ---
-    let meuIDOriginal = "", peer, connGame = null, online = false, minhaVez = false, meuSimbolo = "X";
-    let estado = ["","","","","","","","",""], ativo = true, pX = 0, pO = 0, nomeX = "X", nomeO = "O";
-    let jAtual = "X", quemComeca = "X", contraIA = false, dificuldadeIA = 'ultra', iaPensando = false;
-    let currentChatId = null, buscandoGlobal = false;
+function aplicarCoresDaSkin() {
+    let s = skinsDB.find(x => x.id === skinEquipada) || skinsDB[0];
+    document.documentElement.style.setProperty('--neon-red', s.corX);
+    document.documentElement.style.setProperty('--neon-cyan', s.corO);
+}
 
-    // --- SISTEMA DE SKINS (LOJA COMPLETA) ---
-    const skinsDB = [
-        { id: 'default', nome: 'Clássico Neon', x: 'X', o: 'O', corX: '#ff2a6d', corO: '#05d9e8', unlocked: true },
-        { id: 'lapis', nome: 'Material Escolar', x: '✏️', o: '🍩', corX: '#f1c40f', corO: '#e67e22', unlocked: false },
-        { id: 'medieval', nome: 'Batalha Medieval', x: '⚔️', o: '🛡️', corX: '#bdc3c7', corO: '#f39c12', unlocked: false },
-        { id: 'galaxia', nome: 'Cosmos', x: '🪐', o: '⭐', corX: '#9d4edd', corO: '#00ff7f', unlocked: false },
-        { id: 'monstros', nome: 'Assustador', x: '🦇', o: '🎃', corX: '#2ecc71', corO: '#8e44ad', unlocked: false }
-    ];
-    let skinEquipada = localStorage.getItem('ticTacSkinEquipada') || 'default';
-
-    function aplicarCoresDaSkin() { 
-        let s = skinsDB.find(x => x.id === skinEquipada) || skinsDB[0]; 
-        document.documentElement.style.setProperty('--neon-red', s.corX); 
-        document.documentElement.style.setProperty('--neon-cyan', s.corO); 
-    }A
-
-    function renderizarMenuSkins() {
-        const lista = document.getElementById('listaSkins'); if(!lista) return; lista.innerHTML = '';
-        const salvas = JSON.parse(localStorage.getItem('ticTacSkinsUnlocked')) || ['default'];
-        skinsDB.forEach(s => {
-            if (salvas.includes(s.id)) s.unlocked = true;
-            const btn = document.createElement('button');
-            let txt = skinEquipada === s.id ? 'ATIVO' : (s.unlocked ? 'USAR' : 'ABRIR');
-            btn.className = "btn-skin-item";
-            btn.style.cssText = `width:100%; border:2px solid ${s.unlocked ? s.corX : '#444'}; background:rgba(0,0,0,0.5); color:white; padding:15px; border-radius:15px; margin-bottom:10px; display:flex; align-items:center; cursor:pointer;`;
-            btn.innerHTML = `<span style="font-size:1.5rem; margin-right:15px;">${s.x}${s.o}</span><span style="flex-grow:1; text-align:left;">${s.nome}</span><small>${txt}</small>`;
-            btn.onclick = () => {
-                if(s.unlocked) { skinEquipada = s.id; localStorage.setItem('ticTacSkinEquipada', s.id); aplicarCoresDaSkin(); renderizarMenuSkins(); som(800,0.1); }
-                else { s.unlocked = true; salvas.push(s.id); localStorage.setItem('ticTacSkinsUnlocked', JSON.stringify(salvas)); skinEquipada = s.id; localStorage.setItem('ticTacSkinEquipada', s.id); aplicarCoresDaSkin(); renderizarMenuSkins(); somVitoria(); mostrarToast("Skin Desbloqueada!"); }
-            };
-            lista.appendChild(btn);
-        });
-    }
-
-    // --- BOLHA DE NOTIFICAÇÃO ---
-    function mostrarToast(msg) {
-        const t = document.getElementById('toastNotificacao'); const tm = document.getElementById('toastMsg');
-        if(!t || !tm) return; tm.innerText = msg; t.classList.add('toast-visivel');
-        setTimeout(() => t.classList.remove('toast-visivel'), 3500);
-    }
-
-    // --- NAVEGAÇÃO (FIX DO ESTICAMENTO) ---
-    function mostrarSetup(m) {
-        const ids = ['botoesMenu', 'setupLocal', 'setupOnlineMenu', 'setupAmigos', 'setupGlobal', 'setupIA', 'setupSkins'];
-        ids.forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; });
-        const alvo = { local:'setupLocal', onlineMenu:'setupOnlineMenu', amigos:'setupAmigos', global:'setupGlobal', ia:'setupIA', skins:'setupSkins' }[m];
-        if(alvo) document.getElementById(alvo).style.display = 'flex'; else document.getElementById('botoesMenu').style.display = 'flex';
-    }
-    function voltarMenu() { mostrarSetup(''); }
-
-    // --- LOGIN E NUVEM ---
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            document.getElementById('telaLogin').style.display = 'none'; document.getElementById('telaInicial').style.display = 'flex';
-            let hash = 0; for (let i = 0; i < user.uid.length; i++) hash = user.uid.charCodeAt(i) + ((hash << 5) - hash);
-            meuIDOriginal = Math.abs(hash % 90000 + 10000).toString(); document.getElementById('meuId').innerText = meuIDOriginal;
-            if(peer) peer.destroy(); iniciarPeer(meuIDOriginal);
-            let n = user.isAnonymous ? "Convidado" : user.email.split('@')[0];
-            document.getElementById('nomeOnlineGeral').value = n; document.getElementById('displayNomePerfil').innerText = n;
-            iniciarEscutaPedidos();
-        } else { document.getElementById('telaLogin').style.display = 'flex'; document.getElementById('telaInicial').style.display = 'none'; }
+function renderizarMenuSkins() {
+    const lista = document.getElementById('listaSkins'); if(!lista) return; lista.innerHTML = '';
+    skinsDB.forEach(s => {
+        const btn = document.createElement('button');
+        let txt = skinEquipada === s.id ? 'ATIVO' : (s.unlocked ? 'USAR' : 'ABRIR');
+        btn.className = 'btn-menu';
+        btn.style.marginBottom = '10px';
+        btn.innerHTML = `<span style="font-size:1.2rem">${s.x} ${s.o}</span> | ${s.nome} | ${txt}`;
+        btn.onclick = () => { if(s.unlocked) { skinEquipada = s.id; localStorage.setItem('ticTacSkinEquipada', s.id); carregarSkins(); } else { liberarSkin(s.id); } };
+        lista.appendChild(btn);
     });
+}
+function liberarSkin(id) { let s = skinsDB.find(x => x.id === id); if(s) { s.unlocked = true; let u = JSON.parse(localStorage.getItem('ticTacSkinsUnlocked')) || ['default']; u.push(id); localStorage.setItem('ticTacSkinsUnlocked', JSON.stringify(u)); carregarSkins(); mostrarToast("Skin Desbloqueada!"); } }
+function getDisplaySkin(simbolo) { let s = skinsDB.find(x => x.id === skinEquipada); return simbolo === 'X' ? s.x : s.o; }
 
-    function entrarComoConvidado() { auth.signInAnonymously(); }
-    function iniciarEscutaPedidos() {
-        db.collection('users').doc(meuIDOriginal).collection('pedidos').onSnapshot(snap => {
-            const area = document.getElementById('areaPedidos'), lista = document.getElementById('listaPedidosContainer'); lista.innerHTML = '';
-            if(snap.empty) { area.style.display = 'none'; return; }
-            area.style.display = 'block'; document.getElementById('countPedidos').innerText = snap.size;
-            snap.forEach(doc => {
-                const div = document.createElement('div'); div.className = 'pedido-card';
-                div.innerHTML = `<span>${doc.data().nome}</span><button onclick="aceitarPedido('${doc.id}','${doc.data().nome}')">✔️</button>`;
-                lista.appendChild(div);
-            });
+// --- AMIGOS E NUVEM ---
+function iniciarEscutaPedidos() {
+    db.collection('users').doc(meuIDOriginal).collection('pedidos').onSnapshot(snap => {
+        const area = document.getElementById('areaPedidos'), lista = document.getElementById('listaPedidosContainer');
+        lista.innerHTML = '';
+        if(snap.empty) { area.style.display = 'none'; return; }
+        area.style.display = 'block'; document.getElementById('countPedidos').innerText = snap.size;
+        snap.forEach(doc => {
+            const div = document.createElement('div'); div.className = 'pedido-card';
+            div.innerHTML = `<span>${doc.data().nome}</span> <button onclick="aceitarPedido('${doc.id}','${doc.data().nome}')">✔️</button>`;
+            lista.appendChild(div);
         });
-        db.collection('users').doc(meuIDOriginal).collection('aceitos').onSnapshot(snap => {
-            snap.docChanges().forEach(change => { if(change.type === "added") { salvarAmigo(change.doc.id, change.doc.data().nome); mostrarToast(`🤝 ${change.doc.data().nome} ACEITOU!`); db.collection('users').doc(meuIDOriginal).collection('aceitos').doc(change.doc.id).delete(); renderizarAmigos(); } });
-        });
-    }
-
-    function enviarPedidoAmizade() {
-        const id = document.getElementById('inputAddAmigo').value.trim(); const n = document.getElementById('nomeOnlineGeral').value.trim();
-        if(id.length < 5 || id === meuIDOriginal) return mostrarToast("ID INVÁLIDO");
-        db.collection('users').doc(id).collection('pedidos').doc(meuIDOriginal).set({ nome: n, timestamp: firebase.firestore.FieldValue.serverTimestamp() }).then(() => { mostrarToast("PEDIDO ENVIADO!"); document.getElementById('inputAddAmigo').value = ""; });
-    }
-
-    function aceitarPedido(id, n) {
-        salvarAmigo(id, n); db.collection('users').doc(meuIDOriginal).collection('pedidos').doc(id).delete();
-        db.collection('users').doc(id).collection('aceitos').doc(meuIDOriginal).set({ nome: document.getElementById('nomeOnlineGeral').value, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-        renderizarAmigos(); mostrarToast("AMIGO ADICIONADO!");
-    }
-
-    function salvarAmigo(id, n) { let am = JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || []; if(!am.some(x=>x.id===id)) { am.push({id:id, nomeC:n, chat:[]}); localStorage.setItem('ticTacAmigos_v2', JSON.stringify(am)); } }
-    function renderizarAmigos() {
-        const c = document.getElementById('listaDeAmigosContainer'); let am = JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || []; c.innerHTML = am.length ? '' : '<p>LISTA VAZIA</p>';
-        am.forEach(a => { const d = document.createElement('div'); d.className = 'friend-card'; d.innerHTML = `<span>${a.nomeC}</span><button onclick="abrirChat('${a.id}')">💬</button>`; c.appendChild(d); });
-    }
-
-    // --- PEER E CHAT ---
-    function iniciarPeer(id) {
-        peer = new Peer(id);
-        peer.on('connection', c => {
-            c.on('data', d => {
-                if(d.t === 'chat_msg') { 
-                    let am = JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || []; let i = am.findIndex(x=>x.id===d.id);
-                    if(i > -1) { am[i].chat.push({sender:'theirs', msg:d.msg}); localStorage.setItem('ticTacAmigos_v2', JSON.stringify(am)); }
-                    if(currentChatId === d.id) renderizarChat(); else mostrarToast(`💬 ${d.nome}: ${d.msg}`);
-                }
-            });
-        });
-    }
-
-    function abrirChat(id) { currentChatId = id; document.getElementById('modalChat').style.display='flex'; renderizarChat(); }
-    function fecharChat() { document.getElementById('modalChat').style.display='none'; }
-    function renderizarChat() {
-        const c = document.getElementById('chatMsgContainer'); c.innerHTML=''; let a = (JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || []).find(x=>x.id===currentChatId);
-        if(a) a.chat.forEach(m => { const d = document.createElement('div'); d.className = 'msg-bubble '+(m.sender==='mine'?'msg-mine':'msg-theirs'); d.innerText = m.msg; c.appendChild(d); });
-        c.scrollTop = c.scrollHeight;
-    }
-    function enviarMsgChat() {
-        const txt = document.getElementById('chatInput').value.trim(); if(!txt || !currentChatId) return;
-        let t = peer.connect(currentChatId); t.on('open', () => { 
-            t.send({t:'chat_msg', id:meuIDOriginal, nome:document.getElementById('nomeOnlineGeral').value, msg:txt});
-            let am = JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || []; let i = am.findIndex(x=>x.id===currentChatId);
-            if(i > -1) { am[i].chat.push({sender:'mine', msg:txt}); localStorage.setItem('ticTacAmigos_v2', JSON.stringify(am)); }
-            document.getElementById('chatInput').value = ''; renderizarChat(); setTimeout(()=>t.close(), 1000);
-        });
-    }
-
-    // --- LÓGICA DO JOGO (FIX DA IA E NOME) ---
-    function iniciarJogo(m) {
-        resetLocal(); 
-        if(m==='ia') { 
-            contraIA=true; 
-            nomeX = document.getElementById('nomeJogadorIA').value.trim() || "VOCÊ"; 
-            nomeO = "MÁQUINA"; 
-        } else { 
-            contraIA=false; 
-            nomeX = document.getElementById('nomeLocalX').value.trim() || "X"; 
-            nomeO = document.getElementById('nomeLocalO').value.trim() || "O"; 
-        }
-        document.getElementById('telaInicial').style.display='none'; document.getElementById('telaJogo').style.display='flex';
-        document.getElementById('txtNomeX').innerText=nomeX; document.getElementById('txtNomeO').innerText=nomeO;
-        atualizarStatus();
-    }
-
-    function marcar(i, s) {
-        if(estado[i]!=="" || !ativo) return; som(600,0.1);
-        estado[i]=s; const el=document.querySelectorAll('.celula')[i];
-        el.innerText=getDisplaySkin(s); el.classList.add(s==='X'?'x-player':'o-player');
-        checar();
-    }
-
-    function checar() {
-        const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-        let win = null; for(let p of w) if(estado[p[0]]!=="" && estado[p[0]]===estado[p[1]] && estado[p[0]]===estado[p[2]]) win = estado[p[0]];
-        if(win) { ativo=false; document.getElementById('status').innerText=(win==='X'?nomeX:nomeO)+" VENCEU!"; somVitoria(); document.getElementById('btnNovaPartida').style.display='block'; }
-        else if(!estado.includes("")) { ativo=false; document.getElementById('status').innerText="EMPATE!"; document.getElementById('btnNovaPartida').style.display='block'; }
-    }
-
-    function resetLocal() {
-        estado.fill(""); ativo=true; iaPensando=false; jAtual="X"; 
-        document.querySelectorAll('.celula').forEach(c => { c.innerText=""; c.className="celula"; });
-        document.getElementById('btnNovaPartida').style.display='none'; atualizarStatus();
-    }
-
-    function atualizarStatus() { document.getElementById('status').innerText=`VEZ DE ${jAtual==='X'?nomeX:nomeO}`; }
-
-    // --- INTELIGÊNCIA ARTIFICIAL (ALGORITMO MINIMAX ULTRA) ---
-    function jogadaIA() {
-        if(!ativo || !contraIA || jAtual!=='O' || iaPensando) return;
-        iaPensando = true; document.getElementById('status').innerText="IA PENSANDO...";
-        setTimeout(() => {
-            let idx; 
-            if (dificuldadeIA === 'noob') {
-                let v = estado.map((v,i)=>v===""?i:null).filter(v=>v!==null);
-                idx = v[Math.floor(Math.random()*v.length)];
-            } else {
-                idx = minimax(estado, 'O').index;
-            }
-            marcar(idx, 'O'); 
-            if(ativo) { jAtual='X'; atualizarStatus(); }
-            iaPensando = false;
-        }, 600);
-    }
-
-    function minimax(re, jo) {
-        let v = checarVitoriaSimples(re);
-        if(v==='X') return {score:-10}; if(v==='O') return {score:10}; if(!re.includes("")) return {score:0};
-        let movs = [];
-        for(let i=0; i<9; i++) {
-            if(re[i]==="") {
-                let m = {index:i}; re[i]=jo;
-                m.score = minimax(re, jo==='O'?'X':'O').score;
-                re[i]=""; movs.push(m);
-            }
-        }
-        let melhor;
-        if(jo==='O') {
-            let b = -Infinity;
-            for(let i=0; i<movs.length; i++) if(movs[i].score > b) { b=movs[i].score; melhor=i; }
-        } else {
-            let b = Infinity;
-            for(let i=0; i<movs.length; i++) if(movs[i].score < b) { b=movs[i].score; melhor=i; }
-        }
-        return movs[melhor];
-    }
-
-    function checarVitoriaSimples(b) {
-        const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-        for(let p of w) if(b[p[0]]!=="" && b[p[0]]===b[p[1]] && b[p[0]]===b[p[2]]) return b[p[0]];
-        return null;
-    }
-
-    document.querySelectorAll('.celula').forEach(c => c.addEventListener('click', e => { 
-        if(!ativo || online || iaPensando) return;
-        if(estado[e.target.dataset.index] !== "") return;
-        marcar(e.target.dataset.index, jAtual); 
-        if(ativo) { 
-            jAtual = jAtual==='X'?'O':'X'; atualizarStatus(); 
-            if(contraIA) jogadaIA(); 
-        } 
-    }));
-
-    function setDificuldade(d) { dificuldadeIA = d; iniciarJogo('ia'); }
-    function sairDaPartida() { location.reload(); }
-    function abrirAmigosHub() { renderizarAmigos(); mostrarSetup('amigos'); }
-    
-    // Inicializar cores
-    aplicarCoresDaSkin();
-    renderizarMenuSkins();
-</script><script>
-    // --- DESTRAVA DE ÁUDIO (MOBILE FIX) ---
-    const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
-    document.body.addEventListener('click', () => { if (ctxAudio.state === 'suspended') ctxAudio.resume(); });
-
-    // --- SISTEMA DE ÁUDIO E EFEITOS ---
-    const elemMusica = document.getElementById('musicaFundo'); 
-    let musicaAtiva = false;
-
-    function toggleAudio() { 
-        if (musicaAtiva) { 
-            if(elemMusica) elemMusica.pause(); 
-            document.getElementById('iconeSomOn').style.display = 'none'; 
-            document.getElementById('iconeSomOff').style.display = 'block'; 
-        } else { 
-            if(elemMusica) { elemMusica.volume = 0.35; elemMusica.play().catch(e => {}); } 
-            document.getElementById('iconeSomOn').style.display = 'block'; 
-            document.getElementById('iconeSomOff').style.display = 'none'; 
-        } 
-        musicaAtiva = !musicaAtiva; 
-    }
-
-    function som(f, d) { 
-        try { 
-            const o = ctxAudio.createOscillator(); const g = ctxAudio.createGain(); 
-            o.frequency.value = f; g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + d); 
-            o.connect(g); g.connect(ctxAudio.destination); o.start(); o.stop(ctxAudio.currentTime + d); 
-        } catch(e){} 
-    }
-
-    function somVitoria() { 
-        try { 
-            const o = ctxAudio.createOscillator(); const g = ctxAudio.createGain(); 
-            o.type = 'square'; o.frequency.setValueAtTime(150, ctxAudio.currentTime); 
-            o.frequency.exponentialRampToValueAtTime(800, ctxAudio.currentTime + 0.4); 
-            g.gain.setValueAtTime(0, ctxAudio.currentTime); g.gain.linearRampToValueAtTime(0.15, ctxAudio.currentTime + 0.1); 
-            g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + 0.6); 
-            o.connect(g); g.connect(ctxAudio.destination); o.start(); o.stop(ctxAudio.currentTime + 0.6); 
-        } catch(e){} 
-    }
-
-    // --- CONFIGURAÇÃO FIREBASE ---
-    const firebaseConfig = {
-        apiKey: "AIzaSyDv64s-6JctziIGcyDfogeVJHnvGf6pDRc",
-        authDomain: "jogo-da-velha-000.firebaseapp.com",
-        projectId: "jogo-da-velha-000",
-        storageBucket: "jogo-da-velha-000.firebasestorage.app",
-        messagingSenderId: "175809267928",
-        appId: "1:175809267928:web:7d18bbd870a82482daafad"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    // --- VARIÁVEIS DE ESTADO ---
-    let meuIDOriginal = "", peer, connGame = null, online = false, minhaVez = false, meuSimbolo = "X";
-    let estado = ["","","","","","","","",""], ativo = true, pX = 0, pO = 0, nomeX = "X", nomeO = "O";
-    let jAtual = "X", quemComeca = "X", contraIA = false, dificuldadeIA = 'ultra', iaPensando = false;
-    let currentChatId = null, buscandoGlobal = false;
-
-    // --- SISTEMA DE SKINS (LOJA COMPLETA) ---
-    const skinsDB = [
-        { id: 'default', nome: 'Clássico Neon', x: 'X', o: 'O', corX: '#ff2a6d', corO: '#05d9e8', unlocked: true },
-        { id: 'lapis', nome: 'Material Escolar', x: '✏️', o: '🍩', corX: '#f1c40f', corO: '#e67e22', unlocked: false },
-        { id: 'medieval', nome: 'Batalha Medieval', x: '⚔️', o: '🛡️', corX: '#bdc3c7', corO: '#f39c12', unlocked: false },
-        { id: 'galaxia', nome: 'Cosmos', x: '🪐', o: '⭐', corX: '#9d4edd', corO: '#00ff7f', unlocked: false },
-        { id: 'monstros', nome: 'Assustador', x: '🦇', o: '🎃', corX: '#2ecc71', corO: '#8e44ad', unlocked: false }
-    ];
-    let skinEquipada = localStorage.getItem('ticTacSkinEquipada') || 'default';
-
-    function aplicarCoresDaSkin() { 
-        let s = skinsDB.find(x => x.id === skinEquipada) || skinsDB[0]; 
-        document.documentElement.style.setProperty('--neon-red', s.corX); 
-        document.documentElement.style.setProperty('--neon-cyan', s.corO); 
-    }
-
-    function renderizarMenuSkins() {
-        const lista = document.getElementById('listaSkins'); if(!lista) return; lista.innerHTML = '';
-        const salvas = JSON.parse(localStorage.getItem('ticTacSkinsUnlocked')) || ['default'];
-        skinsDB.forEach(s => {
-            if (salvas.includes(s.id)) s.unlocked = true;
-            const btn = document.createElement('button');
-            let txt = skinEquipada === s.id ? 'ATIVO' : (s.unlocked ? 'USAR' : 'ABRIR');
-            btn.className = "btn-skin-item";
-            btn.style.cssText = `width:100%; border:2px solid ${s.unlocked ? s.corX : '#444'}; background:rgba(0,0,0,0.5); color:white; padding:15px; border-radius:15px; margin-bottom:10px; display:flex; align-items:center; cursor:pointer;`;
-            btn.innerHTML = `<span style="font-size:1.5rem; margin-right:15px;">${s.x}${s.o}</span><span style="flex-grow:1; text-align:left;">${s.nome}</span><small>${txt}</small>`;
-            btn.onclick = () => {
-                if(s.unlocked) { skinEquipada = s.id; localStorage.setItem('ticTacSkinEquipada', s.id); aplicarCoresDaSkin(); renderizarMenuSkins(); som(800,0.1); }
-                else { s.unlocked = true; salvas.push(s.id); localStorage.setItem('ticTacSkinsUnlocked', JSON.stringify(salvas)); skinEquipada = s.id; localStorage.setItem('ticTacSkinEquipada', s.id); aplicarCoresDaSkin(); renderizarMenuSkins(); somVitoria(); mostrarToast("Skin Desbloqueada!"); }
-            };
-            lista.appendChild(btn);
-        });
-    }
-
-    // --- BOLHA DE NOTIFICAÇÃO ---
-    function mostrarToast(msg) {
-        const t = document.getElementById('toastNotificacao'); const tm = document.getElementById('toastMsg');
-        if(!t || !tm) return; tm.innerText = msg; t.classList.add('toast-visivel');
-        setTimeout(() => t.classList.remove('toast-visivel'), 3500);
-    }
-
-    // --- NAVEGAÇÃO (FIX DO ESTICAMENTO) ---
-    function mostrarSetup(m) {
-        const ids = ['botoesMenu', 'setupLocal', 'setupOnlineMenu', 'setupAmigos', 'setupGlobal', 'setupIA', 'setupSkins'];
-        ids.forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; });
-        const alvo = { local:'setupLocal', onlineMenu:'setupOnlineMenu', amigos:'setupAmigos', global:'setupGlobal', ia:'setupIA', skins:'setupSkins' }[m];
-        if(alvo) document.getElementById(alvo).style.display = 'flex'; else document.getElementById('botoesMenu').style.display = 'flex';
-    }
-    function voltarMenu() { mostrarSetup(''); }
-
-    // --- LOGIN E NUVEM ---
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            document.getElementById('telaLogin').style.display = 'none'; document.getElementById('telaInicial').style.display = 'flex';
-            let hash = 0; for (let i = 0; i < user.uid.length; i++) hash = user.uid.charCodeAt(i) + ((hash << 5) - hash);
-            meuIDOriginal = Math.abs(hash % 90000 + 10000).toString(); document.getElementById('meuId').innerText = meuIDOriginal;
-            if(peer) peer.destroy(); iniciarPeer(meuIDOriginal);
-            let n = user.isAnonymous ? "Convidado" : user.email.split('@')[0];
-            document.getElementById('nomeOnlineGeral').value = n; document.getElementById('displayNomePerfil').innerText = n;
-            iniciarEscutaPedidos();
-        } else { document.getElementById('telaLogin').style.display = 'flex'; document.getElementById('telaInicial').style.display = 'none'; }
     });
-
-    function entrarComoConvidado() { auth.signInAnonymously(); }
-    function iniciarEscutaPedidos() {
-        db.collection('users').doc(meuIDOriginal).collection('pedidos').onSnapshot(snap => {
-            const area = document.getElementById('areaPedidos'), lista = document.getElementById('listaPedidosContainer'); lista.innerHTML = '';
-            if(snap.empty) { area.style.display = 'none'; return; }
-            area.style.display = 'block'; document.getElementById('countPedidos').innerText = snap.size;
-            snap.forEach(doc => {
-                const div = document.createElement('div'); div.className = 'pedido-card';
-                div.innerHTML = `<span>${doc.data().nome}</span><button onclick="aceitarPedido('${doc.id}','${doc.data().nome}')">✔️</button>`;
-                lista.appendChild(div);
-            });
-        });
-        db.collection('users').doc(meuIDOriginal).collection('aceitos').onSnapshot(snap => {
-            snap.docChanges().forEach(change => { if(change.type === "added") { salvarAmigo(change.doc.id, change.doc.data().nome); mostrarToast(`🤝 ${change.doc.data().nome} ACEITOU!`); db.collection('users').doc(meuIDOriginal).collection('aceitos').doc(change.doc.id).delete(); renderizarAmigos(); } });
-        });
-    }
-
-    function enviarPedidoAmizade() {
-        const id = document.getElementById('inputAddAmigo').value.trim(); const n = document.getElementById('nomeOnlineGeral').value.trim();
-        if(id.length < 5 || id === meuIDOriginal) return mostrarToast("ID INVÁLIDO");
-        db.collection('users').doc(id).collection('pedidos').doc(meuIDOriginal).set({ nome: n, timestamp: firebase.firestore.FieldValue.serverTimestamp() }).then(() => { mostrarToast("PEDIDO ENVIADO!"); document.getElementById('inputAddAmigo').value = ""; });
-    }
-
-    function aceitarPedido(id, n) {
-        salvarAmigo(id, n); db.collection('users').doc(meuIDOriginal).collection('pedidos').doc(id).delete();
-        db.collection('users').doc(id).collection('aceitos').doc(meuIDOriginal).set({ nome: document.getElementById('nomeOnlineGeral').value, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-        renderizarAmigos(); mostrarToast("AMIGO ADICIONADO!");
-    }
-
-    function salvarAmigo(id, n) { let am = JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || []; if(!am.some(x=>x.id===id)) { am.push({id:id, nomeC:n, chat:[]}); localStorage.setItem('ticTacAmigos_v2', JSON.stringify(am)); } }
-    function renderizarAmigos() {
-        const c = document.getElementById('listaDeAmigosContainer'); let am = JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || []; c.innerHTML = am.length ? '' : '<p>LISTA VAZIA</p>';
-        am.forEach(a => { const d = document.createElement('div'); d.className = 'friend-card'; d.innerHTML = `<span>${a.nomeC}</span><button onclick="abrirChat('${a.id}')">💬</button>`; c.appendChild(d); });
-    }
-
-    // --- PEER E CHAT ---
-    function iniciarPeer(id) {
-        peer = new Peer(id);
-        peer.on('connection', c => {
-            c.on('data', d => {
-                if(d.t === 'chat_msg') { 
-                    let am = JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || []; let i = am.findIndex(x=>x.id===d.id);
-                    if(i > -1) { am[i].chat.push({sender:'theirs', msg:d.msg}); localStorage.setItem('ticTacAmigos_v2', JSON.stringify(am)); }
-                    if(currentChatId === d.id) renderizarChat(); else mostrarToast(`💬 ${d.nome}: ${d.msg}`);
-                }
-            });
-        });
-    }
-
-    function abrirChat(id) { currentChatId = id; document.getElementById('modalChat').style.display='flex'; renderizarChat(); }
-    function fecharChat() { document.getElementById('modalChat').style.display='none'; }
-    function renderizarChat() {
-        const c = document.getElementById('chatMsgContainer'); c.innerHTML=''; let a = (JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || []).find(x=>x.id===currentChatId);
-        if(a) a.chat.forEach(m => { const d = document.createElement('div'); d.className = 'msg-bubble '+(m.sender==='mine'?'msg-mine':'msg-theirs'); d.innerText = m.msg; c.appendChild(d); });
-        c.scrollTop = c.scrollHeight;
-    }
-    function enviarMsgChat() {
-        const txt = document.getElementById('chatInput').value.trim(); if(!txt || !currentChatId) return;
-        let t = peer.connect(currentChatId); t.on('open', () => { 
-            t.send({t:'chat_msg', id:meuIDOriginal, nome:document.getElementById('nomeOnlineGeral').value, msg:txt});
-            let am = JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || []; let i = am.findIndex(x=>x.id===currentChatId);
-            if(i > -1) { am[i].chat.push({sender:'mine', msg:txt}); localStorage.setItem('ticTacAmigos_v2', JSON.stringify(am)); }
-            document.getElementById('chatInput').value = ''; renderizarChat(); setTimeout(()=>t.close(), 1000);
-        });
-    }
-
-    // --- LÓGICA DO JOGO (FIX DA IA E NOME) ---
-    function iniciarJogo(m) {
-        resetLocal(); 
-        if(m==='ia') { 
-            contraIA=true; 
-            nomeX = document.getElementById('nomeJogadorIA').value.trim() || "VOCÊ"; 
-            nomeO = "MÁQUINA"; 
-        } else { 
-            contraIA=false; 
-            nomeX = document.getElementById('nomeLocalX').value.trim() || "X"; 
-            nomeO = document.getElementById('nomeLocalO').value.trim() || "O"; 
-        }
-        document.getElementById('telaInicial').style.display='none'; document.getElementById('telaJogo').style.display='flex';
-        document.getElementById('txtNomeX').innerText=nomeX; document.getElementById('txtNomeO').innerText=nomeO;
-        atualizarStatus();
-    }
-
-    function marcar(i, s) {
-        if(estado[i]!=="" || !ativo) return; som(600,0.1);
-        estado[i]=s; const el=document.querySelectorAll('.celula')[i];
-        el.innerText=getDisplaySkin(s); el.classList.add(s==='X'?'x-player':'o-player');
-        checar();
-    }
-
-    function checar() {
-        const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-        let win = null; for(let p of w) if(estado[p[0]]!=="" && estado[p[0]]===estado[p[1]] && estado[p[0]]===estado[p[2]]) win = estado[p[0]];
-        if(win) { ativo=false; document.getElementById('status').innerText=(win==='X'?nomeX:nomeO)+" VENCEU!"; somVitoria(); document.getElementById('btnNovaPartida').style.display='block'; }
-        else if(!estado.includes("")) { ativo=false; document.getElementById('status').innerText="EMPATE!"; document.getElementById('btnNovaPartida').style.display='block'; }
-    }
-
-    function resetLocal() {
-        estado.fill(""); ativo=true; iaPensando=false; jAtual="X"; 
-        document.querySelectorAll('.celula').forEach(c => { c.innerText=""; c.className="celula"; });
-        document.getElementById('btnNovaPartida').style.display='none'; atualizarStatus();
-    }
-
-    function atualizarStatus() { document.getElementById('status').innerText=`VEZ DE ${jAtual==='X'?nomeX:nomeO}`; }
-
-    // --- INTELIGÊNCIA ARTIFICIAL (ALGORITMO MINIMAX ULTRA) ---
-    function jogadaIA() {
-        if(!ativo || !contraIA || jAtual!=='O' || iaPensando) return;
-        iaPensando = true; document.getElementById('status').innerText="IA PENSANDO...";
-        setTimeout(() => {
-            let idx; 
-            if (dificuldadeIA === 'noob') {
-                let v = estado.map((v,i)=>v===""?i:null).filter(v=>v!==null);
-                idx = v[Math.floor(Math.random()*v.length)];
-            } else {
-                idx = minimax(estado, 'O').index;
-            }
-            marcar(idx, 'O'); 
-            if(ativo) { jAtual='X'; atualizarStatus(); }
-            iaPensando = false;
-        }, 600);
-    }
-
-    function minimax(re, jo) {
-        let v = checarVitoriaSimples(re);
-        if(v==='X') return {score:-10}; if(v==='O') return {score:10}; if(!re.includes("")) return {score:0};
-        let movs = [];
-        for(let i=0; i<9; i++) {
-            if(re[i]==="") {
-                let m = {index:i}; re[i]=jo;
-                m.score = minimax(re, jo==='O'?'X':'O').score;
-                re[i]=""; movs.push(m);
-            }
-        }
-        let melhor;
-        if(jo==='O') {
-            let b = -Infinity;
-            for(let i=0; i<movs.length; i++) if(movs[i].score > b) { b=movs[i].score; melhor=i; }
-        } else {
-            let b = Infinity;
-            for(let i=0; i<movs.length; i++) if(movs[i].score < b) { b=movs[i].score; melhor=i; }
-        }
-        return movs[melhor];
-    }
-
-    function checarVitoriaSimples(b) {
-        const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-        for(let p of w) if(b[p[0]]!=="" && b[p[0]]===b[p[1]] && b[p[0]]===b[p[2]]) return b[p[0]];
-        return null;
-    }
-
-    document.querySelectorAll('.celula').forEach(c => c.addEventListener('click', e => { 
-        if(!ativo || online || iaPensando) return;
-        if(estado[e.target.dataset.index] !== "") return;
-        marcar(e.target.dataset.index, jAtual); 
-        if(ativo) { 
-            jAtual = jAtual==='X'?'O':'X'; atualizarStatus(); 
-            if(contraIA) jogadaIA(); 
-        } 
-    }));
-
-    function setDificuldade(d) { dificuldadeIA = d; iniciarJogo('ia'); }
-    function sairDaPartida() { location.reload(); }
-    function abrirAmigosHub() { renderizarAmigos(); mostrarSetup('amigos'); }
-    
-    // Inicializar cores
-    aplicarCoresDaSkin();
-    renderizarMenuSkins();
-</script><script>
-    // --- DESTRAVA DE ÁUDIO (MOBILE FIX) ---
-    const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
-    document.body.addEventListener('click', () => { if (ctxAudio.state === 'suspended') ctxAudio.resume(); });
-
-    // --- SISTEMA DE ÁUDIO E EFEITOS ---
-    const elemMusica = document.getElementById('musicaFundo'); 
-    let musicaAtiva = false;
-
-    function toggleAudio() { 
-        if (musicaAtiva) { 
-            if(elemMusica) elemMusica.pause(); 
-            document.getElementById('iconeSomOn').style.display = 'none'; 
-            document.getElementById('iconeSomOff').style.display = 'block'; 
-        } else { 
-            if(elemMusica) { elemMusica.volume = 0.35; elemMusica.play().catch(e => {}); } 
-            document.getElementById('iconeSomOn').style.display = 'block'; 
-            document.getElementById('iconeSomOff').style.display = 'none'; 
-        } 
-        musicaAtiva = !musicaAtiva; 
-    }
-
-    function som(f, d) { 
-        try { 
-            const o = ctxAudio.createOscillator(); const g = ctxAudio.createGain(); 
-            o.frequency.value = f; g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + d); 
-            o.connect(g); g.connect(ctxAudio.destination); o.start(); o.stop(ctxAudio.currentTime + d); 
-        } catch(e){} 
-    }
-
-    function somVitoria() { 
-        try { 
-            const o = ctxAudio.createOscillator(); const g = ctxAudio.createGain(); 
-            o.type = 'square'; o.frequency.setValueAtTime(150, ctxAudio.currentTime); 
-            o.frequency.exponentialRampToValueAtTime(800, ctxAudio.currentTime + 0.4); 
-            g.gain.setValueAtTime(0, ctxAudio.currentTime); g.gain.linearRampToValueAtTime(0.15, ctxAudio.currentTime + 0.1); 
-            g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + 0.6); 
-            o.connect(g); g.connect(ctxAudio.destination); o.start(); o.stop(ctxAudio.currentTime + 0.6); 
-        } catch(e){} 
-    }
-
-    // --- CONFIGURAÇÃO FIREBASE ---
-    const firebaseConfig = {
-        apiKey: "AIzaSyDv64s-6JctziIGcyDfogeVJHnvGf6pDRc",
-        authDomain: "jogo-da-velha-000.firebaseapp.com",
-        projectId: "jogo-da-velha-000",
-        storageBucket: "jogo-da-velha-000.firebasestorage.app",
-        messagingSenderId: "175809267928",
-        appId: "1:175809267928:web:7d18bbd870a82482daafad"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    // --- VARIÁVEIS DE ESTADO ---
-    let meuIDOriginal = "", peer, connGame = null, online = false, minhaVez = false, meuSimbolo = "X";
-    let estado = ["","","","","","","","",""], ativo = true, pX = 0, pO = 0, nomeX = "X", nomeO = "O";
-    let jAtual = "X", quemComeca = "X", contraIA = false, dificuldadeIA = 'ultra', iaPensando = false;
-    let currentChatId = null, buscandoGlobal = false;
-
-    // --- SISTEMA DE SKINS (LOJA COMPLETA) ---
-    const skinsDB = [
-        { id: 'default', nome: 'Clássico Neon', x: 'X', o: 'O', corX: '#ff2a6d', corO: '#05d9e8', unlocked: true },
-        { id: 'lapis', nome: 'Material Escolar', x: '✏️', o: '🍩', corX: '#f1c40f', corO: '#e67e22', unlocked: false },
-        { id: 'medieval', nome: 'Batalha Medieval', x: '⚔️', o: '🛡️', corX: '#bdc3c7', corO: '#f39c12', unlocked: false },
-        { id: 'galaxia', nome: 'Cosmos', x: '🪐', o: '⭐', corX: '#9d4edd', corO: '#00ff7f', unlocked: false },
-        { id: 'monstros', nome: 'Assustador', x: '🦇', o: '🎃', corX: '#2ecc71', corO: '#8e44ad', unlocked: false }
-    ];
-    let skinEquipada = localStorage.getItem('ticTacSkinEquipada') || 'default';
-
-    function aplicarCoresDaSkin() { 
-        let s = skinsDB.find(x => x.id === skinEquipada) || skinsDB[0]; 
-        document.documentElement.style.setProperty('--neon-red', s.corX); 
-        document.documentElement.style.setProperty('--neon-cyan', s.corO); 
-    }
-
-    function renderizarMenuSkins() {
-        const lista = document.getElementById('listaSkins'); if(!lista) return; lista.innerHTML = '';
-        const salvas = JSON.parse(localStorage.getItem('ticTacSkinsUnlocked')) || ['default'];
-        skinsDB.forEach(s => {
-            if (salvas.includes(s.id)) s.unlocked = true;
-            const btn = document.createElement('button');
-            let txt = skinEquipada === s.id ? 'ATIVO' : (s.unlocked ? 'USAR' : 'ABRIR');
-            btn.className = "btn-skin-item";
-            btn.style.cssText = `width:100%; border:2px solid ${s.unlocked ? s.corX : '#444'}; background:rgba(0,0,0,0.5); color:white; padding:15px; border-radius:15px; margin-bottom:10px; display:flex; align-items:center; cursor:pointer;`;
-            btn.innerHTML = `<span style="font-size:1.5rem; margin-right:15px;">${s.x}${s.o}</span><span style="flex-grow:1; text-align:left;">${s.nome}</span><small>${txt}</small>`;
-            btn.onclick = () => {
-                if(s.unlocked) { skinEquipada = s.id; localStorage.setItem('ticTacSkinEquipada', s.id); aplicarCoresDaSkin(); renderizarMenuSkins(); som(800,0.1); }
-                else { s.unlocked = true; salvas.push(s.id); localStorage.setItem('ticTacSkinsUnlocked', JSON.stringify(salvas)); skinEquipada = s.id; localStorage.setItem('ticTacSkinEquipada', s.id); aplicarCoresDaSkin(); renderizarMenuSkins(); somVitoria(); mostrarToast("Skin Desbloqueada!"); }
-            };
-            lista.appendChild(btn);
-        });
-    }
-
-    // --- BOLHA DE NOTIFICAÇÃO ---
-    function mostrarToast(msg) {
-        const t = document.getElementById('toastNotificacao'); const tm = document.getElementById('toastMsg');
-        if(!t || !tm) return; tm.innerText = msg; t.classList.add('toast-visivel');
-        setTimeout(() => t.classList.remove('toast-visivel'), 3500);
-    }
-
-    // --- NAVEGAÇÃO (FIX DO ESTICAMENTO) ---
-    function mostrarSetup(m) {
-        const ids = ['botoesMenu', 'setupLocal', 'setupOnlineMenu', 'setupAmigos', 'setupGlobal', 'setupIA', 'setupSkins'];
-        ids.forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; });
-        const alvo = { local:'setupLocal', onlineMenu:'setupOnlineMenu', amigos:'setupAmigos', global:'setupGlobal', ia:'setupIA', skins:'setupSkins' }[m];
-        if(alvo) document.getElementById(alvo).style.display = 'flex'; else document.getElementById('botoesMenu').style.display = 'flex';
-    }
-    function voltarMenu() { mostrarSetup(''); }
-
-    // --- LOGIN E NUVEM ---
-    auth.onAuthStateChanged(user => {
-        if (user) {
-            document.getElementById('telaLogin').style.display = 'none'; document.getElementById('telaInicial').style.display = 'flex';
-            let hash = 0; for (let i = 0; i < user.uid.length; i++) hash = user.uid.charCodeAt(i) + ((hash << 5) - hash);
-            meuIDOriginal = Math.abs(hash % 90000 + 10000).toString(); document.getElementById('meuId').innerText = meuIDOriginal;
-            if(peer) peer.destroy(); iniciarPeer(meuIDOriginal);
-            let n = user.isAnonymous ? "Convidado" : user.email.split('@')[0];
-            document.getElementById('nomeOnlineGeral').value = n; document.getElementById('displayNomePerfil').innerText = n;
-            iniciarEscutaPedidos();
-        } else { document.getElementById('telaLogin').style.display = 'flex'; document.getElementById('telaInicial').style.display = 'none'; }
+    db.collection('users').doc(meuIDOriginal).collection('aceitos').onSnapshot(snap => {
+        snap.docChanges().forEach(c => { if(c.type === "added") { salvarAmigo(c.doc.id, c.doc.data().nome); mostrarToast("Novo Amigo Adicionado!"); db.collection('users').doc(meuIDOriginal).collection('aceitos').doc(c.doc.id).delete(); renderizarAmigos(); } });
     });
+}
 
-    function entrarComoConvidado() { auth.signInAnonymously(); }
-    function iniciarEscutaPedidos() {
-        db.collection('users').doc(meuIDOriginal).collection('pedidos').onSnapshot(snap => {
-            const area = document.getElementById('areaPedidos'), lista = document.getElementById('listaPedidosContainer'); lista.innerHTML = '';
-            if(snap.empty) { area.style.display = 'none'; return; }
-            area.style.display = 'block'; document.getElementById('countPedidos').innerText = snap.size;
-            snap.forEach(doc => {
-                const div = document.createElement('div'); div.className = 'pedido-card';
-                div.innerHTML = `<span>${doc.data().nome}</span><button onclick="aceitarPedido('${doc.id}','${doc.data().nome}')">✔️</button>`;
-                lista.appendChild(div);
-            });
-        });
-        db.collection('users').doc(meuIDOriginal).collection('aceitos').onSnapshot(snap => {
-            snap.docChanges().forEach(change => { if(change.type === "added") { salvarAmigo(change.doc.id, change.doc.data().nome); mostrarToast(`🤝 ${change.doc.data().nome} ACEITOU!`); db.collection('users').doc(meuIDOriginal).collection('aceitos').doc(change.doc.id).delete(); renderizarAmigos(); } });
-        });
-    }
+function enviarPedidoAmizade() {
+    const id = document.getElementById('inputAddAmigo').value.trim();
+    if(!id || id === meuIDOriginal) return mostrarToast("ID INVÁLIDO");
+    db.collection('users').doc(id).collection('pedidos').doc(meuIDOriginal).set({ nome: document.getElementById('nomeOnlineGeral').value }).then(() => mostrarToast("PEDIDO ENVIADO!"));
+}
 
-    function enviarPedidoAmizade() {
-        const id = document.getElementById('inputAddAmigo').value.trim(); const n = document.getElementById('nomeOnlineGeral').value.trim();
-        if(id.length < 5 || id === meuIDOriginal) return mostrarToast("ID INVÁLIDO");
-        db.collection('users').doc(id).collection('pedidos').doc(meuIDOriginal).set({ nome: n, timestamp: firebase.firestore.FieldValue.serverTimestamp() }).then(() => { mostrarToast("PEDIDO ENVIADO!"); document.getElementById('inputAddAmigo').value = ""; });
-    }
+function aceitarPedido(id, nome) {
+    salvarAmigo(id, nome);
+    db.collection('users').doc(meuIDOriginal).collection('pedidos').doc(id).delete();
+    db.collection('users').doc(id).collection('aceitos').doc(meuIDOriginal).set({ nome: document.getElementById('nomeOnlineGeral').value });
+    renderizarAmigos(); mostrarToast("AMIZADE ACEITA!");
+}
 
-    function aceitarPedido(id, n) {
-        salvarAmigo(id, n); db.collection('users').doc(meuIDOriginal).collection('pedidos').doc(id).delete();
-        db.collection('users').doc(id).collection('aceitos').doc(meuIDOriginal).set({ nome: document.getElementById('nomeOnlineGeral').value, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-        renderizarAmigos(); mostrarToast("AMIGO ADICIONADO!");
-    }
+function salvarAmigo(id, nome) {
+    let am = JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || [];
+    if(!am.some(x => x.id === id)) { am.push({id, nomeC: nome, chat: []}); localStorage.setItem('ticTacAmigos_v2', JSON.stringify(am)); }
+}
 
-    function salvarAmigo(id, n) { let am = JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || []; if(!am.some(x=>x.id===id)) { am.push({id:id, nomeC:n, chat:[]}); localStorage.setItem('ticTacAmigos_v2', JSON.stringify(am)); } }
-    function renderizarAmigos() {
-        const c = document.getElementById('listaDeAmigosContainer'); let am = JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || []; c.innerHTML = am.length ? '' : '<p>LISTA VAZIA</p>';
-        am.forEach(a => { const d = document.createElement('div'); d.className = 'friend-card'; d.innerHTML = `<span>${a.nomeC}</span><button onclick="abrirChat('${a.id}')">💬</button>`; c.appendChild(d); });
-    }
+function renderizarAmigos() {
+    const c = document.getElementById('listaDeAmigosContainer'); let am = JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || [];
+    c.innerHTML = am.length ? '' : 'Vazio';
+    am.forEach(a => {
+        const d = document.createElement('div'); d.className = 'friend-card';
+        d.innerHTML = `<span>${a.nomeC}</span> <button onclick="abrirChat('${a.id}')">💬</button>`;
+        c.appendChild(d);
+    });
+}
 
-    // --- PEER E CHAT ---
-    function iniciarPeer(id) {
-        peer = new Peer(id);
-        peer.on('connection', c => {
-            c.on('data', d => {
-                if(d.t === 'chat_msg') { 
-                    let am = JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || []; let i = am.findIndex(x=>x.id===d.id);
-                    if(i > -1) { am[i].chat.push({sender:'theirs', msg:d.msg}); localStorage.setItem('ticTacAmigos_v2', JSON.stringify(am)); }
-                    if(currentChatId === d.id) renderizarChat(); else mostrarToast(`💬 ${d.nome}: ${d.msg}`);
-                }
-            });
-        });
-    }
+// --- JOGO ---
+function iniciarJogo(m) {
+    resetLocal();
+    if(m==='ia') { contraIA=true; nomeX=document.getElementById('nomeJogadorIA').value||"EU"; nomeO="MÁQUINA"; }
+    else if(m==='local') { contraIA=false; nomeX=document.getElementById('nomeLocalX').value||"X"; nomeO=document.getElementById('nomeLocalO').value||"O"; }
+    document.getElementById('telaInicial').style.display='none'; document.getElementById('telaJogo').style.display='flex';
+    document.getElementById('txtNomeX').innerText=nomeX; document.getElementById('txtNomeO').innerText=nomeO;
+}
 
-    function abrirChat(id) { currentChatId = id; document.getElementById('modalChat').style.display='flex'; renderizarChat(); }
-    function fecharChat() { document.getElementById('modalChat').style.display='none'; }
-    function renderizarChat() {
-        const c = document.getElementById('chatMsgContainer'); c.innerHTML=''; let a = (JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || []).find(x=>x.id===currentChatId);
-        if(a) a.chat.forEach(m => { const d = document.createElement('div'); d.className = 'msg-bubble '+(m.sender==='mine'?'msg-mine':'msg-theirs'); d.innerText = m.msg; c.appendChild(d); });
-        c.scrollTop = c.scrollHeight;
-    }
-    function enviarMsgChat() {
-        const txt = document.getElementById('chatInput').value.trim(); if(!txt || !currentChatId) return;
-        let t = peer.connect(currentChatId); t.on('open', () => { 
-            t.send({t:'chat_msg', id:meuIDOriginal, nome:document.getElementById('nomeOnlineGeral').value, msg:txt});
-            let am = JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || []; let i = am.findIndex(x=>x.id===currentChatId);
-            if(i > -1) { am[i].chat.push({sender:'mine', msg:txt}); localStorage.setItem('ticTacAmigos_v2', JSON.stringify(am)); }
-            document.getElementById('chatInput').value = ''; renderizarChat(); setTimeout(()=>t.close(), 1000);
-        });
-    }
+document.querySelectorAll('.celula').forEach(c => {
+    c.addEventListener('click', e => {
+        const i = e.target.dataset.index;
+        if(estado[i] !== "" || !ativo || iaPensando) return;
+        marcar(i, jAtual);
+        jAtual = jAtual === 'X' ? 'O' : 'X'; document.getElementById('status').innerText = `VEZ DE ${jAtual==='X'?nomeX:nomeO}`;
+        if(contraIA && ativo && jAtual === 'O') jogadaIA();
+    });
+});
 
-    // --- LÓGICA DO JOGO (FIX DA IA E NOME) ---
-    function iniciarJogo(m) {
-        resetLocal(); 
-        if(m==='ia') { 
-            contraIA=true; 
-            nomeX = document.getElementById('nomeJogadorIA').value.trim() || "VOCÊ"; 
-            nomeO = "MÁQUINA"; 
-        } else { 
-            contraIA=false; 
-            nomeX = document.getElementById('nomeLocalX').value.trim() || "X"; 
-            nomeO = document.getElementById('nomeLocalO').value.trim() || "O"; 
+function marcar(i, s) { 
+    estado[i] = s; const el = document.querySelectorAll('.celula')[i];
+    el.innerText = getDisplaySkin(s); el.classList.add(s==='X'?'x-player':'o-player');
+    checarVitoria();
+}
+
+function checarVitoria() {
+    const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+    for(let p of w) {
+        if(estado[p[0]]!=="" && estado[p[0]]===estado[p[1]] && estado[p[0]]===estado[p[2]]) {
+            ativo=false; document.getElementById('status').innerText = (estado[p[0]]==='X'?nomeX:nomeO) + " VENCEU!";
+            document.getElementById('btnNovaPartida').style.display='block'; return;
         }
-        document.getElementById('telaInicial').style.display='none'; document.getElementById('telaJogo').style.display='flex';
-        document.getElementById('txtNomeX').innerText=nomeX; document.getElementById('txtNomeO').innerText=nomeO;
-        atualizarStatus();
     }
+    if(!estado.includes("")) { ativo=false; document.getElementById('status').innerText="EMPATE!"; document.getElementById('btnNovaPartida').style.display='block'; }
+}
 
-    function marcar(i, s) {
-        if(estado[i]!=="" || !ativo) return; som(600,0.1);
-        estado[i]=s; const el=document.querySelectorAll('.celula')[i];
-        el.innerText=getDisplaySkin(s); el.classList.add(s==='X'?'x-player':'o-player');
-        checar();
-    }
+function resetLocal() { 
+    estado.fill(""); ativo=true; iaPensando=false; jAtual="X";
+    document.querySelectorAll('.celula').forEach(c => { c.innerText=""; c.className="celula"; });
+    document.getElementById('btnNovaPartida').style.display='none';
+}
 
-    function checar() {
-        const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-        let win = null; for(let p of w) if(estado[p[0]]!=="" && estado[p[0]]===estado[p[1]] && estado[p[0]]===estado[p[2]]) win = estado[p[0]];
-        if(win) { ativo=false; document.getElementById('status').innerText=(win==='X'?nomeX:nomeO)+" VENCEU!"; somVitoria(); document.getElementById('btnNovaPartida').style.display='block'; }
-        else if(!estado.includes("")) { ativo=false; document.getElementById('status').innerText="EMPATE!"; document.getElementById('btnNovaPartida').style.display='block'; }
-    }
+function jogadaIA() {
+    iaPensando = true; document.getElementById('status').innerText="PENSANDO...";
+    setTimeout(() => {
+        let vazios = estado.map((v,i)=>v===""?i:null).filter(v=>v!==null);
+        let idx = vazios[Math.floor(Math.random()*vazios.length)]; // IA Simples para teste
+        marcar(idx, 'O'); if(ativo) { jAtual='X'; document.getElementById('status').innerText=`VEZ DE ${nomeX}`; }
+        iaPensando = false;
+    }, 600);
+}
 
-    function resetLocal() {
-        estado.fill(""); ativo=true; iaPensando=false; jAtual="X"; 
-        document.querySelectorAll('.celula').forEach(c => { c.innerText=""; c.className="celula"; });
-        document.getElementById('btnNovaPartida').style.display='none'; atualizarStatus();
-    }
-
-    function atualizarStatus() { document.getElementById('status').innerText=`VEZ DE ${jAtual==='X'?nomeX:nomeO}`; }
-
-    // --- INTELIGÊNCIA ARTIFICIAL (ALGORITMO MINIMAX ULTRA) ---
-    function jogadaIA() {
-        if(!ativo || !contraIA || jAtual!=='O' || iaPensando) return;
-        iaPensando = true; document.getElementById('status').innerText="IA PENSANDO...";
-        setTimeout(() => {
-            let idx; 
-            if (dificuldadeIA === 'noob') {
-                let v = estado.map((v,i)=>v===""?i:null).filter(v=>v!==null);
-                idx = v[Math.floor(Math.random()*v.length)];
-            } else {
-                idx = minimax(estado, 'O').index;
-            }
-            marcar(idx, 'O'); 
-            if(ativo) { jAtual='X'; atualizarStatus(); }
-            iaPensando = false;
-        }, 600);
-    }
-
-    function minimax(re, jo) {
-        let v = checarVitoriaSimples(re);
-        if(v==='X') return {score:-10}; if(v==='O') return {score:10}; if(!re.includes("")) return {score:0};
-        let movs = [];
-        for(let i=0; i<9; i++) {
-            if(re[i]==="") {
-                let m = {index:i}; re[i]=jo;
-                m.score = minimax(re, jo==='O'?'X':'O').score;
-                re[i]=""; movs.push(m);
-            }
-        }
-        let melhor;
-        if(jo==='O') {
-            let b = -Infinity;
-            for(let i=0; i<movs.length; i++) if(movs[i].score > b) { b=movs[i].score; melhor=i; }
-        } else {
-            let b = Infinity;
-            for(let i=0; i<movs.length; i++) if(movs[i].score < b) { b=movs[i].score; melhor=i; }
-        }
-        return movs[melhor];
-    }
-
-    function checarVitoriaSimples(b) {
-        const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-        for(let p of w) if(b[p[0]]!=="" && b[p[0]]===b[p[1]] && b[p[0]]===b[p[2]]) return b[p[0]];
-        return null;
-    }
-
-    document.querySelectorAll('.celula').forEach(c => c.addEventListener('click', e => { 
-        if(!ativo || online || iaPensando) return;
-        if(estado[e.target.dataset.index] !== "") return;
-        marcar(e.target.dataset.index, jAtual); 
-        if(ativo) { 
-            jAtual = jAtual==='X'?'O':'X'; atualizarStatus(); 
-            if(contraIA) jogadaIA(); 
-        } 
-    }));
-
-    function setDificuldade(d) { dificuldadeIA = d; iniciarJogo('ia'); }
-    function sairDaPartida() { location.reload(); }
-    function abrirAmigosHub() { renderizarAmigos(); mostrarSetup('amigos'); }
-    
-    // Inicializar cores
-    aplicarCoresDaSkin();
-    renderizarMenuSkins();
-</script>
+// --- NAVEGAÇÃO ---
+function mostrarSetup(m) {
+    document.getElementById('botoesMenu').style.display='none';
+    document.getElementById('setupLocal').style.display= m==='local'?'flex':'none';
+    document.getElementById('setupIA').style.display= m==='ia'?'flex':'none';
+    document.getElementById('setupAmigos').style.display= m==='amigos'?'flex':'none';
+    document.getElementById('setupSkins').style.display= m==='skins'?'flex':'none';
+    if(!m) document.getElementById('botoesMenu').style.display='flex';
+}
+function voltarMenu() { mostrarSetup(); }
+function sairDaPartida() { location.reload(); }
+carregarSkins();</script>
 </body>
 </html>
