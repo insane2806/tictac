@@ -13,188 +13,96 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,700;0,900;1,900&display=swap" rel="stylesheet">
-    
     <style>
-        /* =========================================
-           VARIÁVEIS DE COR E SETUP GERAL
-        ========================================= */
         :root {
-            --neon-red: #ff2a6d; 
-            --neon-cyan: #05d9e8; 
+            --neon-red: #ff2a6d;
+            --neon-cyan: #05d9e8;
             --neon-purple: #9d4edd;
-            --neon-green: #00ff7f; 
-            --neon-yellow: #f1c40f; 
+            --neon-green: #00ff7f;
+            --neon-yellow: #f1c40f;
             --bg-dark: #020205; 
         }
         
-        * { 
-            margin: 0; 
-            padding: 0; 
-            box-sizing: border-box; 
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
             color: white; 
             font-family: 'Montserrat', sans-serif;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            height: 100vh; 
-            height: 100svh; 
-            overflow: hidden;
-            position: relative; 
-            background-color: var(--bg-dark); 
+            display: flex; align-items: center; justify-content: center;
+            height: 100vh; height: 100svh; overflow: hidden;
+            position: relative;
+            background-color: var(--bg-dark);
             transition: background-color 0.1s; 
         }
 
-        /* =========================================
-           BRILHOS E ANIMAÇÕES DE TELA
-        ========================================= */
+        /* BRILHOS SUAVIZADOS E ANIMAÇÕES */
         .flash-red { animation: flashShock 0.4s ease-in-out; }
-        @keyframes flashShock { 
-            0%, 100% { background-color: transparent; } 
-            20% { background-color: rgba(255, 42, 109, 0.3); } 
-            40% { background-color: transparent; } 
-            60% { background-color: rgba(255, 42, 109, 0.4); } 
-            80% { background-color: transparent; } 
-        }
-        
+        @keyframes flashShock { 0%, 100% { background-color: transparent; } 20% { background-color: rgba(255, 42, 109, 0.3); } 40% { background-color: transparent; } 60% { background-color: rgba(255, 42, 109, 0.4); } 80% { background-color: transparent; } }
         .flash-win-x { animation: flashWinX 0.6s ease-out; }
-        @keyframes flashWinX { 
-            0%, 100% { background-color: transparent; } 
-            20% { background-color: color-mix(in srgb, var(--neon-red) 25%, transparent); } 
-            80% { background-color: transparent; } 
-        }
-        
+        @keyframes flashWinX { 0%, 100% { background-color: transparent; } 20% { background-color: color-mix(in srgb, var(--neon-red) 25%, transparent); } 80% { background-color: transparent; } }
         .flash-win-o { animation: flashWinO 0.6s ease-out; }
-        @keyframes flashWinO { 
-            0%, 100% { background-color: transparent; } 
-            20% { background-color: color-mix(in srgb, var(--neon-cyan) 25%, transparent); } 
-            80% { background-color: transparent; } 
-        }
+        @keyframes flashWinO { 0%, 100% { background-color: transparent; } 20% { background-color: color-mix(in srgb, var(--neon-cyan) 25%, transparent); } 80% { background-color: transparent; } }
 
-        /* =========================================
-           FUNDO DINÂMICO GALÁXIA
-        ========================================= */
+        /* FUNDO DINÂMICO GALÁXIA */
         .background-animated {
-            position: absolute; 
-            top: 0; left: 0; right: 0; bottom: 0; 
-            z-index: -1;
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: -1;
             background: radial-gradient(circle at 15% 20%, rgba(15, 6, 35, 0.8) 0%, transparent 40%),
-                        radial-gradient(circle at 85% 80%, rgba(6, 19, 35, 0.8) 0%, transparent 40%), 
-                        #020205;
+                        radial-gradient(circle at 85% 80%, rgba(6, 19, 35, 0.8) 0%, transparent 40%), #020205;
             overflow: hidden;
         }
-
         .background-animated::before {
-            content: ''; 
-            position: absolute; 
-            top: -100%; left: -100%; right: -100%; bottom: -100%;
-            background-image: 
-                radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.3) 2px, transparent 4px),
-                radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.2) 1.5px, transparent 3px),
-                radial-gradient(circle, rgba(255,255,255,0.5) 0%, transparent 2px);
-            background-size: 300px 300px, 200px 200px, 100px 100px; 
-            background-position: 0 0, 50px 50px, 120px 120px;
-            opacity: 0.7; 
-            animation: moveStars 40s linear infinite; 
+            content: ''; position: absolute; top: -100%; left: -100%; right: -100%; bottom: -100%;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.3) 2px, transparent 4px),
+                              radial-gradient(circle, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0.2) 1.5px, transparent 3px),
+                              radial-gradient(circle, rgba(255,255,255,0.5) 0%, transparent 2px);
+            background-size: 300px 300px, 200px 200px, 100px 100px; background-position: 0 0, 50px 50px, 120px 120px;
+            opacity: 0.7; animation: moveStars 40s linear infinite; 
         }
-
-        @keyframes moveStars { 
-            from { transform: translateY(0) translateX(0); } 
-            to { transform: translateY(300px) translateX(150px); } 
-        }
-
+        @keyframes moveStars { from { transform: translateY(0) translateX(0); } to { transform: translateY(300px) translateX(150px); } }
         .background-animated::after {
-            content: ''; 
-            position: absolute; 
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: 
-                radial-gradient(circle at 70% 30%, rgba(157, 78, 221, 0.15) 0%, transparent 60%),
-                radial-gradient(circle at 30% 70%, rgba(5, 217, 232, 0.1) 0%, transparent 60%);
-            filter: blur(60px); 
-            animation: pulseNebula 15s ease-in-out infinite alternate;
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(circle at 70% 30%, rgba(157, 78, 221, 0.15) 0%, transparent 60%),
+                        radial-gradient(circle at 30% 70%, rgba(5, 217, 232, 0.1) 0%, transparent 60%);
+            filter: blur(60px); animation: pulseNebula 15s ease-in-out infinite alternate;
         }
+        @keyframes pulseNebula { 0% { opacity: 0.6; transform: scale(1); } 100% { opacity: 1; transform: scale(1.05); } }
 
-        @keyframes pulseNebula { 
-            0% { opacity: 0.6; transform: scale(1); } 
-            100% { opacity: 1; transform: scale(1.05); } 
-        }
-
-        /* =========================================
-           BOTÕES DO CANTO SUPERIOR (ÁUDIO/MIC)
-        ========================================= */
+        /* BOTÕES CANTO SUPERIOR */
         .btn-top-corner, .btn-top-corner-2 {
-            position: absolute; 
-            top: 12px; 
-            background: rgba(5, 5, 10, 0.6);
-            border: 1px solid var(--neon-cyan); 
-            border-radius: 50%; 
-            width: 36px; height: 36px;
-            display: flex; align-items: center; justify-content: center; 
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(5, 217, 232, 0.3); 
-            transition: 0.3s; 
-            z-index: 100;
+            position: absolute; top: 12px; background: rgba(5, 5, 10, 0.6);
+            border: 1px solid var(--neon-cyan); border-radius: 50%; width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+            box-shadow: 0 0 10px rgba(5, 217, 232, 0.3); transition: 0.3s; z-index: 100;
         }
-
-        .btn-top-corner { right: 15px; } 
+        .btn-top-corner { right: 15px; }
         .btn-top-corner-2 { right: 60px; }
-
-        .btn-top-corner:hover, .btn-top-corner-2:hover { 
-            background: rgba(5, 217, 232, 0.2); 
-            box-shadow: 0 0 15px var(--neon-cyan); 
-            transform: scale(1.05); 
-        }
-
+        .btn-top-corner:hover, .btn-top-corner-2:hover { background: rgba(5, 217, 232, 0.2); box-shadow: 0 0 15px var(--neon-cyan); transform: scale(1.05); }
         .icone-som { width: 18px; height: 18px; fill: var(--neon-cyan); }
 
-        /* =========================================
-           TELAS GERAIS E SCROLL
-        ========================================= */
+        /* TELAS GERAIS */
         #telaLogin { 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
             width: 100%; height: 100%; text-align: center; position: absolute;
             background-color: transparent; z-index: 3000;
         }
 
-        #telaInicial { 
-            display: none; flex-direction: column; align-items: center; justify-content: flex-start; 
-            width: 100%; height: 100%; text-align: center; overflow-y: auto; padding: 40px 10px; 
-        }
-
-        #telaJogo { 
-            display: none; flex-direction: column; align-items: center; justify-content: center; 
-            width: 100%; height: 100%; position: relative; 
-        }
-
-        #telaInicial::-webkit-scrollbar { width: 6px; } 
+        #telaInicial { display: none; flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; height: 100%; text-align: center; overflow-y: auto; padding-top: 20px; }
+        #telaJogo { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; position: relative; }
+        #telaInicial::-webkit-scrollbar { width: 6px; }
         #telaInicial::-webkit-scrollbar-thumb { background: var(--neon-purple); border-radius: 10px; }
-        
-        .logo-container { margin-bottom: 40px; position: relative; text-align: center; flex-shrink: 0; }
-        
-        .logo { 
-            font-size: 4.5rem; font-weight: 900; font-style: italic; letter-spacing: -3px; 
-            color: white; text-shadow: 0 0 15px rgba(255,255,255,0.9), 0 0 25px var(--neon-cyan), 0 0 35px var(--neon-cyan), 0 0 45px var(--neon-cyan); 
-            display: flex; align-items: center; justify-content: center; 
-        }
-        .logo span { color: white; }
-        
-        .sub { 
-            color: var(--neon-cyan); font-size: 0.8rem; letter-spacing: 5px; text-transform: uppercase; font-weight: 700; 
-            border: 1.5px solid var(--neon-cyan); border-radius: 20px; padding: 6px 18px; display: inline-block; 
-            margin-top: -12px; box-shadow: 0 0 15px rgba(5, 217, 232, 0.6), inset 0 0 7px rgba(5, 217, 232, 0.6); background: rgba(0, 0, 0, 0.6); 
-        }
 
-        /* =========================================
-           CARTÃO DE PERFIL (ONLINE)
-        ========================================= */
-        .profile-card { 
-            background: linear-gradient(135deg, rgba(20,20,35,0.8), rgba(5,5,15,0.9)); 
-            border: 2px solid var(--neon-cyan); border-radius: 20px; padding: 20px; width: 300px; 
-            margin-bottom: 25px; display: flex; flex-direction: column; gap: 15px; 
-            box-shadow: 0 0 20px rgba(5, 217, 232, 0.3), inset 0 0 15px rgba(5, 217, 232, 0.2); 
-            backdrop-filter: blur(10px); transition: 0.3s; flex-shrink: 0; 
+        .logo-container { margin-bottom: 40px; position: relative; text-align: center; flex-shrink: 0; }
+        .logo { font-size: 4.5rem; font-weight: 900; font-style: italic; letter-spacing: -3px; color: white; text-shadow: 0 0 15px rgba(255,255,255,0.9), 0 0 25px var(--neon-cyan), 0 0 35px var(--neon-cyan), 0 0 45px var(--neon-cyan); display: flex; align-items: center; justify-content: center; }
+        .logo span { color: white; }
+        .sub { color: var(--neon-cyan); font-size: 0.8rem; letter-spacing: 5px; text-transform: uppercase; font-weight: 700; border: 1.5px solid var(--neon-cyan); border-radius: 20px; padding: 6px 18px; display: inline-block; margin-top: -12px; box-shadow: 0 0 15px rgba(5, 217, 232, 0.6), inset 0 0 7px rgba(5, 217, 232, 0.6); background: rgba(0, 0, 0, 0.6); }
+
+        /* CARTÃO DE PERFIL */
+        .profile-card {
+            background: linear-gradient(135deg, rgba(20,20,35,0.8), rgba(5,5,15,0.9));
+            border: 2px solid var(--neon-cyan); border-radius: 20px; padding: 20px;
+            width: 300px; margin-bottom: 25px; display: flex; flex-direction: column; gap: 15px;
+            box-shadow: 0 0 20px rgba(5, 217, 232, 0.3), inset 0 0 15px rgba(5, 217, 232, 0.2);
+            backdrop-filter: blur(10px); transition: 0.3s; flex-shrink: 0;
         }
         .profile-card:hover { transform: scale(1.02); box-shadow: 0 0 25px rgba(5, 217, 232, 0.5), inset 0 0 20px rgba(5, 217, 232, 0.3); }
         .profile-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
@@ -204,81 +112,27 @@
         .rank-value { font-size: 1.4rem; font-weight: 900; letter-spacing: 1px; text-shadow: 0 0 12px currentColor; }
         .pdl-value { font-size: 0.8rem; color: #ddd; font-weight: bold; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 15px; align-self: center; border: 1px solid rgba(255,255,255,0.2); }
 
-        /* =========================================
-           LISTA DE AMIGOS E SOLICITAÇÕES
-        ========================================= */
-        .friend-card, .pedido-card { 
-            background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); border-radius: 15px; 
-            padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; 
-            transition: 0.3s; margin-bottom: 8px; width: 100%; 
+        /* LISTA DE AMIGOS (SOCIAL HUB) */
+        .friend-card, .pedido-card {
+            background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 15px; padding: 12px 15px; display: flex; justify-content: space-between;
+            align-items: center; transition: 0.3s; margin-bottom: 8px; width: 100%;
         }
         .friend-card:hover { border-color: var(--neon-purple); box-shadow: 0 0 15px rgba(157, 78, 221, 0.3); background: rgba(157, 78, 221, 0.1); }
         .pedido-card { border-color: var(--neon-yellow); background: rgba(241, 196, 15, 0.1); }
-        
-        .friend-info { display: flex; flex-direction: column; align-items: flex-start; flex-grow: 1; margin-left: 10px; overflow: hidden; text-align: left;}
-        .friend-name { font-weight: bold; color: white; font-size: 0.95rem; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;}
+        .friend-info { display: flex; flex-direction: column; align-items: flex-start; flex-grow: 1; margin-left: 10px; overflow: hidden; text-align: left; }
+        .friend-name { font-weight: bold; color: white; font-size: 0.95rem; letter-spacing: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px; }
         .friend-id { font-size: 0.65rem; color: var(--neon-cyan); }
-        
         .friend-actions { display: flex; gap: 6px; }
         .btn-icon { background: rgba(255,255,255,0.05); border: none; font-size: 1.2rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 50%; }
         .btn-icon:hover { background: rgba(255,255,255,0.15); transform: scale(1.1); }
-        
         .btn-chat { color: #00ff7f; } 
         .btn-edit { color: #f1c40f; } 
         .btn-trash { color: #ff2a6d; }
-        
-        /* =========================================
-           CHAT MODAL
-        ========================================= */
-        #modalChat { 
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.9); z-index: 4000; justify-content: center; align-items: center; 
-            backdrop-filter: blur(5px); animation: fadeIn 0.3s; 
-        }
-        .chat-container { 
-            background: rgba(10,10,20,0.95); border: 2px solid var(--neon-purple); border-radius: 20px; 
-            width: 340px; height: 500px; display: flex; flex-direction: column; 
-            box-shadow: 0 0 30px rgba(157, 78, 221, 0.4); max-width: 95%; 
-        }
-        .chat-header { 
-            padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; 
-            justify-content: space-between; align-items: center; background: rgba(157, 78, 221, 0.1); 
-            border-top-left-radius: 18px; border-top-right-radius: 18px; 
-        }
-        .chat-header h3 { color: white; font-size: 1rem; margin: 0; display: flex; flex-direction: column; text-align: left; }
-        .chat-header h3 span { font-size: 0.7rem; color: var(--neon-cyan); font-weight: normal; }
-        
-        .chat-messages { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .chat-messages::-webkit-scrollbar { width: 6px; } 
-        .chat-messages::-webkit-scrollbar-thumb { background: var(--neon-purple); border-radius: 10px; }
-        
-        .msg-bubble { max-width: 80%; padding: 10px 14px; border-radius: 15px; font-size: 0.85rem; word-wrap: break-word; text-align: left; }
-        .msg-mine { background: var(--neon-purple); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .msg-theirs { background: rgba(255,255,255,0.1); color: white; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid rgba(255,255,255,0.2); }
-        
-        .chat-action-bar { padding: 10px; display: flex; justify-content: center; background: rgba(0,0,0,0.3); border-top: 1px solid rgba(255,255,255,0.05); }
-        .btn-desafiar-chat { 
-            background: linear-gradient(90deg, #ff2a6d, #9d4edd); border: none; padding: 10px 20px; 
-            border-radius: 20px; color: white; font-weight: bold; cursor: pointer; width: 100%; 
-            text-transform: uppercase; box-shadow: 0 0 10px rgba(255, 42, 109, 0.4); transition: 0.3s; 
-        }
-        .btn-desafiar-chat:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(255, 42, 109, 0.6); }
-        
-        .chat-input-area { padding: 10px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 8px; align-items: center; }
-        .chat-input { flex-grow: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--neon-purple); border-radius: 20px; color: white; padding: 10px 15px; outline: none; font-family: inherit; }
-        .chat-send-btn { background: var(--neon-purple); border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: white; font-size: 1.2rem; transition: 0.2s;}
-        .chat-send-btn:hover { transform: scale(1.1); box-shadow: 0 0 10px var(--neon-purple); }
 
-        /* =========================================
-           BOTÕES E INPUTS PADRÃO DO JOGO
-        ========================================= */
+        /* BOTÕES PADRÕES */
         #botoesMenu { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 15px; flex-shrink: 0; }
-        
-        .btn-menu, .btn-acao { 
-            width: 300px; padding: 18px; border-radius: 40px; border: none; font-weight: 700; 
-            cursor: pointer; font-size: 1.1rem; transition: 0.4s; text-transform: uppercase; 
-            letter-spacing: 2px; color: white; position: relative; overflow: hidden; flex-shrink: 0; 
-        }
+        .btn-menu, .btn-acao { width: 300px; padding: 18px; border-radius: 40px; border: none; font-weight: 700; cursor: pointer; font-size: 1.1rem; transition: 0.4s; text-transform: uppercase; letter-spacing: 2px; color: white; position: relative; overflow: hidden; flex-shrink: 0; }
         .btn-menu::before, .btn-acao::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); transition: 0.5s; }
         .btn-menu:hover::before, .btn-acao:hover::before { left: 100%; }
         .btn-menu:hover, .btn-acao:hover { transform: scale(1.03); }
@@ -288,54 +142,48 @@
         .btn-ia-menu { background: linear-gradient(90deg, #002244, #05d9e8, #002244); border: 2px solid var(--neon-cyan); box-shadow: 0 0 20px var(--neon-cyan), inset 0 0 12px rgba(5, 217, 232, 0.6); }
         .btn-loja { background: rgba(241, 196, 15, 0.1); border: 2px solid var(--neon-yellow); color: var(--neon-yellow); box-shadow: 0 0 15px rgba(241, 196, 15, 0.3); }
         
-        /* =========================================
-           BOTÕES DA IA (NOOB, MESTRE E ULTRA INSTINTO)
-        ========================================= */
+        /* CORES CORRIGIDAS DOS NÍVEIS DA IA */
         .btn-noob { 
             background: rgba(0, 255, 127, 0.05); 
             border: 2px solid var(--neon-green); 
             color: var(--neon-green); 
-            box-shadow: 0 0 10px rgba(0, 255, 127, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 127, 0.3);
             margin-bottom: 10px; width: 260px; 
             padding: 15px; border-radius: 30px; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s;
         }
-        .btn-noob:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(0, 255, 127, 0.6); }
+        .btn-noob:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(0, 255, 127, 0.6); }
         
         .btn-mestre { 
             background: rgba(255, 42, 109, 0.05); 
             border: 2px solid var(--neon-red); 
             color: var(--neon-red); 
-            box-shadow: 0 0 10px rgba(255, 42, 109, 0.3);
+            box-shadow: 0 0 15px rgba(255, 42, 109, 0.3);
             margin-bottom: 10px; width: 260px; 
             padding: 15px; border-radius: 30px; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s;
         }
-        .btn-mestre:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 42, 109, 0.6); }
+        .btn-mestre:hover { transform: scale(1.05); box-shadow: 0 0 25px rgba(255, 42, 109, 0.6); }
         
-        /* ULTRA INSTINTO COM BRILHO BRANCO/PRATEADO PURO E PULSANTE */
+        /* O VERDADEIRO ULTRA INSTINTO (Aura Prateada) */
         .btn-ultra { 
-            background: rgba(255, 255, 255, 0.05); 
+            background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(150,200,255,0.2), rgba(255,255,255,0.05));
             border: 2px solid #ffffff; 
             color: #ffffff; 
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5), inset 0 0 10px rgba(255, 255, 255, 0.2); 
-            text-shadow: 0 0 8px #ffffff; 
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5), inset 0 0 10px rgba(150, 200, 255, 0.4); 
+            text-shadow: 0 0 8px #ffffff, 0 0 15px #aaddff; 
             margin-bottom: 10px; width: 260px; 
             padding: 15px; border-radius: 30px; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; transition: 0.3s;
-            animation: pulseUltra 1.5s infinite alternate ease-in-out;
+            animation: pulseUltra 2s infinite alternate ease-in-out;
         }
         .btn-ultra:hover { transform: scale(1.05); }
 
         @keyframes pulseUltra {
-            0% { box-shadow: 0 0 10px rgba(255,255,255,0.3), inset 0 0 5px rgba(255,255,255,0.1); }
-            100% { box-shadow: 0 0 25px rgba(255,255,255,0.8), inset 0 0 15px rgba(255,255,255,0.5); }
+            0% { box-shadow: 0 0 10px rgba(255,255,255,0.3), inset 0 0 5px rgba(150,200,255,0.2); }
+            100% { box-shadow: 0 0 30px rgba(255,255,255,0.8), inset 0 0 20px rgba(150,200,255,0.6); }
         }
-        
+
         .btn-acao { width: auto; padding: 18px 50px; margin-top: 30px; }
 
-        .input-nome { 
-            background: rgba(0,0,0,0.7); border: 1.5px solid rgba(255,255,255,0.15); color: white; 
-            padding: 18px; border-radius: 40px; width: 300px; text-align: center; font-size: 1rem; 
-            outline: none; margin-bottom: 15px; font-family: inherit; transition: 0.3s; flex-shrink: 0; 
-        }
+        .input-nome { background: rgba(0,0,0,0.7); border: 1.5px solid rgba(255,255,255,0.15); color: white; padding: 18px; border-radius: 40px; width: 300px; text-align: center; font-size: 1rem; outline: none; margin-bottom: 15px; font-family: inherit; transition: 0.3s; flex-shrink: 0; }
         .input-nome:focus { border-color: var(--neon-cyan); box-shadow: 0 0 15px rgba(5, 217, 232, 0.4); background: rgba(0,0,0,0.8); }
 
         .erro-input { color: var(--neon-red); font-size: 0.8rem; margin-bottom: 15px; margin-top: -5px; display: none; font-weight: bold; text-shadow: 0 0 10px var(--neon-red); text-transform: uppercase; letter-spacing: 1px; animation: shakeErro 0.3s ease-in-out; }
@@ -344,41 +192,43 @@
         #alertaWifi { display: none; position: absolute; top: 80px; left: 50%; transform: translateX(-50%); background: rgba(241, 196, 15, 0.15); border: 1px solid var(--neon-yellow); color: var(--neon-yellow); padding: 8px 20px; border-radius: 30px; font-size: 0.85rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 0 15px rgba(241, 196, 15, 0.4); z-index: 2000; animation: blinkWifi 1.5s infinite alternate; white-space: nowrap; }
         @keyframes blinkWifi { 0% { opacity: 0.5; box-shadow: 0 0 5px rgba(241, 196, 15, 0.2); } 100% { opacity: 1; box-shadow: 0 0 20px rgba(241, 196, 15, 0.8); } }
 
-        /* =========================================
-           CONTAINERS DE MENUS
-        ========================================= */
-        #setupOnlineMenu, #setupAmigos, #setupGlobal, #setupLocal, #setupIA, #setupSkins { 
-            display: none; flex-direction: column; align-items: center; justify-content: flex-start; 
-            width: 100%; animation: fadeIn 0.4s ease forwards; flex-shrink: 0; 
-        }
+        #setupOnlineMenu, #setupAmigos, #setupGlobal, #setupLocal, #setupIA, #setupSkins { display: none; flex-direction: column; align-items: center; justify-content: flex-start; width: 100%; animation: fadeIn 0.4s ease forwards; flex-shrink: 0; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         #listaSkins { display: flex; flex-direction: column; gap: 10px; width: 320px; padding: 5px; margin-bottom: 20px; }
         #listaDeAmigosContainer, #listaPedidosContainer { display: flex; flex-direction: column; width: 320px; padding: 5px; }
         
-        /* MODAIS GERAIS (AVISO E CONVITE) */
-        #modalConvite, #modalAviso { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 5000; justify-content: center; align-items: center; backdrop-filter: blur(8px); animation: fadeIn 0.3s; }
+        /* CHAT MODAL E GERAIS */
+        #modalChat, #modalConvite, #modalAviso { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 4000; justify-content: center; align-items: center; backdrop-filter: blur(5px); animation: fadeIn 0.3s; }
+        .chat-container { background: rgba(10,10,20,0.95); border: 2px solid var(--neon-purple); border-radius: 20px; width: 340px; height: 500px; display: flex; flex-direction: column; box-shadow: 0 0 30px rgba(157, 78, 221, 0.4); max-width: 95%; }
+        .chat-header { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; background: rgba(157, 78, 221, 0.1); border-top-left-radius: 18px; border-top-right-radius: 18px; }
+        .chat-header h3 { color: white; font-size: 1rem; margin: 0; display: flex; flex-direction: column; text-align: left; }
+        .chat-header h3 span { font-size: 0.7rem; color: var(--neon-cyan); font-weight: normal; }
+        .chat-messages { flex-grow: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .chat-messages::-webkit-scrollbar { width: 6px; } .chat-messages::-webkit-scrollbar-thumb { background: var(--neon-purple); border-radius: 10px; }
+        .msg-bubble { max-width: 80%; padding: 10px 14px; border-radius: 15px; font-size: 0.85rem; word-wrap: break-word; text-align: left; }
+        .msg-mine { background: var(--neon-purple); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .msg-theirs { background: rgba(255,255,255,0.1); color: white; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid rgba(255,255,255,0.2); }
+        .chat-action-bar { padding: 10px; display: flex; justify-content: center; background: rgba(0,0,0,0.3); border-top: 1px solid rgba(255,255,255,0.05); }
+        .btn-desafiar-chat { background: linear-gradient(90deg, #ff2a6d, #9d4edd); border: none; padding: 10px 20px; border-radius: 20px; color: white; font-weight: bold; cursor: pointer; width: 100%; text-transform: uppercase; box-shadow: 0 0 10px rgba(255, 42, 109, 0.4); transition: 0.3s; }
+        .btn-desafiar-chat:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(255, 42, 109, 0.6); }
+        .chat-input-area { padding: 10px; border-top: 1px solid rgba(255,255,255,0.1); display: flex; gap: 8px; align-items: center; }
+        .chat-input { flex-grow: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--neon-purple); border-radius: 20px; color: white; padding: 10px 15px; outline: none; font-family: inherit; }
+        .chat-send-btn { background: var(--neon-purple); border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: white; font-size: 1.2rem; transition: 0.2s;}
+        .chat-send-btn:hover { transform: scale(1.1); box-shadow: 0 0 10px var(--neon-purple); }
+
         .modal-content { background: rgba(10,10,20,0.95); border: 2px solid var(--neon-cyan); padding: 30px; border-radius: 25px; text-align: center; box-shadow: 0 0 40px rgba(5,217,232,0.3), inset 0 0 20px rgba(5,217,232,0.2); max-width: 90%; width: 350px; }
         .btn-aceitar { background: linear-gradient(90deg, #004d26, #00ff7f, #004d26); border-color: var(--neon-green); box-shadow: 0 0 15px var(--neon-green); width: 100%; margin-bottom: 10px; color: black; padding: 15px; border-radius: 30px; font-weight: bold; cursor: pointer; text-transform: uppercase; letter-spacing: 1px; }
         .btn-recusar { background: linear-gradient(90deg, #4d0015, #ff2a6d, #4d0015); border-color: var(--neon-red); box-shadow: 0 0 15px var(--neon-red); width: 100%; padding: 15px; border-radius: 30px; color: white; font-weight: bold; cursor: pointer; border: 1px solid; text-transform: uppercase; letter-spacing: 1px; }
 
-        /* =========================================
-           PLACAR E TABULEIRO (ÁREA DE JOGO)
-        ========================================= */
+        /* PLACAR E TABULEIRO GERAL */
         .placar { display: flex; gap: 35px; margin-bottom: 45px; background: rgba(5, 5, 10, 0.9); padding: 12px 35px; border-radius: 50px; border: 1.5px solid rgba(255,255,255,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.7); font-size: 0.95rem; font-weight: 700; align-items: center; backdrop-filter: blur(5px); }
         .x-player, .o-player { position: relative; display: flex; align-items: center; justify-content: center; } 
         .x-player span:first-child, .o-player span:first-child { font-weight: normal; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
         .x-player span:last-child { color: var(--neon-red); font-size: 1.3rem; margin-left: 8px; text-shadow: 0 0 12px var(--neon-red), 0 0 20px var(--neon-red); }
         .o-player span:last-child { color: var(--neon-cyan); font-size: 1.3rem; margin-left: 8px; text-shadow: 0 0 12px var(--neon-cyan), 0 0 20px var(--neon-cyan); }
         
-        .tabuleiro { 
-            display: grid; grid-template-columns: repeat(3, 95px); gap: 5px; 
-            background: color-mix(in srgb, var(--neon-cyan) 15%, transparent); padding: 5px; 
-            border-radius: 22px; border: 2.5px solid var(--neon-cyan); 
-            box-shadow: 0 0 20px color-mix(in srgb, var(--neon-cyan) 40%, transparent), inset 0 0 15px color-mix(in srgb, var(--neon-cyan) 40%, transparent); 
-            position: relative; transition: border-color 0.3s, box-shadow 0.3s, background 0.3s; 
-        }
-        
+        .tabuleiro { display: grid; grid-template-columns: repeat(3, 95px); gap: 5px; background: color-mix(in srgb, var(--neon-cyan) 15%, transparent); padding: 5px; border-radius: 22px; border: 2.5px solid var(--neon-cyan); box-shadow: 0 0 20px color-mix(in srgb, var(--neon-cyan) 40%, transparent), inset 0 0 15px color-mix(in srgb, var(--neon-cyan) 40%, transparent); position: relative; transition: border-color 0.3s, box-shadow 0.3s, background 0.3s; }
         .board-win-x { border-color: var(--neon-red) !important; box-shadow: 0 0 40px var(--neon-red), inset 0 0 20px var(--neon-red) !important; background: color-mix(in srgb, var(--neon-red) 25%, transparent) !important; }
         .board-win-o { border-color: var(--neon-cyan) !important; box-shadow: 0 0 40px var(--neon-cyan), inset 0 0 20px var(--neon-cyan) !important; background: color-mix(in srgb, var(--neon-cyan) 25%, transparent) !important; }
         
@@ -388,15 +238,9 @@
         .shake-vitoria { animation: shakeWin 0.4s ease-in-out both; }
         @keyframes shakeWin { 10%, 90% { transform: translate3d(-1px, 0, 0); } 20%, 80% { transform: translate3d(2px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-3px, 1px, 0); } 40%, 60% { transform: translate3d(3px, -1px, 0); } }
 
-        .celula { 
-            width: 95px; height: 95px; background: #05060a; display: flex; align-items: center; justify-content: center; 
-            font-size: 3.8rem; font-weight: 900; font-family: 'Montserrat', sans-serif; cursor: pointer; 
-            transition: background 0.2s, transform 0.2s, box-shadow 0.2s; position: relative; 
-        }
-        .celula[data-index="0"] { border-top-left-radius: 18px; } 
-        .celula[data-index="2"] { border-top-right-radius: 18px; }
-        .celula[data-index="6"] { border-bottom-left-radius: 18px; } 
-        .celula[data-index="8"] { border-bottom-right-radius: 18px; }
+        .celula { width: 95px; height: 95px; background: #05060a; display: flex; align-items: center; justify-content: center; font-size: 3.8rem; font-weight: 900; font-family: 'Montserrat', sans-serif; cursor: pointer; transition: background 0.2s, transform 0.2s, box-shadow 0.2s; position: relative; }
+        .celula[data-index="0"] { border-top-left-radius: 18px; } .celula[data-index="2"] { border-top-right-radius: 18px; }
+        .celula[data-index="6"] { border-bottom-left-radius: 18px; } .celula[data-index="8"] { border-bottom-right-radius: 18px; }
         .celula:hover { background: rgba(255,255,255,0.08); }
         .celula:active { transform: scale(0.95); } 
 
@@ -410,19 +254,15 @@
         .status-vitoria { animation: pulseStatus 0.6s infinite alternate; }
         @keyframes pulseStatus { 0% { transform: scale(1); filter: brightness(1); } 100% { transform: scale(1.15); filter: brightness(1.5); } }
 
-        /* =========================================
-           REAÇÕES E RODAPÉ
-        ========================================= */
+        /* REAÇÕES */
         #barraReacoes { display: none; justify-content: center; gap: 15px; margin-top: 20px; }
         .btn-reacao { background: rgba(255,255,255,0.1); border: 1px solid var(--neon-cyan); border-radius: 50%; width: 45px; height: 45px; font-size: 1.5rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(5, 217, 232, 0.2); }
         .btn-reacao:hover { transform: scale(1.2); box-shadow: 0 0 15px var(--neon-cyan); background: rgba(5, 217, 232, 0.2); }
         .reacao-flutuante { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); font-size: 2.2rem !important; pointer-events: none; animation: floatUpAndFade 2.5s ease-out forwards; z-index: 9999; }
         @keyframes floatUpAndFade { 0% { opacity: 0; transform: translate(-50%, 10px) scale(0.5); } 15% { opacity: 1; transform: translate(-50%, -10px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -60px) scale(1); } }
 
-        .credito-footer { 
-            margin-top: 30px; margin-bottom: 20px; display: flex; flex-direction: column; 
-            align-items: center; gap: 6px; opacity: 0.8; transition: opacity 0.3s; flex-shrink: 0; 
-        }
+        /* FOOTER */
+        .credito-footer { margin-top: 30px; margin-bottom: 20px; display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 0.8; transition: opacity 0.3s; flex-shrink: 0; }
         .credito-footer:hover { opacity: 1; }
         .credito-texto { font-size: 0.75rem; color: #ccc; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; text-shadow: 0 0 5px rgba(255,255,255,0.3); }
         .link-axion { text-decoration: none; display: flex; align-items: center; gap: 8px; margin-top: 6px; }
@@ -430,11 +270,7 @@
         .link-axion:hover .icone-insta { fill: white; transform: scale(1.1); }
         .link-axion:hover .texto-axion { color: white !important; text-shadow: 0 0 5px rgba(255,255,255,0.5); }
 
-        .btn-texto { 
-            background: none; border: none; color: #aaa; margin-top: 18px; margin-bottom: 10px; 
-            cursor: pointer; font-family: inherit; font-size: 0.95rem; transition: 0.2s; 
-            text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0; 
-        }
+        .btn-texto { background: none; border: none; color: #aaa; margin-top: 18px; margin-bottom: 10px; cursor: pointer; font-family: inherit; font-size: 0.95rem; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; flex-shrink: 0; }
         .btn-texto:hover { color: white; text-shadow: 0 0 8px rgba(255,255,255,0.6); }
 
         .loader-global { margin: 20px 0; width: 40px; height: 40px; border: 4px solid rgba(5, 217, 232, 0.2); border-left-color: var(--neon-cyan); border-radius: 50%; animation: spin 1s linear infinite; }
@@ -456,7 +292,6 @@
         
         <button class="btn-menu btn-online" onclick="entrarConta()" style="margin-bottom: 15px;">ENTRAR</button>
         <button class="btn-menu btn-local" onclick="criarConta()" style="margin-bottom: 15px;">CRIAR CONTA</button>
-        
         <button class="btn-texto" onclick="entrarComoConvidado()" style="color: var(--neon-cyan); text-shadow: 0 0 8px rgba(5, 217, 232, 0.5);">Entrar como Convidado</button>
     </div>
 
@@ -502,12 +337,10 @@
         <svg id="iconeSomOff" viewBox="0 0 24 24" class="icone-som"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
         <svg id="iconeSomOn" viewBox="0 0 24 24" class="icone-som" style="display:none;"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
     </button>
-
     <button id="btnMic" class="btn-top-corner" onclick="toggleMic()" style="display:none;" aria-label="Ligar/Desligar Seu Microfone">
         <svg id="iconeMicOn" viewBox="0 0 24 24" class="icone-som" style="display:none;"><path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5-3c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/></svg>
         <svg id="iconeMicOff" viewBox="0 0 24 24" class="icone-som" style="display:block; fill:var(--neon-red);"><path d="M19 11h-2c0 .91-.26 1.75-.69 2.48l1.46 1.46C18.54 13.82 19 12.46 19 11zM14.98 11.17c.02-.11.02-.23.02-.34V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6 6V11c0 1.66 1.34 3 3 3 .23 0 .44-.02.65-.08l1.87 1.87c-.73.43-1.57.69-2.48.69-2.76 0-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c.57-.08 1.12-.24 1.64-.46l5.09 5.09 1.27-1.27L4.27 3z"/></svg>
     </button>
-
     <button id="btnMutarAmigo" class="btn-top-corner-2" onclick="toggleMuteAmigo()" style="display:none;" aria-label="Silenciar Áudio do Amigo">
         <svg id="iconeSpkOn" viewBox="0 0 24 24" class="icone-som"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
         <svg id="iconeSpkOff" viewBox="0 0 24 24" class="icone-som" style="display:none; fill:var(--neon-red);"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
@@ -538,11 +371,10 @@
                     <span id="txtElo" class="pdl-value">1000 PDL</span>
                 </div>
             </div>
-
             <input type="text" id="nomeOnlineGeral" class="input-nome" placeholder="Alterar Apelido" maxlength="10">
             <p id="erroNomeGeral" class="erro-input">Preencha seu apelido!</p>
             <button class="btn-menu btn-ia-menu" onclick="abrirGlobal()" style="margin-bottom:15px;">🌍 Partida Global</button>
-            <button class="btn-menu btn-online" onclick="abrirAmigosHub()">👥 Central de Amigos</button>
+            <button class="btn-menu btn-online" onclick="abrirAmigosHub()">👥 Minha Lista de Amigos</button>
             <button class="btn-texto" onclick="voltarMenu()">Voltar</button>
         </div>
 
@@ -638,13 +470,12 @@
     </div>
 
     <script>
-        // --- DESTRAVA DE ÁUDIO NO MOBILE (Primeiro Toque) ---
         const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
         document.body.addEventListener('click', () => {
             if (ctxAudio.state === 'suspended') ctxAudio.resume();
         });
 
-        // --- CONFIGURAÇÃO FIREBASE (Com Firestore) ---
+        // --- CONFIGURAÇÃO FIREBASE E FIRESTORE ---
         const firebaseConfig = {
             apiKey: "AIzaSyDv64s-6JctziIGcyDfogeVJHnvGf6pDRc",
             authDomain: "jogo-da-velha-000.firebaseapp.com",
@@ -679,15 +510,13 @@
         let nomeX = "X";
         let nomeO = "O";
         
-        // Configuração original para o X (Humano) começar primeiro contra a IA
-        let quemComeca = "O"; 
+        let quemComeca = "X"; // Alterna a cada partida
         let jAtual = "X"; 
         
-        // Variáveis da IA
         let contraIA = false;
         let dificuldadeIA = 'ultra';
+        let iaPensando = false; 
         
-        // Variáveis Globais e Social
         let buscandoGlobal = false;
         let globalRoomIndex = 1;
         let salaGlobalAlvo = "";
@@ -701,13 +530,12 @@
         let lastPong = Date.now();
         let listenerPedidos = null; 
 
-        // --- SISTEMA DE LOGIN FIREBASE & INICIALIZAÇÃO ---
+        // --- SISTEMA DE LOGIN FIREBASE ---
         auth.onAuthStateChanged(user => {
             if (user) {
                 document.getElementById('telaLogin').style.display = 'none';
                 document.getElementById('telaInicial').style.display = 'flex';
                 
-                // Gera o ID Fixo
                 let hash = 0;
                 for (let i = 0; i < user.uid.length; i++) {
                     hash = user.uid.charCodeAt(i) + ((hash << 5) - hash);
@@ -730,7 +558,6 @@
                     document.getElementById('displayNomePerfil').innerText = e.target.value.trim() || "JOGADOR";
                 });
 
-                // Inicia escuta da Nuvem para "Pedidos de Amizade" offline
                 iniciarEscutaPedidosOffline();
 
             } else {
@@ -767,7 +594,7 @@
 
         function sairDaConta() { auth.signOut(); }
 
-        // --- RANK / ELO ONLINE ---
+        // --- RANK / ELO ---
         let meuElo = parseInt(localStorage.getItem('ticTacElo')) || 1000;
         
         function getRankObj(elo) {
@@ -919,7 +746,7 @@
             } 
         }
 
-        function getDisplaySkin(simbolo) { 
+        getDisplaySkin = (simbolo) => { 
             let skin = skinsDB.find(s => s.id === skinEquipada) || skinsDB[0]; 
             return simbolo === 'X' ? skin.x : skin.o; 
         }
@@ -1013,16 +840,13 @@
             el.className = 'reacao-flutuante';
             const container = origem === 'X' ? document.querySelector('.x-player') : document.querySelector('.o-player');
             
-            if (container) {
-                container.appendChild(el);
-            } else {
-                document.body.appendChild(el);
-            }
+            if (container) container.appendChild(el);
+            else document.body.appendChild(el);
             
             setTimeout(() => el.remove(), 2000);
         }
 
-        // --- NAVEGAÇÃO E MODAIS ---
+        // --- NAVEGAÇÃO ---
         function mostrarSetup(m) {
             document.getElementById('botoesMenu').style.display = 'none';
             document.getElementById('setupLocal').style.display = 'none';
@@ -1045,9 +869,7 @@
             else if(m === 'menuPrincipal') document.getElementById('botoesMenu').style.display = 'flex';
         }
 
-        function voltarMenu() {
-            mostrarSetup('menuPrincipal');
-        }
+        function voltarMenu() { mostrarSetup('menuPrincipal'); }
 
         function mostrarAviso(msg) {
             document.getElementById('textoAviso').innerText = msg;
@@ -1069,8 +891,6 @@
             
             peer.on('connection', c => {
                 c.on('data', d => {
-                    
-                    // 1. Mensagem de Chat
                     if (d.t === 'chat_msg') {
                         salvarMsgLocal(d.id, { sender: 'theirs', msg: d.msg });
                         if (currentChatId === d.id && document.getElementById('modalChat').style.display === 'flex') {
@@ -1079,8 +899,6 @@
                             mostrarAviso(`Nova mensagem de ${d.nome}`);
                         }
                     }
-                    
-                    // 2. Desafio para Jogar (X1)
                     else if (d.t === 'game_req') {
                         if (online || contraIA || buscandoGlobal) {
                             c.send({t: 'rej_ocupado'});
@@ -1094,13 +912,9 @@
                         document.getElementById('btnAccConvite').onclick = aceitarDesafioJogo;
                         document.getElementById('modalConvite').style.display = 'flex';
                     }
-                    
-                    // 3. Recusa de Desafio
                     else if (d.t === 'rej' || d.t === 'rej_ocupado') {
                         mostrarAviso(d.t === 'rej_ocupado' ? "O jogador está ocupado agora." : "Seu pedido foi recusado.");
                     }
-                    
-                    // 4. Matchmaking Global
                     else if (d.t === 'req_global' && buscandoGlobal) {
                         connGame = c;
                         nomeO = d.nome || "Oponente";
@@ -1124,7 +938,6 @@
                 });
             });
 
-            // Lógica de Voz
             peer.on('call', call => {
                 call.answer(meuStream);
                 call.on('stream', streamRemoto => {
@@ -1178,11 +991,9 @@
         }
 
 
-        // --- CENTRAL DE AMIGOS E SOLICITAÇÕES (NUVEM) ---
-        function getAmigosDB() {
-            return JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || [];
-        }
-
+        // --- CENTRAL DE AMIGOS E SOLICITAÇÕES ---
+        function getAmigosDB() { return JSON.parse(localStorage.getItem('ticTacAmigos_v2')) || []; }
+        
         function salvarAmigoDB(id, nome) {
             let amigos = getAmigosDB();
             if(!amigos.some(a => a.id === id)) {
@@ -1201,105 +1012,94 @@
             mostrarSetup('amigos');
         }
 
-        // 1. Enviar Pedido (Vai pro Firestore do Amigo) COM TIMEOUT ANTI-TRAVAMENTO
         function enviarPedidoAmizade() {
             const idInput = document.getElementById('inputAddAmigo');
             const idAlvo = idInput.value.trim();
             const meuNome = document.getElementById('nomeOnlineGeral').value.trim();
             const feedback = document.getElementById('msgFeedbackAmigo');
             
-            if(!db) {
-                feedback.innerText = "Erro: Banco de Dados não ativado no Firebase!";
-                feedback.style.color = "var(--neon-red)";
-                feedback.style.display = "block";
-                return;
-            }
-            
+            feedback.style.display = "block"; 
+
             if(idAlvo.length < 5 || idAlvo === meuIDOriginal) {
                 feedback.innerText = "ID Inválido ou é o seu próprio ID!";
                 feedback.style.color = "var(--neon-red)";
-                feedback.style.display = "block";
                 return;
             }
             
             if(getAmigosDB().some(a => a.id === idAlvo)) {
                 feedback.innerText = "Este jogador já está na sua Lista de Amigos!";
                 feedback.style.color = "var(--neon-yellow)";
-                feedback.style.display = "block";
                 return;
             }
 
             feedback.innerText = "Enviando pedido de amizade...";
             feedback.style.color = "var(--neon-cyan)";
-            feedback.style.display = "block";
             
-            // TIMEOUT ANTI-TRAVAMENTO (Cancela em 8 segundos se a nuvem falhar)
-            const timeoutPromise = new Promise((_, reject) => 
-                setTimeout(() => reject(new Error("Timeout")), 8000)
-            );
-            
-            const firebasePromise = db.collection('users').doc(idAlvo).collection('pedidos').doc(meuIDOriginal).set({
-                nome: meuNome, 
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            });
-
-            Promise.race([firebasePromise, timeoutPromise])
-            .then(() => {
-                feedback.innerText = "Pedido de amizade enviado com sucesso!";
-                feedback.style.color = "var(--neon-green)";
-                idInput.value = "";
+            try {
+                if(!db) throw new Error("Firestore não ativado.");
                 
-                setTimeout(() => { feedback.style.display = "none"; }, 4000);
-            }).catch(e => {
-                if (e.message === "Timeout") {
-                    feedback.innerText = "Falha! O Firestore Database (Modo Teste) não está ativo.";
-                } else {
-                    feedback.innerText = "Erro de permissão no Firebase.";
-                }
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 8000));
+                const firebasePromise = db.collection('users').doc(idAlvo).collection('pedidos').doc(meuIDOriginal).set({
+                    nome: meuNome, 
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                Promise.race([firebasePromise, timeoutPromise]).then(() => {
+                    feedback.innerText = "Pedido de amizade enviado com sucesso!";
+                    feedback.style.color = "var(--neon-green)";
+                    idInput.value = "";
+                    setTimeout(() => { feedback.style.display = "none"; }, 4000);
+                }).catch(e => {
+                    if (e.message === "Timeout") feedback.innerText = "O Firebase demorou muito para responder.";
+                    else feedback.innerText = "Não foi possível enviar (Erro de permissão).";
+                    feedback.style.color = "var(--neon-red)";
+                });
+            } catch(e) {
+                feedback.innerText = "Modo offline: O banco de dados não está ativo no Firebase.";
                 feedback.style.color = "var(--neon-red)";
-                console.error("Erro Firebase:", e);
-            });
+            }
         }
 
-        // 2. Escutar Pedidos (Fica olhando o seu Firestore)
         function iniciarEscutaPedidosOffline() {
             if(!db) return;
-            
-            listenerPedidos = db.collection('users').doc(meuIDOriginal).collection('pedidos').onSnapshot(snapshot => {
-                const areaPedidos = document.getElementById('areaPedidos');
-                const countText = document.getElementById('countPedidos');
-                const listaPedidos = document.getElementById('listaPedidosContainer');
-                
-                listaPedidos.innerHTML = '';
-                
-                if(snapshot.empty) {
-                    areaPedidos.style.display = 'none';
-                    countText.innerText = "0";
-                    return;
-                }
-                
-                areaPedidos.style.display = 'block';
-                countText.innerText = snapshot.size;
-                
-                snapshot.forEach(doc => {
-                    const idRemetente = doc.id;
-                    const nomeRemetente = doc.data().nome;
+            try {
+                listenerPedidos = db.collection('users').doc(meuIDOriginal).collection('pedidos').onSnapshot(snapshot => {
+                    const areaPedidos = document.getElementById('areaPedidos');
+                    const countText = document.getElementById('countPedidos');
+                    const listaPedidos = document.getElementById('listaPedidosContainer');
                     
-                    const div = document.createElement('div');
-                    div.className = 'pedido-card';
-                    div.innerHTML = `
-                        <div class="friend-info">
-                            <span class="friend-name">${nomeRemetente}</span>
-                            <span class="friend-id">ID: ${idRemetente}</span>
-                        </div>
-                        <div class="friend-actions">
-                            <button class="btn-icon btn-chat" onclick="aceitarPedidoDB('${idRemetente}', '${nomeRemetente}')" title="Aceitar Amizade">✔️</button>
-                            <button class="btn-icon btn-trash" onclick="recusarPedidoDB('${idRemetente}')" title="Recusar Amizade">✖️</button>
-                        </div>
-                    `;
-                    listaPedidos.appendChild(div);
+                    listaPedidos.innerHTML = '';
+                    
+                    if(snapshot.empty) {
+                        areaPedidos.style.display = 'none';
+                        countText.innerText = "0";
+                        return;
+                    }
+                    
+                    areaPedidos.style.display = 'block';
+                    countText.innerText = snapshot.size;
+                    
+                    snapshot.forEach(doc => {
+                        const idRemetente = doc.id;
+                        const nomeRemetente = doc.data().nome;
+                        const div = document.createElement('div');
+                        div.className = 'pedido-card';
+                        div.innerHTML = `
+                            <div class="friend-info">
+                                <span class="friend-name">${nomeRemetente}</span>
+                                <span class="friend-id">ID: ${idRemetente}</span>
+                            </div>
+                            <div class="friend-actions">
+                                <button class="btn-icon btn-chat" onclick="aceitarPedidoDB('${idRemetente}', '${nomeRemetente}')" title="Aceitar Amizade">✔️</button>
+                                <button class="btn-icon btn-trash" onclick="recusarPedidoDB('${idRemetente}')" title="Recusar Amizade">✖️</button>
+                            </div>
+                        `;
+                        listaPedidos.appendChild(div);
+                    });
+                }, error => {
+                    console.warn("Aviso do Firestore: O banco não está configurado ou não tem permissão para ler.", error);
                 });
-            });
+            } catch(e) {}
         }
 
         function aceitarPedidoDB(idRemetente, nomeRemetente) {
@@ -1410,9 +1210,7 @@
         function enviarMsgChat() {
             const inputEl = document.getElementById('chatInput');
             const texto = inputEl.value.trim();
-            
             if(!texto || !currentChatId) return;
-            
             const meuNome = document.getElementById('nomeOnlineGeral').value.trim();
             
             let tempConn = peer.connect(currentChatId);
@@ -1428,7 +1226,7 @@
             });
         }
 
-        // --- SISTEMA DE DESAFIO (X1 DIRETO DA LISTA/CHAT) ---
+        // --- SISTEMA DE DESAFIO ---
         function desafiarDoChat() {
             if(!currentChatId) return;
             enviarDesafio(currentChatId);
@@ -1487,7 +1285,6 @@
             iniciarJogo('online');
         }
 
-        // --- SISTEMA DE LINK DE CONVITE ---
         function gerarLinkConvite() {
             let link = window.location.href.split('?')[0] + "?roomId=" + meuIDOriginal;
             try {
@@ -1573,7 +1370,7 @@
             mostrarSetup('onlineMenu');
         }
 
-        // --- LÓGICA DO JOGO (O TABULEIRO E A PARTIDA) ---
+        // --- LÓGICA DO JOGO ---
         function setupConnGame() {
             connGame.on('data', d => {
                 if(d.t === 'j') {
@@ -1641,7 +1438,6 @@
             iniciarJogo('ia');
         }
 
-        // FUNÇÃO DE INÍCIO COM RESET SEGURO
         function iniciarJogo(m) {
             if(m === 'local') {
                 nomeX = document.getElementById('nomeLocalX').value.trim();
@@ -1691,14 +1487,18 @@
             document.getElementById('sO').innerText = pO;
 
             atualizarStatus();
+
+            if (contraIA && jAtual === 'O') {
+                jogadaIA();
+            }
         }
 
         document.querySelectorAll('.celula').forEach(c => {
             c.addEventListener('click', e => {
                 const i = e.target.dataset.index;
                 
-                // TRAVAS DE SEGURANÇA BLINDADAS
-                if (estado[i] !== "" || !ativo) return;
+                // TRAVAS DE SEGURANÇA
+                if (estado[i] !== "" || !ativo || iaPensando) return;
                 if (online && !minhaVez) return;
                 if (contraIA && jAtual === 'O') return;
                 
@@ -1819,7 +1619,8 @@
             estado.fill(""); 
             ativo = true; 
             
-            // Revezamento de quem começa a partida
+            iaPensando = false; 
+            
             quemComeca = quemComeca === "X" ? "O" : "X";
             jAtual = quemComeca;
             
@@ -1843,7 +1644,6 @@
             document.getElementById('btnNovaPartida').style.display = 'none';
             atualizarStatus(); 
 
-            // Se a máquina começa, ela joga agora!
             if (contraIA && jAtual === 'O') {
                 jogadaIA();
             }
@@ -1925,16 +1725,13 @@
             statusEl.style.color = "#fff";
             statusEl.classList.remove('status-vitoria');
             
-            // Zera o placar ao sair
+            resetLocal(); 
             pX = 0; pO = 0;
             document.getElementById('sX').innerText = pX; 
             document.getElementById('sO').innerText = pO;
-            
-            // Garante que a próxima partida o Humano comece
-            quemComeca = "O"; 
         }
 
-        // --- INTELIGÊNCIA ARTIFICIAL PERFEITA E ORIGINAL ---
+        // --- IA OTIMIZADA E ORIGINAL ---
         function achaMovimentoCritico(jogador) {
             for(let i = 0; i < 9; i++) {
                 if(estado[i] === "") {
@@ -1948,12 +1745,18 @@
         }
 
         function jogadaIA() {
-            if (!ativo || !contraIA) return;
+            if (!ativo || !contraIA || jAtual !== 'O') return;
             
-            const s = document.getElementById('status');
-            s.innerText = "MÁQUINA PENSANDO...";
+            iaPensando = true;
+            document.getElementById('status').innerText = "MÁQUINA PENSANDO...";
             
             setTimeout(() => {
+                // Failsafe
+                if (!ativo || jAtual !== 'O') {
+                    iaPensando = false;
+                    return;
+                }
+
                 let index;
                 let vazios = estado.filter(x => x === "").length;
                 let disponiveis = estado.map((v, i) => v === "" ? i : null).filter(v => v !== null);
@@ -1979,7 +1782,7 @@
                     }
                 } 
                 else {
-                    // ULTRA INSTINTO (Minimax perfeito original)
+                    // Ultra Instinto
                     if (vazios === 9) {
                         index = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
                     } else if (vazios === 8 && estado[4] === "") {
@@ -1989,7 +1792,13 @@
                     }
                 }
 
+                if (index === undefined || index === null || estado[index] !== "") {
+                    index = disponiveis[0]; // Failsafe máximo
+                }
+
                 marcar(index, 'O');
+                
+                iaPensando = false;
                 
                 if (ativo) { 
                     jAtual = 'X'; 
@@ -2020,13 +1829,19 @@
                 if (novoEstado[i] === "") {
                     let mov = { index: i };
                     novoEstado[i] = jogadorAI;
-                    mov.score = minimax(novoEstado, jogadorAI === 'O' ? 'X' : 'O').score;
+                    
+                    if (jogadorAI === 'O') {
+                        mov.score = minimax(novoEstado, 'X').score;
+                    } else {
+                        mov.score = minimax(novoEstado, 'O').score;
+                    }
+                    
                     novoEstado[i] = "";
                     movimentos.push(mov);
                 }
             }
             
-            let melhorMovimento;
+            let melhorMovimento = 0;
             if (jogadorAI === 'O') {
                 let bestScore = -Infinity;
                 for (let i = 0; i < movimentos.length; i++) {
