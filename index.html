@@ -50,9 +50,7 @@
         /* =========================================
            BRILHOS E ANIMAÇÕES DE TELA
         ========================================= */
-        .flash-red { 
-            animation: flashShock 0.4s ease-in-out; 
-        }
+        .flash-red { animation: flashShock 0.4s ease-in-out; }
         @keyframes flashShock { 
             0%, 100% { background-color: transparent; } 
             20% { background-color: rgba(255, 42, 109, 0.3); } 
@@ -61,18 +59,14 @@
             80% { background-color: transparent; } 
         }
         
-        .flash-win-x { 
-            animation: flashWinX 0.6s ease-out; 
-        }
+        .flash-win-x { animation: flashWinX 0.6s ease-out; }
         @keyframes flashWinX { 
             0%, 100% { background-color: transparent; } 
             20% { background-color: color-mix(in srgb, var(--neon-red) 25%, transparent); } 
             80% { background-color: transparent; } 
         }
         
-        .flash-win-o { 
-            animation: flashWinO 0.6s ease-out; 
-        }
+        .flash-win-o { animation: flashWinO 0.6s ease-out; }
         @keyframes flashWinO { 
             0%, 100% { background-color: transparent; } 
             20% { background-color: color-mix(in srgb, var(--neon-cyan) 25%, transparent); } 
@@ -178,6 +172,7 @@
         #telaInicial::-webkit-scrollbar-thumb { background: var(--neon-purple); border-radius: 10px; }
         
         .logo-container { margin-bottom: 40px; position: relative; text-align: center; flex-shrink: 0; }
+        
         .logo { 
             font-size: 4.5rem; font-weight: 900; font-style: italic; letter-spacing: -3px; 
             color: white; text-shadow: 0 0 15px rgba(255,255,255,0.9), 0 0 25px var(--neon-cyan), 0 0 35px var(--neon-cyan), 0 0 45px var(--neon-cyan); 
@@ -294,49 +289,47 @@
         .btn-loja { background: rgba(241, 196, 15, 0.1); border: 2px solid var(--neon-yellow); color: var(--neon-yellow); box-shadow: 0 0 15px rgba(241, 196, 15, 0.3); }
         
         /* =========================================
-           NOVAS CORES DA IA (ULTRA INSTINTO E AFINS)
+           AURA DOS BOTS (NOOB, MESTRE E ULTRA INSTINTO)
         ========================================= */
         .btn-noob { 
             background: rgba(0, 255, 127, 0.1); 
             border: 2px solid var(--neon-green); 
             color: var(--neon-green); 
-            box-shadow: 0 0 15px rgba(0, 255, 127, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 127, 0.4), inset 0 0 10px rgba(0, 255, 127, 0.2);
+            animation: pulseNoob 2s infinite alternate;
             margin-bottom: 10px; width: 260px; 
+        }
+        @keyframes pulseNoob {
+            0% { box-shadow: 0 0 10px rgba(0,255,127,0.3), inset 0 0 5px rgba(0,255,127,0.1); }
+            100% { box-shadow: 0 0 20px rgba(0,255,127,0.6), inset 0 0 15px rgba(0,255,127,0.4); }
         }
         
         .btn-mestre { 
             background: rgba(255, 42, 109, 0.1); 
             border: 2px solid var(--neon-red); 
             color: var(--neon-red); 
-            box-shadow: 0 0 15px rgba(255, 42, 109, 0.3);
+            box-shadow: 0 0 15px rgba(255, 42, 109, 0.4), inset 0 0 10px rgba(255, 42, 109, 0.2);
+            animation: pulseMestre 2s infinite alternate;
             margin-bottom: 10px; width: 260px; 
+        }
+        @keyframes pulseMestre {
+            0% { box-shadow: 0 0 10px rgba(255,42,109,0.3), inset 0 0 5px rgba(255,42,109,0.1); }
+            100% { box-shadow: 0 0 20px rgba(255,42,109,0.6), inset 0 0 15px rgba(255,42,109,0.4); }
         }
         
-        /* O VERDADEIRO ULTRA INSTINTO (Aura Giratória) */
+        /* O VERDADEIRO ULTRA INSTINTO (Aura Prateada) */
         .btn-ultra { 
-            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(150,200,255,0.2), rgba(255,255,255,0.1)); 
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(150,200,255,0.05) 70%);
             border: 2px solid #ffffff; 
             color: #ffffff; 
-            box-shadow: 0 0 15px rgba(200, 230, 255, 0.6), inset 0 0 15px rgba(200, 230, 255, 0.4); 
-            text-shadow: 0 0 8px #ffffff, 0 0 20px #aaddff; 
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.6), inset 0 0 20px rgba(200, 230, 255, 0.5); 
+            text-shadow: 0 0 10px #ffffff, 0 0 20px #aaddff; 
+            animation: pulseUltra 1.5s infinite alternate ease-in-out;
             margin-bottom: 10px; width: 260px; 
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
         }
-
-        .btn-ultra::after {
-            content: '';
-            position: absolute;
-            top: -50%; left: -50%; width: 200%; height: 200%;
-            background: conic-gradient(transparent, rgba(255,255,255,0.4), transparent 30%);
-            animation: auraGoku 3s linear infinite;
-            z-index: -1;
-        }
-
-        @keyframes auraGoku {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes pulseUltra {
+            0% { box-shadow: 0 0 15px rgba(255,255,255,0.4), inset 0 0 10px rgba(200,230,255,0.3); }
+            100% { box-shadow: 0 0 35px rgba(255,255,255,0.9), inset 0 0 25px rgba(200,230,255,0.8); }
         }
         
         .btn-acao { width: auto; padding: 18px 50px; margin-top: 30px; }
@@ -355,7 +348,7 @@
         @keyframes blinkWifi { 0% { opacity: 0.5; box-shadow: 0 0 5px rgba(241, 196, 15, 0.2); } 100% { opacity: 1; box-shadow: 0 0 20px rgba(241, 196, 15, 0.8); } }
 
         /* =========================================
-           CONTAINERS DE MENUS (DISPLAY FLEX)
+           CONTAINERS DE MENUS
         ========================================= */
         #setupOnlineMenu, #setupAmigos, #setupGlobal, #setupLocal, #setupIA, #setupSkins { 
             display: none; flex-direction: column; align-items: center; justify-content: flex-start; 
@@ -421,7 +414,7 @@
         @keyframes pulseStatus { 0% { transform: scale(1); filter: brightness(1); } 100% { transform: scale(1.15); filter: brightness(1.5); } }
 
         /* =========================================
-           REAÇÕES
+           REAÇÕES E RODAPÉ
         ========================================= */
         #barraReacoes { display: none; justify-content: center; gap: 15px; margin-top: 20px; }
         .btn-reacao { background: rgba(255,255,255,0.1); border: 1px solid var(--neon-cyan); border-radius: 50%; width: 45px; height: 45px; font-size: 1.5rem; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 10px rgba(5, 217, 232, 0.2); }
@@ -429,9 +422,6 @@
         .reacao-flutuante { position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); font-size: 2.2rem !important; pointer-events: none; animation: floatUpAndFade 2.5s ease-out forwards; z-index: 9999; }
         @keyframes floatUpAndFade { 0% { opacity: 0; transform: translate(-50%, 10px) scale(0.5); } 15% { opacity: 1; transform: translate(-50%, -10px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -60px) scale(1); } }
 
-        /* =========================================
-           FOOTER 
-        ========================================= */
         .credito-footer { 
             margin-top: 30px; margin-bottom: 20px; display: flex; flex-direction: column; 
             align-items: center; gap: 6px; opacity: 0.8; transition: opacity 0.3s; flex-shrink: 0; 
@@ -565,7 +555,7 @@
             <div style="display:flex; flex-direction: column; align-items: center; width: 320px; margin-bottom: 10px;">
                 <input type="number" id="inputAddAmigo" class="input-nome" placeholder="Digite o ID do Amigo" inputmode="numeric" style="width: 100%; margin-bottom: 10px;">
                 <button class="btn-menu btn-online" onclick="enviarPedidoAmizade()" style="width: 100%; margin-bottom: 5px;">➕ Adicionar Amigo</button>
-                <p id="msgFeedbackAmigo" style="font-size: 0.85rem; font-weight: bold; margin-bottom: 15px; display: none;"></p>
+                <p id="msgFeedbackAmigo" style="font-size: 0.85rem; font-weight: bold; margin-top: 5px; margin-bottom: 15px; display: none;"></p>
             </div>
             
             <button class="btn-texto" onclick="gerarLinkConvite()" style="margin-top:0; margin-bottom:20px; color:var(--neon-green);">🔗 ou Enviar Link de Convite</button>
@@ -591,9 +581,9 @@
             <input type="text" id="nomeJogadorIA" class="input-nome" placeholder="Seu Apelido" maxlength="10">
             <p id="erroIA" class="erro-input">Por favor, digite seu apelido!</p>
             <p style="font-size:0.8rem; color:#aaa; margin-bottom:10px; text-transform: uppercase; letter-spacing: 2px;">Escolha o nível da IA:</p>
-            <button class="btn-menu btn-noob" onclick="setDificuldade('noob')">NOOB</button>
-            <button class="btn-menu btn-mestre" onclick="setDificuldade('mestre')">MESTRE</button>
-            <button class="btn-menu btn-ultra" onclick="setDificuldade('ultra')">ULTRA INSTINTO</button>
+            <button class="btn-noob" onclick="setDificuldade('noob')">NOOB</button>
+            <button class="btn-mestre" onclick="setDificuldade('mestre')">MESTRE</button>
+            <button class="btn-ultra" onclick="setDificuldade('ultra')">ULTRA INSTINTO</button>
             <button class="btn-texto" onclick="voltarMenu()">Voltar</button>
         </div>
 
@@ -665,6 +655,7 @@
             appId: "1:175809267928:web:7d18bbd870a82482daafad",
             measurementId: "G-F2NSRKELGL"
         };
+        
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
@@ -1225,6 +1216,10 @@
                 feedback.style.display = "block";
                 return;
             }
+
+            feedback.innerText = "Enviando pedido para a nuvem...";
+            feedback.style.color = "var(--neon-cyan)";
+            feedback.style.display = "block";
             
             db.collection('users').doc(idAlvo).collection('pedidos').doc(meuIDOriginal).set({
                 nome: meuNome, 
@@ -1233,15 +1228,14 @@
                 // Feedback Verdinho e apaga o input
                 feedback.innerText = "Pedido de amizade enviado com sucesso!";
                 feedback.style.color = "var(--neon-green)";
-                feedback.style.display = "block";
                 idInput.value = "";
                 
                 // Apaga a mensagem depois de 4 segundos
                 setTimeout(() => { feedback.style.display = "none"; }, 4000);
             }).catch(e => {
-                feedback.innerText = "Erro ao conectar com a nuvem.";
+                feedback.innerText = "Erro ao conectar. O Firestore do seu Firebase está ativo?";
                 feedback.style.color = "var(--neon-red)";
-                feedback.style.display = "block";
+                console.error("Erro Firebase:", e);
             });
         }
 
@@ -1623,6 +1617,7 @@
             iniciarJogo('ia');
         }
 
+        // FUNÇÃO CORRIGIDA: Agora reseta o tabuleiro antes de abrir a tela
         function iniciarJogo(m) {
             if(m === 'local') {
                 nomeX = document.getElementById('nomeLocalX').value.trim();
@@ -1805,7 +1800,7 @@
             ativo = true; 
             
             iaPensando = false; 
-            clearTimeout(timeoutIA); // Limpa travadas
+            clearTimeout(timeoutIA); // Limpa travadas da IA
             
             quemComeca = quemComeca === "X" ? "O" : "X";
             jAtual = quemComeca;
@@ -1917,7 +1912,7 @@
             document.getElementById('sO').innerText = pO;
         }
 
-        // --- INTELIGÊNCIA ARTIFICIAL BLINDADA (MINIMAX) ---
+        // --- INTELIGÊNCIA ARTIFICIAL BLINDADA E SEM BUGS ---
         function achaMovimentoCritico(jogador) {
             for(let i = 0; i < 9; i++) {
                 if(estado[i] === "") {
@@ -1931,18 +1926,19 @@
         }
 
         function jogadaIA() {
-            clearTimeout(timeoutIA); // Limpa qualquer chamada fantasma
+            clearTimeout(timeoutIA); // Limpa qualquer chamada fantasma passada
 
-            // A barreira de segurança:
-            if (!ativo || !contraIA || iaPensando) return;
+            // Trava rígida: Só joga se for a vez dela e ninguém clicou antes
+            if (!ativo || !contraIA || iaPensando || jAtual !== 'O') return;
             
-            iaPensando = true; // Abaixa o escudo pra evitar que o cara clique
+            iaPensando = true; // Aciona o escudo anti-cliques
+            
             const s = document.getElementById('status');
             s.innerText = "MÁQUINA PENSANDO...";
             
             timeoutIA = setTimeout(() => {
                 try {
-                    // Segurança extra dentro do tempo
+                    // Segurança extra: verifica de novo no exato momento da jogada
                     if (!ativo || jAtual !== 'O') return;
 
                     let index;
@@ -1950,6 +1946,7 @@
                     let disponiveis = estado.map((v, i) => v === "" ? i : null).filter(v => v !== null);
 
                     if (dificuldadeIA === 'noob') {
+                        // Sorteia aleatório
                         index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
                     } 
                     else if (dificuldadeIA === 'mestre') {
@@ -1961,33 +1958,45 @@
                         } else if (blockMove !== -1) {
                             index = blockMove;
                         } else {
-                            if (Math.random() > 0.75) {
-                                index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
-                            } else {
-                                if (vazios === 9) index = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
-                                else {
-                                    let copia = [...estado];
-                                    index = minimax(copia, 'O').index;
-                                }
-                            }
+                            // Joga aleatório para dar chance de erro
+                            index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
                         }
                     } 
                     else {
+                        // ULTRA INSTINTO (Minimax perfeito)
                         if (vazios === 9) {
+                            // Primeira jogada: cantos ou centro
                             index = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
                         } else if (vazios === 8 && estado[4] === "") {
+                            // Se o humano não pegou o centro, pega o centro
                             index = 4;
                         } else {
-                            let copia = [...estado];
-                            index = minimax(copia, 'O').index;
+                            // Minimax simples e direto
+                            let melhorScore = -Infinity;
+                            let melhorMov = disponiveis[0];
+                            
+                            for (let i = 0; i < 9; i++) {
+                                if (estado[i] === "") {
+                                    estado[i] = 'O';
+                                    let score = minimax(estado, 0, false);
+                                    estado[i] = "";
+                                    
+                                    if (score > melhorScore) {
+                                        melhorScore = score;
+                                        melhorMov = i;
+                                    }
+                                }
+                            }
+                            index = melhorMov;
                         }
                     }
 
-                    // Fallback caso a IA surte e não saiba o que fazer (evita travar o jogo)
+                    // Fallback de emergência (caso dê algum tilt no cálculo)
                     if (index === undefined || index === null) {
-                        index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+                        index = disponiveis[0];
                     }
 
+                    // Executa a jogada da IA
                     marcar(index, 'O');
                     
                     if (ativo) { 
@@ -1997,7 +2006,7 @@
                 } catch(e) {
                     console.error("Erro na IA:", e);
                 } finally {
-                    iaPensando = false; // Sobe o escudo
+                    iaPensando = false; // Desativa o escudo
                 }
             }, 600);
         }
@@ -2012,49 +2021,36 @@
             return null;
         }
 
-        function minimax(novoEstado, jogadorAI) {
-            let v = checarVitoriaSimples(novoEstado);
-            if (v === 'X') return { score: -10 }; 
-            if (v === 'O') return { score: 10 };  
-            if (!novoEstado.includes("")) return { score: 0 }; 
+        // Função Minimax Perfeita e Simplificada (Não dá crash)
+        function minimax(board, depth, isMaximizing) {
+            let result = checarVitoriaSimples(board);
+            if (result === 'O') return 10 - depth;
+            if (result === 'X') return depth - 10;
+            if (!board.includes("")) return 0;
 
-            let movimentos = [];
-            
-            for (let i = 0; i < 9; i++) {
-                if (novoEstado[i] === "") {
-                    let mov = { index: i };
-                    novoEstado[i] = jogadorAI;
-                    
-                    if (jogadorAI === 'O') {
-                        mov.score = minimax(novoEstado, 'X').score;
-                    } else {
-                        mov.score = minimax(novoEstado, 'O').score;
-                    }
-                    
-                    novoEstado[i] = ""; // Volta pro lugar
-                    movimentos.push(mov);
-                }
-            }
-            
-            let melhorMovimento = 0; // Failsafe
-            if (jogadorAI === 'O') {
+            if (isMaximizing) {
                 let bestScore = -Infinity;
-                for (let i = 0; i < movimentos.length; i++) {
-                    if (movimentos[i].score > bestScore) {
-                        bestScore = movimentos[i].score;
-                        melhorMovimento = i;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === "") {
+                        board[i] = 'O';
+                        let score = minimax(board, depth + 1, false);
+                        board[i] = "";
+                        bestScore = Math.max(score, bestScore);
                     }
                 }
+                return bestScore;
             } else {
                 let bestScore = Infinity;
-                for (let i = 0; i < movimentos.length; i++) {
-                    if (movimentos[i].score < bestScore) {
-                        bestScore = movimentos[i].score;
-                        melhorMovimento = i;
+                for (let i = 0; i < 9; i++) {
+                    if (board[i] === "") {
+                        board[i] = 'X';
+                        let score = minimax(board, depth + 1, true);
+                        board[i] = "";
+                        bestScore = Math.min(score, bestScore);
                     }
                 }
+                return bestScore;
             }
-            return movimentos[melhorMovimento];
         }
 
     </script>
