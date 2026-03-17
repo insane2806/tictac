@@ -78,14 +78,14 @@
         .btn-top-corner:hover, .btn-top-corner-2:hover { background: rgba(5, 217, 232, 0.2); box-shadow: 0 0 15px var(--neon-cyan); transform: scale(1.05); }
         .icone-som { width: 18px; height: 18px; fill: var(--neon-cyan); }
 
-        /* TELA DE LOGIN FIREBASE (Nova) */
+        /* TELA DE LOGIN FIREBASE */
         #telaLogin { 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
             width: 100%; height: 100%; text-align: center; position: absolute;
             background-color: transparent; z-index: 3000;
         }
 
-        /* Telas e Menus (Modificado display inicial para none) */
+        /* Telas e Menus */
         #telaInicial { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; text-align: center; }
         #telaJogo { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; position: relative; }
         
@@ -190,7 +190,6 @@
         .celula-vencedora { animation: glowWin 0.8s infinite alternate !important; z-index: 2; }
         @keyframes glowWin { 0% { background: rgba(255, 255, 255, 0.1); transform: scale(1); box-shadow: 0 0 10px rgba(255,255,255,0.2); } 100% { background: rgba(255, 255, 255, 0.25); transform: scale(1.08); box-shadow: 0 0 30px rgba(255,255,255,0.8), inset 0 0 15px rgba(255,255,255,0.5); } }
 
-        /* BRILHO DOS SÍMBOLOS REDUZIDOS (TEXT-SHADOW) */
         .x-player { color: var(--neon-red); text-shadow: 0 0 10px var(--neon-red), 0 0 20px var(--neon-red), 0 0 30px color-mix(in srgb, var(--neon-red) 50%, transparent); }
         .o-player { color: var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan), 0 0 30px color-mix(in srgb, var(--neon-cyan) 50%, transparent); }
         
@@ -297,7 +296,7 @@
         </div>
 
         <div id="setupOnlineAmigo">
-            <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">SEU ID: <span id="meuId" style="color:var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan);">...</span></p>
+            <p style="font-size: 0.8rem; color: #aaa; margin-bottom: 18px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">SEU ID CLOUD: <span id="meuId" style="color:var(--neon-cyan); text-shadow: 0 0 10px var(--neon-cyan);">...</span></p>
             <button id="btnConvidarLink" class="btn-menu btn-local" onclick="gerarLinkConvite()" style="margin-bottom:15px; border-color:var(--neon-green); color:var(--neon-green);">🔗 Enviar Convite (Link)</button>
             
             <div id="divisoriaAmigo" style="width: 100%; border-top: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px;"></div>
@@ -375,16 +374,92 @@
     </div>
 
     <script>
-        // --- DESTRAVA DE ÁUDIO NO MOBILE (Primeiro Toque) ---
+        // --- DESTRAVA DE ÁUDIO NO MOBILE ---
         const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
-        
         document.body.addEventListener('click', () => {
             if (ctxAudio.state === 'suspended') {
                 ctxAudio.resume();
             }
         });
         
-        // --- SISTEMA DE RANK / ELO ONLINE ---
+        // --- CONFIGURAÇÃO FIREBASE (SUAS CHAVES REAIS) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDv64s-6JctziIGcyDfogeVJHnvGf6pDRc",
+            authDomain: "jogo-da-velha-000.firebaseapp.com",
+            projectId: "jogo-da-velha-000",
+            storageBucket: "jogo-da-velha-000.firebasestorage.app",
+            messagingSenderId: "175809267928",
+            appId: "1:175809267928:web:7d18bbd870a82482daafad",
+            measurementId: "G-F2NSRKELGL"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Variáveis Globais
+        let meuIDOriginal = ""; // Agora começa vazio
+        let peer;
+        let connProvisoria = null;
+        let buscandoGlobal = false;
+        let salaGlobalAlvo = "";
+        let globalRoomIndex = 1;
+
+        // --- LÓGICA DO FIREBASE LOGIN E ID FIXO ---
+        auth.onAuthStateChanged(user => {
+            if (user) {
+                document.getElementById('telaLogin').style.display = 'none';
+                document.getElementById('telaInicial').style.display = 'flex';
+                
+                // Transforma UID em ID de 5 dígitos fixo
+                let hash = 0;
+                for (let i = 0; i < user.uid.length; i++) {
+                    hash = user.uid.charCodeAt(i) + ((hash << 5) - hash);
+                }
+                const idFixoPeloFirebase = Math.abs(hash % 90000 + 10000).toString();
+                
+                meuIDOriginal = idFixoPeloFirebase;
+                document.getElementById('meuId').innerText = meuIDOriginal;
+
+                if (peer) {
+                    peer.destroy();
+                    setTimeout(() => { iniciarPeer(meuIDOriginal); }, 500);
+                } else {
+                    iniciarPeer(meuIDOriginal);
+                }
+
+                if (user.isAnonymous) {
+                    document.getElementById('nomeOnlineGeral').value = "Convidado";
+                } else if (user.email) {
+                    document.getElementById('nomeOnlineGeral').value = user.email.split('@')[0];
+                }
+            } else {
+                document.getElementById('telaLogin').style.display = 'flex';
+                document.getElementById('telaInicial').style.display = 'none';
+                if (peer) peer.destroy();
+            }
+        });
+
+        function mostrarErroLogin(msg) {
+            const erroEl = document.getElementById('erroLogin');
+            erroEl.innerText = msg;
+            erroEl.style.display = 'block';
+            setTimeout(() => erroEl.style.display = 'none', 3000);
+        }
+
+        function entrarComoConvidado() { auth.signInAnonymously().catch(() => mostrarErroLogin("Erro de conexão com o Firebase!")); }
+        function criarConta() {
+            const e = document.getElementById('emailLogin').value;
+            const s = document.getElementById('senhaLogin').value;
+            if(!e || !s) return mostrarErroLogin("Preencha tudo!");
+            auth.createUserWithEmailAndPassword(e, s).catch(err => mostrarErroLogin("Erro: " + err.message));
+        }
+        function entrarConta() {
+            const e = document.getElementById('emailLogin').value;
+            const s = document.getElementById('senhaLogin').value;
+            auth.signInWithEmailAndPassword(e, s).catch(() => mostrarErroLogin("E-mail ou senha incorretos!"));
+        }
+        function sairDaConta() { auth.signOut(); }
+
+        // --- SISTEMA DE RANK / ELO ONLINE (Local por enquanto) ---
         let meuElo = parseInt(localStorage.getItem('ticTacElo')) || 1000;
 
         function getRankObj(elo) {
@@ -437,9 +512,7 @@
                     try { cgSdk.game.sdkGameLoadingStart(); } catch(e){}
                     setTimeout(() => { try { cgSdk.game.sdkGameLoadingStop(); } catch(e){} }, 1000); 
                 }
-            } catch (e) {
-                console.warn("SDK não detectado corretamente");
-            }
+            } catch (e) { console.warn("SDK não detectado"); }
         }
         initCrazyGames();
 
@@ -470,7 +543,6 @@
             skinsDB.forEach(skin => {
                 const btn = document.createElement('button');
                 let textoStatus = skinEquipada === skin.id ? 'ATIVO' : (skin.unlocked ? 'USAR' : 'ABRIR');
-                
                 let borderCor = skinEquipada === skin.id ? skin.corO : (skin.unlocked ? skin.corX : '#444');
                 let opacidade = skin.unlocked ? '1' : '0.6';
 
@@ -498,17 +570,13 @@
                         assistirAnuncioSkin(skin.id);
                     }
                 };
-                
-                btn.onmouseover = () => { btn.style.transform = 'scale(1.02)'; }
-                btn.onmouseout = () => { btn.style.transform = 'scale(1)'; }
-                
                 lista.appendChild(btn);
             });
         }
 
         function assistirAnuncioSkin(id) {
             const acionarFallback = () => {
-                let conf = confirm("Modo Teste: Como o jogo ainda não está rodando dentro do site da CrazyGames, não conseguimos mostrar o anúncio real. Deseja simular a visualização e liberar a skin?");
+                let conf = confirm("Modo Teste: Simular visualização de anúncio e liberar a skin?");
                 if(conf) liberarSkin(id);
                 seMusicaTavaTocandoVolte();
             };
@@ -524,9 +592,7 @@
                 } else {
                     acionarFallback();
                 }
-            } catch (e) {
-                acionarFallback();
-            }
+            } catch (e) { acionarFallback(); }
         }
 
         function seMusicaTavaTocandoVolte() {
@@ -557,6 +623,7 @@
 
         carregarSkins();
 
+        // --- SISTEMA DE ÁUDIO E EFEITOS ---
         const elemMusica = document.getElementById('musicaFundo');
         let musicaAtiva = false;
 
@@ -583,14 +650,6 @@
             }
         }
 
-        document.body.addEventListener('click', function autoIniciaSom() {
-            if (document.getElementById('telaJogo').style.display !== 'flex' && !musicaAtiva && elemMusica.paused) {
-                toggleAudio();
-                document.body.removeEventListener('click', autoIniciaSom);
-            }
-        }, { once: true });
-
-        // --- OS EFEITOS SONOROS MANTIDOS IDÊNTICOS ---
         function som(f, d) {
             try {
                 if (ctxAudio.state === 'suspended') ctxAudio.resume(); 
@@ -620,18 +679,6 @@
                 g.connect(ctxAudio.destination);
                 o.start();
                 o.stop(ctxAudio.currentTime + 0.6);
-
-                const o2 = ctxAudio.createOscillator();
-                const g2 = ctxAudio.createGain();
-                o2.type = 'sawtooth';
-                o2.frequency.setValueAtTime(400, ctxAudio.currentTime);
-                o2.frequency.linearRampToValueAtTime(1200, ctxAudio.currentTime + 0.3);
-                g2.gain.setValueAtTime(0.1, ctxAudio.currentTime);
-                g2.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + 0.5);
-                o2.connect(g2);
-                g2.connect(ctxAudio.destination);
-                o2.start();
-                o2.stop(ctxAudio.currentTime + 0.5);
             } catch(e){}
         }
 
@@ -661,58 +708,30 @@
             const el = document.createElement('div');
             el.innerText = emoji;
             el.className = 'reacao-flutuante';
-            
             const container = origem === 'X' ? document.querySelector('.x-player') : document.querySelector('.o-player');
-            
-            if (container) {
-                container.appendChild(el);
-            } else {
-                document.body.appendChild(el);
-            }
-            
+            if (container) container.appendChild(el);
+            else document.body.appendChild(el);
             setTimeout(() => el.remove(), 2000);
         }
 
+        // --- LÓGICA DO JOGO E PEERJS ---
         let nomeX = "X", nomeO = "O", jAtual = "X", quemComeca = "X", ativo = true, estado = ["","","","","","","","",""];
         let pX = 0, pO = 0, online = false, minhaVez = true, meuSimbolo = "X", conn;
-        let connProvisoria = null;
-        let contraIA = false;
-        let dificuldadeIA = 'ultra';
-        
-        let buscandoGlobal = false;
-        let salaGlobalAlvo = "";
-        let globalRoomIndex = 1;
-        
-        let meuStream = null;
-        let micAtivo = false;
-        let amigoMutado = false;
-        
-        let heartbeatTimer;
-        let lastPong = Date.now();
-
-        function gerarID() {
-            return Math.floor(10000 + Math.random() * 89999).toString();
-        }
-
-        let meuIDOriginal = gerarID();
-        let peer;
+        let contraIA = false, dificuldadeIA = 'ultra';
+        let meuStream = null, micAtivo = false, amigoMutado = false;
+        let heartbeatTimer, lastPong = Date.now();
 
         function iniciarPeer(idToUse) {
             peer = new Peer(idToUse);
             
             peer.on('open', currentId => {
-                if(!currentId.startsWith("NeonGlb")) {
-                    document.getElementById('meuId').innerText = currentId;
-                }
-                if(buscandoGlobal && currentId.startsWith("NeonGlb")) {
-                    document.getElementById('statusGlobal').innerText = "AGUARDANDO JOGADOR...";
-                }
+                if(!currentId.startsWith("NeonGlb")) document.getElementById('meuId').innerText = currentId;
+                if(buscandoGlobal && currentId.startsWith("NeonGlb")) document.getElementById('statusGlobal').innerText = "AGUARDANDO JOGADOR...";
             });
             
             peer.on('connection', c => {
                 c.on('open', () => {
                     let isBusy = online || contraIA || document.getElementById('modalConvite').style.display === 'flex';
-                    
                     if (isBusy || (buscandoGlobal && !peer.id.startsWith("NeonGlb"))) {
                         c.send({t: 'rej_ocupado'});
                         setTimeout(() => c.close(), 500);
@@ -724,7 +743,6 @@
                     if(d.t === 'req') {
                         connProvisoria = c;
                         document.getElementById('textoConvite').innerText = `O jogador ${d.nome || 'Desconhecido'} quer entrar na sua sala!`;
-                        document.getElementById('erroConvite').style.display = 'none';
                         document.getElementById('modalConvite').style.display = 'flex';
                         nomeX = d.nome || "Adversário"; 
                     } else if(d.t === 'req_global') {
@@ -734,19 +752,12 @@
                             nomeX = document.getElementById('nomeOnlineGeral').value.trim();
                             conn.send({t: 'acc_global', nome: nomeX});
                             
-                            online = true;
-                            contraIA = false;
-                            meuSimbolo = "X";
-                            minhaVez = true; 
-                            buscandoGlobal = false;
+                            online = true; contraIA = false; meuSimbolo = "X"; minhaVez = true; buscandoGlobal = false;
                             
                             document.getElementById('statusGlobal').innerText = "PARTIDA ENCONTRADA!";
                             document.getElementById('statusGlobal').style.color = "var(--neon-green)";
-                            document.getElementById('statusGlobal').style.textShadow = "0 0 10px var(--neon-green)";
                             
                             setTimeout(() => {
-                                document.getElementById('statusGlobal').style.color = "var(--neon-cyan)";
-                                document.getElementById('statusGlobal').style.textShadow = "0 0 10px var(--neon-cyan)";
                                 setupConn();
                                 iniciarJogo('online');
                             }, 800);
@@ -759,15 +770,12 @@
 
             peer.on('call', call => {
                 call.answer(meuStream);
-                call.on('stream', streamRemoto => {
-                    document.getElementById('vozAmigo').srcObject = streamRemoto;
-                });
+                call.on('stream', streamRemoto => { document.getElementById('vozAmigo').srcObject = streamRemoto; });
             });
 
             peer.on('error', err => {
                 if(err.type === 'peer-unavailable') {
                     if(buscandoGlobal) {
-                        document.getElementById('statusGlobal').innerText = "Procurando Partida...";
                         peer.destroy();
                         setTimeout(() => { iniciarPeer(salaGlobalAlvo); }, 500);
                     } else {
@@ -779,15 +787,9 @@
                             erroOnline.style.display = 'block';
                         }
                     }
-                } else if (err.type === 'unavailable-id') {
-                    if(buscandoGlobal) {
-                        buscarOponenteGlobal();
-                    }
                 }
             });
         }
-
-        iniciarPeer(meuIDOriginal);
 
         async function toggleMic() {
             if (!meuStream) {
@@ -796,16 +798,11 @@
                     micAtivo = true;
                     document.getElementById('iconeMicOn').style.display = 'block';
                     document.getElementById('iconeMicOff').style.display = 'none';
-                    
                     if (online && conn && conn.peer) {
                         const call = peer.call(conn.peer, meuStream);
-                        call.on('stream', streamRemoto => {
-                            document.getElementById('vozAmigo').srcObject = streamRemoto;
-                        });
+                        call.on('stream', streamRemoto => { document.getElementById('vozAmigo').srcObject = streamRemoto; });
                     }
-                } catch(err) {
-                    alert("Você precisa permitir o microfone para usar o chat de voz.");
-                }
+                } catch(err) { alert("Você precisa permitir o microfone para usar o chat de voz."); }
             } else {
                 micAtivo = !micAtivo;
                 meuStream.getAudioTracks()[0].enabled = micAtivo;
@@ -815,16 +812,15 @@
         }
 
         function toggleMuteAmigo() {
-            const audioAmigo = document.getElementById('vozAmigo');
             amigoMutado = !amigoMutado;
-            audioAmigo.muted = amigoMutado;
+            document.getElementById('vozAmigo').muted = amigoMutado;
             document.getElementById('iconeSpkOn').style.display = amigoMutado ? 'none' : 'block';
             document.getElementById('iconeSpkOff').style.display = amigoMutado ? 'block' : 'none';
         }
 
-        // --- SISTEMA DE LINK E LOBBY REFINADOS ---
+        // --- SISTEMA DE LINK REFINADO ---
         function gerarLinkConvite() {
-            let link = window.location.href + "?roomId=" + meuIDOriginal;
+            let link = window.location.href.split('?')[0] + "?roomId=" + meuIDOriginal;
             try {
                 if (cgSdk && cgSdk.game && cgSdk.game.inviteLink) {
                     link = cgSdk.game.inviteLink({ roomId: meuIDOriginal });
@@ -836,7 +832,6 @@
             btn.innerHTML = "⏳ Aguardando Amigo...";
             btn.style.borderColor = "var(--neon-yellow)";
             btn.style.color = "var(--neon-yellow)";
-            btn.style.boxShadow = "0 0 15px rgba(241, 196, 15, 0.4)";
             btn.classList.add("status-vitoria"); 
             
             document.getElementById('idAmigo').style.display = 'none';
@@ -846,7 +841,6 @@
             const msg = document.getElementById('erroOnlineAmigo');
             msg.innerText = "Link copiado! Envie para o amigo e aguarde nesta tela.";
             msg.style.color = "var(--neon-cyan)";
-            msg.style.textShadow = "0 0 10px var(--neon-cyan)";
             msg.style.display = 'block';
         }
 
@@ -854,48 +848,38 @@
             const urlParams = new URLSearchParams(window.location.search);
             const rId = urlParams.get('roomId');
             if (rId) {
-                mostrarSetup('onlineMenu'); 
-                document.getElementById('nomeOnlineGeral').placeholder = "Seu Apelido para entrar...";
-                const btnAmigo = document.querySelector('button[onclick="abrirAmigo()"]');
-                btnAmigo.innerHTML = "🚀 Entrar na Sala do Link";
-                btnAmigo.style.background = "linear-gradient(90deg, #004d26, #00ff7f, #004d26)";
-                btnAmigo.style.borderColor = "var(--neon-green)";
-                btnAmigo.style.boxShadow = "0 0 20px var(--neon-green)";
-                btnAmigo.onclick = () => {
-                    if(!validarNomeGeral()) return;
-                    mostrarSetup('onlineAmigo');
-                    document.getElementById('idAmigo').value = rId;
-                    conectarAmigo();
-                };
+                setTimeout(() => {
+                    mostrarSetup('onlineMenu'); 
+                    document.getElementById('nomeOnlineGeral').placeholder = "Seu Apelido para entrar...";
+                    const btnAmigo = document.querySelector('button[onclick="abrirAmigo()"]');
+                    btnAmigo.innerHTML = "🚀 Entrar na Sala do Link";
+                    btnAmigo.style.background = "linear-gradient(90deg, #004d26, #00ff7f, #004d26)";
+                    btnAmigo.onclick = () => {
+                        if(!validarNomeGeral()) return;
+                        mostrarSetup('onlineAmigo');
+                        document.getElementById('idAmigo').value = rId;
+                        conectarAmigo();
+                    };
+                }, 1000); // Dá tempo do Firebase fazer o login primeiro
             }
         });
 
         function aceitarConvite() {
-            let meuNome = document.getElementById('nomeOnlineGeral').value.trim();
-            if(!meuNome) meuNome = "Host";
-            
-            document.getElementById('erroConvite').style.display = 'none';
+            let meuNome = document.getElementById('nomeOnlineGeral').value.trim() || "Host";
             document.getElementById('modalConvite').style.display = 'none';
             
             conn = connProvisoria;
             nomeO = meuNome;
             conn.send({t: 'acc', nome: nomeO});
             
-            online = true;
-            contraIA = false;
-            meuSimbolo = "O";
-            minhaVez = false;
-            
+            online = true; contraIA = false; meuSimbolo = "O"; minhaVez = false;
             setupConn();
             iniciarJogo('online');
         }
 
         function recusarConvite() {
             document.getElementById('modalConvite').style.display = 'none';
-            if(connProvisoria) {
-                connProvisoria.send({t: 'rej'});
-                setTimeout(() => connProvisoria.close(), 500);
-            }
+            if(connProvisoria) { connProvisoria.send({t: 'rej'}); setTimeout(() => connProvisoria.close(), 500); }
         }
 
         function conectarAmigo() {
@@ -903,7 +887,6 @@
             const btn = document.getElementById('btnConectar');
             const erroOnline = document.getElementById('erroOnlineAmigo');
             const meuNome = document.getElementById('nomeOnlineGeral').value.trim();
-            
             if(!id) return;
 
             erroOnline.style.display = 'none';
@@ -923,13 +906,8 @@
                 
                 conn.on('data', d => {
                     if (d.t === 'acc') {
-                        nomeX = meuNome;
-                        nomeO = d.nome || "Adversário";
-                        online = true;
-                        contraIA = false;
-                        meuSimbolo = "X";
-                        minhaVez = true;
-                        
+                        nomeX = meuNome; nomeO = d.nome || "Adversário";
+                        online = true; contraIA = false; meuSimbolo = "X"; minhaVez = true;
                         setupConn();
                         iniciarJogo('online');
                     } else if (d.t === 'rej' || d.t === 'rej_ocupado') {
@@ -940,17 +918,12 @@
                     }
                 });
             });
-            conn.on('error', () => {
-                clearTimeout(timeout);
-                btn.innerText = "Conectar";
-                erroOnline.style.display = 'block';
-            });
+            conn.on('error', () => { clearTimeout(timeout); btn.innerText = "Conectar"; erroOnline.style.display = 'block'; });
         }
 
         function abrirGlobal() {
             if(!validarNomeGeral()) return;
-            buscandoGlobal = true;
-            globalRoomIndex = 1;
+            buscandoGlobal = true; globalRoomIndex = 1;
             mostrarSetup('global');
             buscarOponenteGlobal();
         }
@@ -968,25 +941,10 @@
                 
                 conn.on('data', d => {
                     if (d.t === 'acc_global') {
-                        nomeO = meuNome;
-                        nomeX = d.nome || "Adversário";
-                        online = true;
-                        contraIA = false;
-                        meuSimbolo = "O";
-                        minhaVez = false; 
-                        buscandoGlobal = false;
-                        
+                        nomeO = meuNome; nomeX = d.nome || "Adversário";
+                        online = true; contraIA = false; meuSimbolo = "O"; minhaVez = false; buscandoGlobal = false;
                         document.getElementById('statusGlobal').innerText = "PARTIDA ENCONTRADA!";
-                        document.getElementById('statusGlobal').style.color = "var(--neon-green)";
-                        document.getElementById('statusGlobal').style.textShadow = "0 0 10px var(--neon-green)";
-                        
-                        setTimeout(() => {
-                            document.getElementById('statusGlobal').style.color = "var(--neon-cyan)";
-                            document.getElementById('statusGlobal').style.textShadow = "0 0 10px var(--neon-cyan)";
-                            setupConn();
-                            iniciarJogo('online');
-                        }, 800);
-                        
+                        setTimeout(() => { setupConn(); iniciarJogo('online'); }, 800);
                     } else if (d.t === 'rej_ocupado') {
                         globalRoomIndex++;
                         if(globalRoomIndex > 20) globalRoomIndex = 1; 
@@ -1007,27 +965,14 @@
 
         function setupConn() {
             conn.on('data', d => {
-                if(d.t === 'j') { 
-                    marcar(d.i, meuSimbolo === 'X' ? 'O' : 'X'); 
-                    minhaVez = true; 
-                    atualizarStatus(); 
-                }
+                if(d.t === 'j') { marcar(d.i, meuSimbolo === 'X' ? 'O' : 'X'); minhaVez = true; atualizarStatus(); }
                 if(d.t === 'r') resetLocal(); 
                 if(d.t === 'react') mostrarReacao(d.e, meuSimbolo === 'X' ? 'O' : 'X');
-                
-                if(d.t === 'ping') {
-                    try { conn.send({t: 'pong'}); } catch(e) {}
-                }
-                if(d.t === 'pong') { 
-                    lastPong = Date.now(); 
-                    document.getElementById('alertaWifi').style.display = 'none'; 
-                }
+                if(d.t === 'ping') { try { conn.send({t: 'pong'}); } catch(e) {} }
+                if(d.t === 'pong') { lastPong = Date.now(); document.getElementById('alertaWifi').style.display = 'none'; }
                 if(d.t === 'left') lidandoComFuga();
             });
-
-            conn.on('close', () => {
-                if(ativo && online) lidandoComFuga();
-            });
+            conn.on('close', () => { if(ativo && online) lidandoComFuga(); });
         }
 
         function iniciarMonitoramento() {
@@ -1035,26 +980,11 @@
             if(online) {
                 lastPong = Date.now();
                 heartbeatTimer = setInterval(() => {
-                    if(!online || !ativo) {
-                        clearInterval(heartbeatTimer);
-                        return;
-                    }
-                    
-                    try {
-                        if(conn && conn.open) {
-                            conn.send({t: 'ping'});
-                        }
-                    } catch(e) {} 
-                    
+                    if(!online || !ativo) return clearInterval(heartbeatTimer);
+                    try { if(conn && conn.open) conn.send({t: 'ping'}); } catch(e) {} 
                     let tempoSemResposta = Date.now() - lastPong;
-                    
-                    if(tempoSemResposta > 4000 && tempoSemResposta <= 10000) {
-                        document.getElementById('alertaWifi').style.display = 'block';
-                    }
-                    
-                    if(tempoSemResposta > 10000) {
-                        lidandoComFuga();
-                    }
+                    if(tempoSemResposta > 4000 && tempoSemResposta <= 10000) document.getElementById('alertaWifi').style.display = 'block';
+                    if(tempoSemResposta > 10000) lidandoComFuga();
                 }, 2000);
             }
         }
@@ -1062,98 +992,70 @@
         function lidandoComFuga() {
             clearInterval(heartbeatTimer);
             if(!ativo || !online) return; 
-            
-            ativo = false;
-            online = false; 
+            ativo = false; online = false; 
             document.getElementById('alertaWifi').style.display = 'none';
-            
-            document.body.style.animation = "none";
-            void document.body.offsetWidth;
-            document.body.style.animation = "flashWinX 0.6s ease-out"; 
             document.getElementById('tabuleiro').classList.add(meuSimbolo === 'X' ? 'board-win-x' : 'board-win-o');
             
             meuSimbolo === 'X' ? pX++ : pO++;
             document.getElementById('sX').innerText = pX; 
             document.getElementById('sO').innerText = pO;
             
-            somVitoria();
-            updateElo('vitoria'); 
-            document.getElementById('btnNovaPartida').style.display = 'none'; 
+            somVitoria(); updateElo('vitoria'); 
             
             const statusEl = document.getElementById('status');
-            statusEl.style.color = "var(--neon-green)";
             statusEl.classList.add('status-vitoria');
-            
             let segundos = 5;
             statusEl.innerText = `FUGIU! VITÓRIA!\nSAINDO EM ${segundos}...`;
             
             let contagem = setInterval(() => {
                 segundos--;
-                if(segundos > 0) {
-                    statusEl.innerText = `FUGIU! VITÓRIA!\nSAINDO EM ${segundos}...`;
-                } else {
-                    clearInterval(contagem);
-                    sairDaPartida(); 
-                }
+                if(segundos > 0) statusEl.innerText = `FUGIU! VITÓRIA!\nSAINDO EM ${segundos}...`;
+                else { clearInterval(contagem); sairDaPartida(); }
             }, 1000);
         }
 
         function sairDaPartida() {
             clearInterval(heartbeatTimer);
-            if (online && conn && conn.open) {
-                try { conn.send({t: 'left'}); } catch(e) {}
-            }
+            if (online && conn && conn.open) try { conn.send({t: 'left'}); } catch(e) {}
             
             document.getElementById('telaJogo').style.display = 'none';
             document.getElementById('telaInicial').style.display = 'flex';
             
             try { if(cgSdk && cgSdk.game) cgSdk.game.gameplayStop(); } catch(e){}
-
             mostrarSetup('menuPrincipal');
             
             document.getElementById('btnAudio').style.display = 'flex';
             document.getElementById('btnMic').style.display = 'none';
             document.getElementById('btnMutarAmigo').style.display = 'none';
+            if (musicaAtiva) elemMusica.play().catch(e=>{});
 
-            if (musicaAtiva) {
-                elemMusica.play().catch(e=>{});
-            }
-
-            if (document.getElementById('btnConectar').innerText !== "Conectar") {
-                document.getElementById('btnConectar').innerText = "Conectar";
-            }
-            
             buscandoGlobal = false;
-            if(conn) { conn.close(); }
-            online = false;
-            ativo = false;
+            if(conn) conn.close();
+            online = false; ativo = false;
             
-            if(peer) {
+            if(peer && !peer.id.startsWith("NeonGlb")) {
+                // peer intacto, só desconecta as amizades passadas
+            } else {
                 peer.destroy();
-                meuIDOriginal = gerarID();
                 setTimeout(() => { iniciarPeer(meuIDOriginal); }, 500); 
             }
             
             if(meuStream) {
                 meuStream.getTracks().forEach(t => t.stop());
-                meuStream = null;
-                micAtivo = false;
+                meuStream = null; micAtivo = false;
                 document.getElementById('iconeMicOn').style.display = 'none';
                 document.getElementById('iconeMicOff').style.display = 'block';
             }
 
-            document.body.style.animation = "";
             document.body.classList.remove('flash-red', 'flash-win-x', 'flash-win-o');
             document.getElementById('tabuleiro').classList.remove('shake-empate', 'board-win-x', 'board-win-o', 'shake-vitoria');
             const statusEl = document.getElementById('status');
             statusEl.style.color = "#fff";
             statusEl.classList.remove('status-vitoria');
-            statusEl.innerText = "SUA VEZ!";
             
             resetLocal(); 
             pX = 0; pO = 0;
-            document.getElementById('sX').innerText = pX; 
-            document.getElementById('sO').innerText = pO;
+            document.getElementById('sX').innerText = pX; document.getElementById('sO').innerText = pO;
         }
 
         function validarNomeGeral() {
@@ -1162,9 +1064,7 @@
             document.getElementById('erroNomeGeral').style.display = 'none'; return true;
         }
 
-        function abrirAmigo() {
-            if(validarNomeGeral()) mostrarSetup('onlineAmigo');
-        }
+        function abrirAmigo() { if(validarNomeGeral()) mostrarSetup('onlineAmigo'); }
 
         function mostrarSetup(m) {
             document.getElementById('botoesMenu').style.display = 'none';
@@ -1174,31 +1074,18 @@
             document.getElementById('setupGlobal').style.display = 'none';
             document.getElementById('setupIA').style.display = 'none';
             document.getElementById('setupSkins').style.display = 'none';
-            
-            document.getElementById('erroIA').style.display = 'none';
-            document.getElementById('erroLocal').style.display = 'none';
-            document.getElementById('erroNomeGeral').style.display = 'none';
-            
-            // Esconde o rodapé por padrão em qualquer sub-tela
             document.getElementById('creditosRodape').style.display = 'none'; 
             
             if(m === 'local') document.getElementById('setupLocal').style.display = 'flex';
             else if(m === 'onlineMenu') document.getElementById('setupOnlineMenu').style.display = 'flex';
             else if(m === 'onlineAmigo') {
-                // Reseta a UI do Lobby para garantir que não fique bugada se a pessoa voltar lá depois
                 const btn = document.getElementById('btnConvidarLink');
                 btn.innerHTML = "🔗 Enviar Convite (Link)";
-                btn.style.borderColor = "var(--neon-green)";
-                btn.style.color = "var(--neon-green)";
-                btn.style.boxShadow = "none";
                 btn.classList.remove("status-vitoria");
                 document.getElementById('idAmigo').style.display = 'inline-block';
                 document.getElementById('btnConectar').style.display = 'inline-block';
                 document.getElementById('divisoriaAmigo').style.display = 'block';
                 document.getElementById('erroOnlineAmigo').style.display = 'none';
-                document.getElementById('erroOnlineAmigo').style.color = "var(--neon-red)";
-                document.getElementById('erroOnlineAmigo').style.textShadow = "0 0 10px var(--neon-red)";
-                
                 document.getElementById('setupOnlineAmigo').style.display = 'flex';
             }
             else if(m === 'global') document.getElementById('setupGlobal').style.display = 'flex';
@@ -1206,55 +1093,34 @@
             else if(m === 'skins') document.getElementById('setupSkins').style.display = 'flex';
             else if(m === 'menuPrincipal') {
                 document.getElementById('botoesMenu').style.display = 'flex';
-                // Volta o rodapé SOMENTE no Menu Principal
                 document.getElementById('creditosRodape').style.display = 'flex'; 
             }
         }
 
-        function voltarMenu() {
-            mostrarSetup('menuPrincipal');
-        }
+        function voltarMenu() { mostrarSetup('menuPrincipal'); }
         
         function setDificuldade(d) {
             const nome = document.getElementById('nomeJogadorIA').value.trim();
-            const erroIA = document.getElementById('erroIA');
-            if(!nome) {
-                erroIA.style.display = 'block';
-                return;
-            }
-            erroIA.style.display = 'none';
-            dificuldadeIA = d;
-            iniciarJogo('ia');
+            if(!nome) { document.getElementById('erroIA').style.display = 'block'; return; }
+            dificuldadeIA = d; iniciarJogo('ia');
         }
 
         function iniciarJogo(m) {
             if(m === 'local') {
                 nomeX = document.getElementById('nomeLocalX').value.trim();
                 nomeO = document.getElementById('nomeLocalO').value.trim();
-                const erroLocal = document.getElementById('erroLocal');
-                if(!nomeX || !nomeO) {
-                    erroLocal.style.display = 'block';
-                    return;
-                }
-                erroLocal.style.display = 'none';
-                online = false;
-                contraIA = false;
+                if(!nomeX || !nomeO) { document.getElementById('erroLocal').style.display = 'block'; return; }
+                online = false; contraIA = false;
             } else if (m === 'ia') {
                 nomeX = document.getElementById('nomeJogadorIA').value.trim();
-                if(!nomeX) {
-                    document.getElementById('erroIA').style.display = 'block';
-                    return;
-                }
                 nomeO = "MÁQUINA";
-                online = false;
-                contraIA = true;
+                online = false; contraIA = true;
             }
 
             try { if(cgSdk && cgSdk.game) cgSdk.game.gameplayStart(); } catch(e){}
 
             pararMusicaImediatamente(); 
             document.getElementById('btnAudio').style.display = 'none';
-            
             document.getElementById('btnMic').style.display = 'none';
             document.getElementById('btnMutarAmigo').style.display = 'none';
             document.getElementById('barraReacoes').style.display = 'none';
@@ -1268,20 +1134,13 @@
             
             document.getElementById('telaInicial').style.display = 'none';
             document.getElementById('telaJogo').style.display = 'flex';
-            
             document.getElementById('txtNomeX').innerText = nomeX.toUpperCase();
             document.getElementById('txtNomeO').innerText = nomeO.toUpperCase();
-            
-            document.getElementById('sX').innerText = pX; 
-            document.getElementById('sO').innerText = pO;
-
             atualizarStatus();
-
-            if (contraIA && jAtual === 'O') {
-                jogadaIA();
-            }
+            if (contraIA && jAtual === 'O') jogadaIA();
         }
 
+        // LÓGICA MINIMAX E IA
         function achaMovimentoCritico(jogador) {
             for(let i = 0; i < 9; i++) {
                 if(estado[i] === "") {
@@ -1296,38 +1155,28 @@
 
         function jogadaIA() {
             if (!ativo || !contraIA) return;
-            const s = document.getElementById('status');
-            s.innerText = "MÁQUINA PENSANDO...";
+            document.getElementById('status').innerText = "MÁQUINA PENSANDO...";
             
             setTimeout(() => {
                 let index;
                 let vazios = estado.filter(x => x === "").length;
                 let disponiveis = estado.map((v, i) => v === "" ? i : null).filter(v => v !== null);
 
-                if (dificuldadeIA === 'noob') {
-                    index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
-                } else if (dificuldadeIA === 'mestre') {
+                if (dificuldadeIA === 'noob') index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+                else if (dificuldadeIA === 'mestre') {
                     let winMove = achaMovimentoCritico('O');
                     let blockMove = achaMovimentoCritico('X');
-                    
-                    if (winMove !== -1) {
-                        index = winMove;
-                    } else if (blockMove !== -1) {
-                        index = blockMove;
-                    } else {
-                        if (Math.random() > 0.75) {
-                            index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
-                        } else {
-                            if (vazios === 9) index = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
-                            else index = minimax(estado, 'O').index;
-                        }
+                    if (winMove !== -1) index = winMove;
+                    else if (blockMove !== -1) index = blockMove;
+                    else {
+                        if (Math.random() > 0.75) index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+                        else index = vazios === 9 ? [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)] : minimax(estado, 'O').index;
                     }
                 } else {
                     if (vazios === 9) index = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
                     else if (vazios === 8 && estado[4] === "") index = 4;
                     else index = minimax(estado, 'O').index;
                 }
-
                 marcar(index, 'O');
                 if (ativo) { jAtual = 'X'; atualizarStatus(); }
             }, 600);
@@ -1335,9 +1184,7 @@
 
         function checarVitoriaSimples(b) {
             const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-            for(let p of w) {
-                if(b[p[0]] !== "" && b[p[0]] === b[p[1]] && b[p[0]] === b[p[2]]) return b[p[0]];
-            }
+            for(let p of w) if(b[p[0]] !== "" && b[p[0]] === b[p[1]] && b[p[0]] === b[p[2]]) return b[p[0]];
             return null;
         }
 
@@ -1362,23 +1209,18 @@
             if (jogadorAI === 'O') {
                 let bestScore = -Infinity;
                 for (let i = 0; i < movimentos.length; i++) {
-                    if (movimentos[i].score > bestScore) {
-                        bestScore = movimentos[i].score;
-                        melhorMovimento = i;
-                    }
+                    if (movimentos[i].score > bestScore) { bestScore = movimentos[i].score; melhorMovimento = i; }
                 }
             } else {
                 let bestScore = Infinity;
                 for (let i = 0; i < movimentos.length; i++) {
-                    if (movimentos[i].score < bestScore) {
-                        bestScore = movimentos[i].score;
-                        melhorMovimento = i;
-                    }
+                    if (movimentos[i].score < bestScore) { bestScore = movimentos[i].score; melhorMovimento = i; }
                 }
             }
             return movimentos[melhorMovimento];
         }
 
+        // MARCAÇÕES TABULEIRO
         document.querySelectorAll('.celula').forEach(c => {
             c.addEventListener('click', e => {
                 const i = e.target.dataset.index;
@@ -1386,16 +1228,11 @@
                 
                 marcar(i, online ? meuSimbolo : jAtual);
                 
-                if(online) { 
-                    conn.send({t:'j', i:i}); 
-                    minhaVez = false; 
-                    atualizarStatus(); 
-                } else { 
+                if(online) { conn.send({t:'j', i:i}); minhaVez = false; atualizarStatus(); } 
+                else { 
                     jAtual = jAtual === 'X' ? 'O' : 'X'; 
                     atualizarStatus(); 
-                    if (contraIA && ativo && jAtual === 'O') {
-                        jogadaIA();
-                    }
+                    if (contraIA && ativo && jAtual === 'O') jogadaIA();
                 }
             });
         });
@@ -1404,9 +1241,7 @@
             som(600, 0.1);
             estado[i] = s;
             const el = document.querySelectorAll('.celula')[i];
-            
             el.innerText = getDisplaySkin(s); 
-            
             el.classList.add(s === 'X' ? 'x-player' : 'o-player');
             checar();
         }
@@ -1416,11 +1251,8 @@
             const s = document.getElementById('status');
             s.style.color = "#fff"; 
             s.classList.remove('status-vitoria');
-            if(online) {
-                s.innerText = minhaVez ? "SUA VEZ!" : "AGUARDE O ADVERSÁRIO...";
-            } else {
-                s.innerText = `VEZ DE ${jAtual === 'X' ? nomeX : nomeO}`;
-            }
+            if(online) s.innerText = minhaVez ? "SUA VEZ!" : "AGUARDE O ADVERSÁRIO...";
+            else s.innerText = `VEZ DE ${jAtual === 'X' ? nomeX : nomeO}`;
         }
         
         function checar() {
@@ -1429,16 +1261,11 @@
 
             for(let p of w) {
                 if(estado[p[0]] !== "" && estado[p[0]] === estado[p[1]] && estado[p[0]] === estado[p[2]]) {
-                    temVencedor = true;
-                    ativo = false; 
-                    
+                    temVencedor = true; ativo = false; 
                     const vencedor = estado[p[0]];
                     const nomeVencedor = vencedor === 'X' ? nomeX : nomeO;
                     
-                    if (online) {
-                        if (vencedor === meuSimbolo) updateElo('vitoria');
-                        else updateElo('derrota');
-                    }
+                    if (online) updateElo(vencedor === meuSimbolo ? 'vitoria' : 'derrota');
                     
                     const statusEl = document.getElementById('status');
                     statusEl.innerText = `${nomeVencedor} VENCEU!`;
@@ -1446,17 +1273,11 @@
                     statusEl.classList.add('status-vitoria');
                     
                     vencedor === 'X' ? pX++ : pO++;
-                    document.getElementById('sX').innerText = pX; 
-                    document.getElementById('sO').innerText = pO;
+                    document.getElementById('sX').innerText = pX; document.getElementById('sO').innerText = pO;
                     
                     const tabuleiro = document.getElementById('tabuleiro');
-                    if(vencedor === 'X') {
-                        document.body.classList.add('flash-win-x');
-                        tabuleiro.classList.add('board-win-x');
-                    } else {
-                        document.body.classList.add('flash-win-o');
-                        tabuleiro.classList.add('board-win-o');
-                    }
+                    if(vencedor === 'X') { document.body.classList.add('flash-win-x'); tabuleiro.classList.add('board-win-x'); } 
+                    else { document.body.classList.add('flash-win-o'); tabuleiro.classList.add('board-win-o'); }
                     tabuleiro.classList.add('shake-vitoria');
 
                     const celulas = document.querySelectorAll('.celula');
@@ -1465,10 +1286,8 @@
                     celulas[p[2]].classList.add('celula-vencedora');
 
                     somVitoria(); 
-                    
                     try { if(cgSdk && cgSdk.game) cgSdk.game.happytime(); } catch(e){}
-                    
-                    if (navigator.vibrate) { navigator.vibrate([100, 50, 100, 50, 200]); }
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
                     
                     document.getElementById('btnNovaPartida').style.display = 'block';
                     return; 
@@ -1477,7 +1296,6 @@
 
             if(!temVencedor && !estado.includes("")) { 
                 ativo = false; 
-                
                 if (online) updateElo('empate');
                 
                 const statusEl = document.getElementById('status');
@@ -1489,36 +1307,26 @@
                 document.body.classList.add('flash-red');
                 
                 somDerrota();
-                if (navigator.vibrate) { navigator.vibrate([100, 50, 100, 50, 200]); }
-                
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
                 document.getElementById('btnNovaPartida').style.display = 'block'; 
             }
         }
         
         function reset() { 
             if(!ativo) {
-                if(online) {
-                    try { conn.send({t:'r'}); } catch(e){}
-                }
+                if(online) try { conn.send({t:'r'}); } catch(e){}
                 resetLocal(); 
             }
         }
         
         function resetLocal() {
-            estado.fill(""); 
-            ativo = true; 
-            
+            estado.fill(""); ativo = true; 
             quemComeca = quemComeca === "X" ? "O" : "X";
             jAtual = quemComeca;
             
-            if(online) {
-                minhaVez = (meuSimbolo === quemComeca);
-            }
+            if(online) minhaVez = (meuSimbolo === quemComeca);
             
-            document.querySelectorAll('.celula').forEach(c => { 
-                c.innerText = ""; 
-                c.className = "celula"; 
-            });
+            document.querySelectorAll('.celula').forEach(c => { c.innerText = ""; c.className = "celula"; });
             
             const tabuleiro = document.getElementById('tabuleiro');
             tabuleiro.classList.remove('shake-empate', 'board-win-x', 'board-win-o', 'shake-vitoria');
@@ -1530,100 +1338,7 @@
             
             document.getElementById('btnNovaPartida').style.display = 'none';
             atualizarStatus(); 
-
-            if (contraIA && jAtual === 'O') {
-                jogadaIA();
-            }
-        }
-
-        // --- SISTEMA DE LOGIN FIREBASE (CONFIGURADO COM SUAS CHAVES REAIS) ---
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyDv64s-6JctziIGcyDfogeVJHnvGf6pDRc",
-            authDomain: "jogo-da-velha-000.firebaseapp.com",
-            projectId: "jogo-da-velha-000",
-            storageBucket: "jogo-da-velha-000.firebasestorage.app",
-            messagingSenderId: "175809267928",
-            appId: "1:175809267928:web:7d18bbd870a82482daafad",
-            measurementId: "G-F2NSRKELGL"
-        };
-
-        // Inicializa o Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-
-        // Monitora se o usuário está logado ou não
-        auth.onAuthStateChanged(user => {
-            if (user) {
-                // Usuário logado: esconde o login e mostra o menu principal
-                document.getElementById('telaLogin').style.display = 'none';
-                document.getElementById('telaInicial').style.display = 'flex';
-                
-                // Se for convidado, coloca o nome padrão. Se tiver e-mail, usa o e-mail.
-                if (user.isAnonymous) {
-                    document.getElementById('nomeOnlineGeral').value = "Convidado";
-                } else if (user.email) {
-                    document.getElementById('nomeOnlineGeral').value = user.email.split('@')[0];
-                }
-            } else {
-                // Ninguém logado: mostra a tela de login
-                document.getElementById('telaLogin').style.display = 'flex';
-                document.getElementById('telaInicial').style.display = 'none';
-            }
-        });
-
-        function mostrarErroLogin(msg) {
-            const erroEl = document.getElementById('erroLogin');
-            erroEl.innerText = msg;
-            erroEl.style.display = 'block';
-            setTimeout(() => erroEl.style.display = 'none', 3000);
-        }
-
-        function criarConta() {
-            const email = document.getElementById('emailLogin').value;
-            const senha = document.getElementById('senhaLogin').value;
-            
-            if(!email || !senha) return mostrarErroLogin("Preencha e-mail e senha!");
-
-            auth.createUserWithEmailAndPassword(email, senha)
-                .then((userCredential) => {
-                    console.log("Conta criada com sucesso!");
-                })
-                .catch((error) => {
-                    if(error.code === 'auth/email-already-in-use') mostrarErroLogin("Este e-mail já existe!");
-                    else if(error.code === 'auth/weak-password') mostrarErroLogin("A senha deve ter no mínimo 6 caracteres.");
-                    else mostrarErroLogin("Erro ao criar conta.");
-                });
-        }
-
-        function entrarConta() {
-            const email = document.getElementById('emailLogin').value;
-            const senha = document.getElementById('senhaLogin').value;
-
-            if(!email || !senha) return mostrarErroLogin("Preencha e-mail e senha!");
-
-            auth.signInWithEmailAndPassword(email, senha)
-                .then((userCredential) => {
-                    console.log("Logado com sucesso!");
-                })
-                .catch((error) => {
-                    mostrarErroLogin("E-mail ou senha incorretos!");
-                });
-        }
-
-        // Função para entrar sem senha
-        function entrarComoConvidado() {
-            auth.signInAnonymously()
-                .then(() => {
-                    console.log("Logado como convidado!");
-                })
-                .catch((error) => {
-                    mostrarErroLogin("Erro ao entrar. O login anônimo está ativo no Firebase?");
-                });
-        }
-
-        function sairDaConta() {
-            auth.signOut();
+            if (contraIA && jAtual === 'O') jogadaIA();
         }
     </script>
 </body>
