@@ -156,7 +156,7 @@
         .icone-som { width: 18px; height: 18px; fill: var(--neon-cyan); }
 
         /* =========================================
-           TELAS GERAIS E SCROLL (MENU E JOGO)
+           TELAS GERAIS E SCROLL
         ========================================= */
         #telaLogin { 
             display: flex; flex-direction: column; align-items: center; justify-content: center; 
@@ -293,11 +293,14 @@
         .btn-ia { background: linear-gradient(90deg, #002244, #05d9e8, #002244); border: 2px solid var(--neon-cyan); box-shadow: 0 0 20px var(--neon-cyan), inset 0 0 12px rgba(5, 217, 232, 0.6); }
         .btn-loja { background: rgba(241, 196, 15, 0.1); border: 2px solid var(--neon-yellow); color: var(--neon-yellow); box-shadow: 0 0 15px rgba(241, 196, 15, 0.3); }
         
-        /* CORES CORRIGIDAS DOS NÍVEIS DE IA */
+        /* =========================================
+           NOVAS CORES DA IA (ULTRA INSTINTO E AFINS)
+        ========================================= */
         .btn-noob { 
             background: rgba(0, 255, 127, 0.1); 
             border: 2px solid var(--neon-green); 
             color: var(--neon-green); 
+            box-shadow: 0 0 15px rgba(0, 255, 127, 0.3);
             margin-bottom: 10px; width: 260px; 
         }
         
@@ -305,16 +308,35 @@
             background: rgba(255, 42, 109, 0.1); 
             border: 2px solid var(--neon-red); 
             color: var(--neon-red); 
+            box-shadow: 0 0 15px rgba(255, 42, 109, 0.3);
             margin-bottom: 10px; width: 260px; 
         }
         
+        /* O VERDADEIRO ULTRA INSTINTO (Aura Giratória) */
         .btn-ultra { 
-            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(200,200,255,0.15)); 
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(150,200,255,0.2), rgba(255,255,255,0.1)); 
             border: 2px solid #ffffff; 
             color: #ffffff; 
-            box-shadow: 0 0 15px rgba(255,255,255,0.4), inset 0 0 10px rgba(255,255,255,0.2); 
-            text-shadow: 0 0 8px #ffffff; 
+            box-shadow: 0 0 15px rgba(200, 230, 255, 0.6), inset 0 0 15px rgba(200, 230, 255, 0.4); 
+            text-shadow: 0 0 8px #ffffff, 0 0 20px #aaddff; 
             margin-bottom: 10px; width: 260px; 
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .btn-ultra::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: conic-gradient(transparent, rgba(255,255,255,0.4), transparent 30%);
+            animation: auraGoku 3s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes auraGoku {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         .btn-acao { width: auto; padding: 18px 50px; margin-top: 30px; }
@@ -667,7 +689,7 @@
         let contraIA = false;
         let dificuldadeIA = 'ultra';
         let timeoutIA = null;
-        let iaPensando = false;
+        let iaPensando = false; // Trava para impedir duplo clique
         
         // Variáveis Globais e Social
         let buscandoGlobal = false;
@@ -1183,7 +1205,7 @@
             mostrarSetup('amigos');
         }
 
-        // 1. Enviar Pedido (Vai pro Firestore do Amigo)
+        // 1. Enviar Pedido (Vai pro Firestore do Amigo) COM FEEDBACK VERDE
         function enviarPedidoAmizade() {
             const idInput = document.getElementById('inputAddAmigo');
             const idAlvo = idInput.value.trim();
@@ -1601,7 +1623,6 @@
             iniciarJogo('ia');
         }
 
-        // FUNÇÃO CORRIGIDA: Agora reseta o tabuleiro antes de abrir a tela
         function iniciarJogo(m) {
             if(m === 'local') {
                 nomeX = document.getElementById('nomeLocalX').value.trim();
@@ -1661,7 +1682,7 @@
             c.addEventListener('click', e => {
                 const i = e.target.dataset.index;
                 
-                // Travas de segurança (Impede clique se a IA está pensando)
+                // TRAVAS DE SEGURANÇA BLINDADAS
                 if (estado[i] !== "" || !ativo || iaPensando) return;
                 if (online && !minhaVez) return;
                 if (contraIA && jAtual === 'O') return;
@@ -1782,8 +1803,9 @@
         function resetLocal() {
             estado.fill(""); 
             ativo = true; 
-            iaPensando = false;
-            clearTimeout(timeoutIA); // Garante que a IA não jogue no susto
+            
+            iaPensando = false; 
+            clearTimeout(timeoutIA); // Limpa travadas
             
             quemComeca = quemComeca === "X" ? "O" : "X";
             jAtual = quemComeca;
@@ -1895,7 +1917,7 @@
             document.getElementById('sO').innerText = pO;
         }
 
-        // --- INTELIGÊNCIA ARTIFICIAL (COM TRAVA DE BUG DUPLO) ---
+        // --- INTELIGÊNCIA ARTIFICIAL BLINDADA (MINIMAX) ---
         function achaMovimentoCritico(jogador) {
             for(let i = 0; i < 9; i++) {
                 if(estado[i] === "") {
@@ -1909,55 +1931,73 @@
         }
 
         function jogadaIA() {
-            clearTimeout(timeoutIA); // Limpa chamadas fantasmas antigas
-            
+            clearTimeout(timeoutIA); // Limpa qualquer chamada fantasma
+
+            // A barreira de segurança:
             if (!ativo || !contraIA || iaPensando) return;
             
-            iaPensando = true; // Trava o tabuleiro pra IA pensar em paz
+            iaPensando = true; // Abaixa o escudo pra evitar que o cara clique
             const s = document.getElementById('status');
             s.innerText = "MÁQUINA PENSANDO...";
             
             timeoutIA = setTimeout(() => {
-                iaPensando = false; // Destrava
-                let index;
-                let vazios = estado.filter(x => x === "").length;
-                let disponiveis = estado.map((v, i) => v === "" ? i : null).filter(v => v !== null);
+                try {
+                    // Segurança extra dentro do tempo
+                    if (!ativo || jAtual !== 'O') return;
 
-                if (dificuldadeIA === 'noob') {
-                    index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
-                } 
-                else if (dificuldadeIA === 'mestre') {
-                    let winMove = achaMovimentoCritico('O');
-                    let blockMove = achaMovimentoCritico('X');
-                    
-                    if (winMove !== -1) {
-                        index = winMove;
-                    } else if (blockMove !== -1) {
-                        index = blockMove;
-                    } else {
-                        if (Math.random() > 0.75) {
-                            index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+                    let index;
+                    let vazios = estado.filter(x => x === "").length;
+                    let disponiveis = estado.map((v, i) => v === "" ? i : null).filter(v => v !== null);
+
+                    if (dificuldadeIA === 'noob') {
+                        index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+                    } 
+                    else if (dificuldadeIA === 'mestre') {
+                        let winMove = achaMovimentoCritico('O');
+                        let blockMove = achaMovimentoCritico('X');
+                        
+                        if (winMove !== -1) {
+                            index = winMove;
+                        } else if (blockMove !== -1) {
+                            index = blockMove;
                         } else {
-                            if (vazios === 9) index = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
-                            else index = minimax(estado, 'O').index;
+                            if (Math.random() > 0.75) {
+                                index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+                            } else {
+                                if (vazios === 9) index = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
+                                else {
+                                    let copia = [...estado];
+                                    index = minimax(copia, 'O').index;
+                                }
+                            }
+                        }
+                    } 
+                    else {
+                        if (vazios === 9) {
+                            index = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
+                        } else if (vazios === 8 && estado[4] === "") {
+                            index = 4;
+                        } else {
+                            let copia = [...estado];
+                            index = minimax(copia, 'O').index;
                         }
                     }
-                } 
-                else {
-                    if (vazios === 9) {
-                        index = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
-                    } else if (vazios === 8 && estado[4] === "") {
-                        index = 4;
-                    } else {
-                        index = minimax(estado, 'O').index;
-                    }
-                }
 
-                marcar(index, 'O');
-                
-                if (ativo) { 
-                    jAtual = 'X'; 
-                    atualizarStatus(); 
+                    // Fallback caso a IA surte e não saiba o que fazer (evita travar o jogo)
+                    if (index === undefined || index === null) {
+                        index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+                    }
+
+                    marcar(index, 'O');
+                    
+                    if (ativo) { 
+                        jAtual = 'X'; 
+                        atualizarStatus(); 
+                    }
+                } catch(e) {
+                    console.error("Erro na IA:", e);
+                } finally {
+                    iaPensando = false; // Sobe o escudo
                 }
             }, 600);
         }
@@ -1991,12 +2031,12 @@
                         mov.score = minimax(novoEstado, 'O').score;
                     }
                     
-                    novoEstado[i] = "";
+                    novoEstado[i] = ""; // Volta pro lugar
                     movimentos.push(mov);
                 }
             }
             
-            let melhorMovimento;
+            let melhorMovimento = 0; // Failsafe
             if (jogadorAI === 'O') {
                 let bestScore = -Infinity;
                 for (let i = 0; i < movimentos.length; i++) {
