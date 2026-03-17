@@ -97,17 +97,10 @@
         /* CARTÃO DE PERFIL (ONLINE) */
         .profile-card {
             background: linear-gradient(135deg, rgba(20,20,35,0.8), rgba(5,5,15,0.9));
-            border: 2px solid var(--neon-cyan);
-            border-radius: 20px;
-            padding: 20px;
-            width: 300px;
-            margin-bottom: 25px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+            border: 2px solid var(--neon-cyan); border-radius: 20px; padding: 20px; width: 300px;
+            margin-bottom: 25px; display: flex; flex-direction: column; gap: 15px;
             box-shadow: 0 0 20px rgba(5, 217, 232, 0.3), inset 0 0 15px rgba(5, 217, 232, 0.2);
-            backdrop-filter: blur(10px);
-            transition: 0.3s;
+            backdrop-filter: blur(10px); transition: 0.3s;
         }
         .profile-card:hover { transform: scale(1.02); box-shadow: 0 0 25px rgba(5, 217, 232, 0.5), inset 0 0 20px rgba(5, 217, 232, 0.3); }
         .profile-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
@@ -116,6 +109,20 @@
         .profile-rank-area { display: flex; flex-direction: column; align-items: center; gap: 5px; }
         .rank-value { font-size: 1.4rem; font-weight: 900; letter-spacing: 1px; text-shadow: 0 0 12px currentColor; }
         .pdl-value { font-size: 0.8rem; color: #ddd; font-weight: bold; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 15px; align-self: center; border: 1px solid rgba(255,255,255,0.2); }
+
+        /* LISTA DE AMIGOS (SOCIAL HUB) */
+        .friend-card {
+            background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 15px; padding: 12px 15px; display: flex; justify-content: space-between;
+            align-items: center; transition: 0.3s; margin-bottom: 8px;
+        }
+        .friend-card:hover { border-color: var(--neon-purple); box-shadow: 0 0 15px rgba(157, 78, 221, 0.3); background: rgba(157, 78, 221, 0.1); }
+        .friend-info { display: flex; flex-direction: column; align-items: flex-start; }
+        .friend-name { font-weight: bold; color: white; font-size: 0.9rem; letter-spacing: 1px;}
+        .btn-desafiar { background: linear-gradient(90deg, #3d0a6b, #8a2be2); border: 1px solid var(--neon-purple); border-radius: 10px; color: white; font-weight: bold; padding: 8px 15px; cursor: pointer; text-transform: uppercase; font-size: 0.75rem; transition: 0.3s; }
+        .btn-desafiar:hover { box-shadow: 0 0 12px var(--neon-purple); transform: scale(1.05); }
+        .btn-remover-amigo { background: none; border: none; color: var(--neon-red); font-size: 1.2rem; cursor: pointer; padding: 0 8px; transition: 0.3s; }
+        .btn-remover-amigo:hover { transform: scale(1.2); text-shadow: 0 0 10px var(--neon-red); }
 
         #botoesMenu { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 15px; }
         
@@ -148,16 +155,14 @@
         }
         @keyframes blinkWifi { 0% { opacity: 0.5; box-shadow: 0 0 5px rgba(241, 196, 15, 0.2); } 100% { opacity: 1; box-shadow: 0 0 20px rgba(241, 196, 15, 0.8); } }
 
-        #setupOnlineMenu, #setupOnlineAmigo, #setupGlobal, #setupLocal, #setupIA, #setupSkins { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; animation: fadeIn 0.4s ease forwards; }
+        #setupOnlineMenu, #setupAmigos, #setupGlobal, #setupLocal, #setupIA, #setupSkins { display: none; flex-direction: column; align-items: center; justify-content: center; width: 100%; animation: fadeIn 0.4s ease forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        #listaSkins { 
-            display: flex; flex-direction: column; gap: 10px; width: 320px; 
-            max-height: 45vh; overflow-y: auto; padding: 5px; margin-bottom: 20px;
-        }
-        #listaSkins::-webkit-scrollbar { width: 6px; }
-        #listaSkins::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
-        #listaSkins::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 10px; }
+        #listaSkins { display: flex; flex-direction: column; gap: 10px; width: 320px; max-height: 45vh; overflow-y: auto; padding: 5px; margin-bottom: 20px; }
+        #listaDeAmigosContainer { display: flex; flex-direction: column; width: 320px; max-height: 35vh; overflow-y: auto; padding: 5px; margin-bottom: 15px; }
+        #listaSkins::-webkit-scrollbar, #listaDeAmigosContainer::-webkit-scrollbar { width: 6px; }
+        #listaSkins::-webkit-scrollbar-track, #listaDeAmigosContainer::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); border-radius: 10px; }
+        #listaSkins::-webkit-scrollbar-thumb, #listaDeAmigosContainer::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 10px; }
 
         #modalConvite { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(8px); animation: fadeIn 0.3s; }
         .modal-content { background: rgba(10,10,20,0.95); border: 2px solid var(--neon-cyan); padding: 40px 30px; border-radius: 25px; text-align: center; box-shadow: 0 0 40px rgba(5,217,232,0.3), inset 0 0 20px rgba(5,217,232,0.2); max-width: 90%; width: 350px; }
@@ -165,7 +170,6 @@
         .btn-recusar { background: linear-gradient(90deg, #4d0015, #ff2a6d, #4d0015); border-color: var(--neon-red); box-shadow: 0 0 15px var(--neon-red); width: 100%; }
 
         .placar { display: flex; gap: 35px; margin-bottom: 45px; background: rgba(5, 5, 10, 0.9); padding: 12px 35px; border-radius: 50px; border: 1.5px solid rgba(255,255,255,0.08); box-shadow: 0 8px 25px rgba(0,0,0,0.7); font-size: 0.95rem; font-weight: 700; align-items: center; backdrop-filter: blur(5px); }
-        
         .x-player, .o-player { position: relative; display: flex; align-items: center; justify-content: center; } 
         .x-player span:first-child, .o-player span:first-child { font-weight: normal; color: #aaa; text-transform: uppercase; letter-spacing: 1px; }
         .x-player span:last-child { color: var(--neon-red); font-size: 1.3rem; margin-left: 8px; text-shadow: 0 0 12px var(--neon-red), 0 0 20px var(--neon-red); }
@@ -173,11 +177,9 @@
         
         /* TABULEIRO E FUNDO SUAVIZADOS */
         .tabuleiro { display: grid; grid-template-columns: repeat(3, 95px); gap: 5px; background: color-mix(in srgb, var(--neon-cyan) 15%, transparent); padding: 5px; border-radius: 22px; border: 2.5px solid var(--neon-cyan); box-shadow: 0 0 20px color-mix(in srgb, var(--neon-cyan) 40%, transparent), inset 0 0 15px color-mix(in srgb, var(--neon-cyan) 40%, transparent); position: relative; transition: border-color 0.3s, box-shadow 0.3s, background 0.3s; }
-        
         .board-win-x { border-color: var(--neon-red) !important; box-shadow: 0 0 40px var(--neon-red), inset 0 0 20px var(--neon-red) !important; background: color-mix(in srgb, var(--neon-red) 25%, transparent) !important; }
         .board-win-o { border-color: var(--neon-cyan) !important; box-shadow: 0 0 40px var(--neon-cyan), inset 0 0 20px var(--neon-cyan) !important; background: color-mix(in srgb, var(--neon-cyan) 25%, transparent) !important; }
         
-        /* AS TREMIDINHAS */
         .shake-empate { animation: shakeBoard 0.5s cubic-bezier(.36,.07,.19,.97) both; border-color: var(--neon-red) !important; box-shadow: 0 0 30px var(--neon-red), inset 0 0 20px var(--neon-red) !important; background: color-mix(in srgb, var(--neon-red) 25%, transparent) !important; }
         @keyframes shakeBoard { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-8px, 2px, 0); } 40%, 60% { transform: translate3d(8px, -2px, 0); } }
 
@@ -237,13 +239,10 @@
         
         <button class="btn-menu btn-online" onclick="entrarConta()" style="margin-bottom: 15px;">ENTRAR</button>
         <button class="btn-menu btn-local" onclick="criarConta()" style="margin-bottom: 15px;">CRIAR CONTA</button>
-        
         <button class="btn-texto" onclick="entrarComoConvidado()" style="color: var(--neon-cyan); text-shadow: 0 0 8px rgba(5, 217, 232, 0.5);">Entrar como Convidado</button>
     </div>
 
-    <audio id="musicaFundo" loop preload="auto">
-        <source src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=cyberpunk-2099-10701.mp3" type="audio/mpeg">
-    </audio>
+    <audio id="musicaFundo" loop preload="auto"><source src="https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=cyberpunk-2099-10701.mp3" type="audio/mpeg"></audio>
     <audio id="vozAmigo" autoplay></audio>
 
     <button id="btnAudio" class="btn-top-corner" onclick="toggleAudio()" aria-label="Ligar/Desligar Música">
@@ -299,16 +298,24 @@
             <input type="text" id="nomeOnlineGeral" class="input-nome" placeholder="Alterar Apelido" maxlength="10">
             <p id="erroNomeGeral" class="erro-input">Preencha seu apelido!</p>
             <button class="btn-menu btn-ia" onclick="abrirGlobal()" style="margin-bottom:15px;">🌍 Partida Global</button>
-            <button class="btn-menu btn-online" onclick="abrirAmigo()">🤝 Jogar com Amigo</button>
+            <button class="btn-menu btn-online" onclick="abrirAmigosHub()">👥 Central de Amigos</button>
             <button class="btn-texto" onclick="voltarMenu()">Voltar</button>
         </div>
 
-        <div id="setupOnlineAmigo">
-            <button id="btnConvidarLink" class="btn-menu btn-local" onclick="gerarLinkConvite()" style="margin-bottom:15px; border-color:var(--neon-green); color:var(--neon-green);">🔗 Enviar Convite (Link)</button>
-            <div id="divisoriaAmigo" style="width: 100%; border-top: 1px solid rgba(255,255,255,0.1); margin-bottom: 15px;"></div>
-            <input type="number" id="idAmigo" class="input-nome" placeholder="ID do Amigo" inputmode="numeric" pattern="[0-9]*">
-            <button id="btnConectar" class="btn-menu btn-online" onclick="conectarAmigo()">Conectar</button>
-            <p id="erroOnlineAmigo" style="color:var(--neon-red); font-size:0.85rem; margin-top:12px; display:none; font-weight:bold; text-shadow: 0 0 10px var(--neon-red);">Código inexistente!</p>
+        <div id="setupAmigos">
+            <h3 style="color:var(--neon-purple); margin-bottom: 20px; text-transform:uppercase; letter-spacing:2px; text-shadow: 0 0 10px var(--neon-purple);">Meus Contatos</h3>
+            
+            <button id="btnConvidarLink" class="btn-menu btn-local" onclick="gerarLinkConvite()" style="width: 320px; margin-bottom:15px; border-color:var(--neon-green); color:var(--neon-green);">🔗 Enviar Link de Convite</button>
+            
+            <div style="display:flex; gap:10px; margin-bottom: 15px; width: 320px;">
+                <input type="number" id="inputAddAmigo" class="input-nome" placeholder="ID do Amigo" style="width: 100%; margin-bottom:0;" inputmode="numeric">
+                <button class="btn-menu btn-ia" style="width: auto; padding: 0 25px; margin-bottom:0;" onclick="adicionarAmigo()">Add</button>
+            </div>
+            <p id="statusCentralAmigos" style="color:var(--neon-red); font-size:0.85rem; margin-bottom:10px; display:none; font-weight:bold;"></p>
+
+            <div id="listaDeAmigosContainer">
+                </div>
+
             <button class="btn-texto" onclick="mostrarSetup('onlineMenu')">Voltar</button>
         </div>
 
@@ -338,8 +345,7 @@
 
         <div id="setupSkins">
             <h3 style="color:var(--neon-yellow); margin-bottom: 20px; text-transform:uppercase; letter-spacing:2px; text-shadow: 0 0 10px var(--neon-yellow);">SKINS PREMIUM</h3>
-            <div id="listaSkins">
-            </div>
+            <div id="listaSkins"></div>
             <button class="btn-texto" onclick="voltarMenu()">Voltar</button>
         </div>
         
@@ -379,16 +385,10 @@
     </div>
 
     <script>
-        // --- DESTRAVA DE ÁUDIO NO MOBILE (Primeiro Toque) ---
         const ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
+        document.body.addEventListener('click', () => { if (ctxAudio.state === 'suspended') ctxAudio.resume(); });
         
-        document.body.addEventListener('click', () => {
-            if (ctxAudio.state === 'suspended') {
-                ctxAudio.resume();
-            }
-        });
-        
-        // --- CONFIGURAÇÃO FIREBASE (SUAS CHAVES REAIS) ---
+        // --- CONFIGURAÇÃO FIREBASE ---
         const firebaseConfig = {
             apiKey: "AIzaSyDv64s-6JctziIGcyDfogeVJHnvGf6pDRc",
             authDomain: "jogo-da-velha-000.firebaseapp.com",
@@ -398,11 +398,9 @@
             appId: "1:175809267928:web:7d18bbd870a82482daafad",
             measurementId: "G-F2NSRKELGL"
         };
-
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
 
-        // Variáveis Globais
         let meuIDOriginal = "";
         let peer;
         let connProvisoria = null;
@@ -410,35 +408,23 @@
         let salaGlobalAlvo = "";
         let globalRoomIndex = 1;
 
-        // --- SISTEMA DE LOGIN E ID FIXO DA NUVEM ---
         auth.onAuthStateChanged(user => {
             if (user) {
                 document.getElementById('telaLogin').style.display = 'none';
                 document.getElementById('telaInicial').style.display = 'flex';
                 
-                // Transforma UID do Firebase em ID fixo de 5 dígitos
                 let hash = 0;
-                for (let i = 0; i < user.uid.length; i++) {
-                    hash = user.uid.charCodeAt(i) + ((hash << 5) - hash);
-                }
-                const idFixoPeloFirebase = Math.abs(hash % 90000 + 10000).toString();
-                
-                meuIDOriginal = idFixoPeloFirebase;
+                for (let i = 0; i < user.uid.length; i++) hash = user.uid.charCodeAt(i) + ((hash << 5) - hash);
+                meuIDOriginal = Math.abs(hash % 90000 + 10000).toString();
                 document.getElementById('meuId').innerText = meuIDOriginal;
 
-                if (peer) {
-                    peer.destroy();
-                    setTimeout(() => { iniciarPeer(meuIDOriginal); }, 500);
-                } else {
-                    iniciarPeer(meuIDOriginal);
-                }
+                if (peer) { peer.destroy(); setTimeout(() => { iniciarPeer(meuIDOriginal); }, 500); } 
+                else { iniciarPeer(meuIDOriginal); }
 
-                // Define o apelido e atualiza o Perfil
                 let nomePadrao = user.isAnonymous ? "Convidado" : user.email.split('@')[0];
                 document.getElementById('nomeOnlineGeral').value = nomePadrao;
                 document.getElementById('displayNomePerfil').innerText = nomePadrao;
 
-                // Atualiza o nome do Perfil em tempo real ao digitar
                 document.getElementById('nomeOnlineGeral').addEventListener('input', (e) => {
                     document.getElementById('displayNomePerfil').innerText = e.target.value.trim() || "JOGADOR";
                 });
@@ -452,33 +438,23 @@
 
         function mostrarErroLogin(msg) {
             const erroEl = document.getElementById('erroLogin');
-            erroEl.innerText = msg;
-            erroEl.style.display = 'block';
+            erroEl.innerText = msg; erroEl.style.display = 'block';
             setTimeout(() => erroEl.style.display = 'none', 3000);
         }
 
-        function entrarComoConvidado() {
-            auth.signInAnonymously().catch(() => mostrarErroLogin("Erro de conexão. O login anônimo está ativo?"));
-        }
-
+        function entrarComoConvidado() { auth.signInAnonymously().catch(() => mostrarErroLogin("Erro de conexão.")); }
         function criarConta() {
-            const e = document.getElementById('emailLogin').value;
-            const s = document.getElementById('senhaLogin').value;
+            const e = document.getElementById('emailLogin').value, s = document.getElementById('senhaLogin').value;
             if(!e || !s) return mostrarErroLogin("Preencha tudo!");
             auth.createUserWithEmailAndPassword(e, s).catch(err => mostrarErroLogin("Erro: " + err.message));
         }
-
         function entrarConta() {
-            const e = document.getElementById('emailLogin').value;
-            const s = document.getElementById('senhaLogin').value;
+            const e = document.getElementById('emailLogin').value, s = document.getElementById('senhaLogin').value;
             auth.signInWithEmailAndPassword(e, s).catch(() => mostrarErroLogin("E-mail ou senha incorretos!"));
         }
-
         function sairDaConta() { auth.signOut(); }
 
-        // --- SISTEMA DE RANK / ELO ONLINE ---
         let meuElo = parseInt(localStorage.getItem('ticTacElo')) || 1000;
-
         function getRankObj(elo) {
             if(elo < 1100) return { nome: "🥉 BRONZE", cor: "#cd7f32" };
             if(elo < 1300) return { nome: "🥈 PRATA", cor: "#bdc3c7" };
@@ -486,31 +462,19 @@
             if(elo < 1800) return { nome: "💎 DIAMANTE", cor: "#05d9e8" };
             return { nome: "👑 MESTRE", cor: "#9d4edd" };
         }
-
         function atualizarDisplayElo() {
             const r = getRankObj(meuElo);
-            const elRank = document.getElementById('txtRank');
-            const elElo = document.getElementById('txtElo');
-            if(elRank && elElo) {
-                elRank.innerText = r.nome;
-                elRank.style.color = r.cor;
-                elElo.innerText = `${meuElo} PDL`;
-            }
+            const elRank = document.getElementById('txtRank'), elElo = document.getElementById('txtElo');
+            if(elRank && elElo) { elRank.innerText = r.nome; elRank.style.color = r.cor; elElo.innerText = `${meuElo} PDL`; }
         }
-
         function updateElo(resultado) {
             if(!online) return;
-            if(resultado === 'vitoria') meuElo += 25;
-            else if(resultado === 'derrota') meuElo = Math.max(0, meuElo - 25);
-            else if(resultado === 'empate') meuElo += 5;
-            
-            localStorage.setItem('ticTacElo', meuElo);
-            atualizarDisplayElo();
+            if(resultado === 'vitoria') meuElo += 25; else if(resultado === 'derrota') meuElo = Math.max(0, meuElo - 25); else if(resultado === 'empate') meuElo += 5;
+            localStorage.setItem('ticTacElo', meuElo); atualizarDisplayElo();
         }
 
-        // --- SISTEMA SKINS CRAZYGAMES ---
+        // SKINS
         let cgSdk = null;
-        
         const skinsDB = [
             { id: 'default', nome: 'Clássico Neon', x: 'X', o: 'O', corX: '#ff2a6d', corO: '#05d9e8', unlocked: true },
             { id: 'lapis', nome: 'Material Escolar', x: '✏️', o: '🍩', corX: '#f1c40f', corO: '#e67e22', unlocked: false },
@@ -518,20 +482,16 @@
             { id: 'galaxia', nome: 'Cosmos', x: '🪐', o: '⭐', corX: '#9d4edd', corO: '#00ff7f', unlocked: false },
             { id: 'monstros', nome: 'Assustador', x: '🦇', o: '🎃', corX: '#2ecc71', corO: '#8e44ad', unlocked: false }
         ];
-
         let skinEquipada = 'default';
 
         async function initCrazyGames() {
             try {
                 if(window.CrazyGames && window.CrazyGames.SDK) {
-                    cgSdk = window.CrazyGames.SDK;
-                    await cgSdk.init();
+                    cgSdk = window.CrazyGames.SDK; await cgSdk.init();
                     try { cgSdk.game.sdkGameLoadingStart(); } catch(e){}
                     setTimeout(() => { try { cgSdk.game.sdkGameLoadingStop(); } catch(e){} }, 1000); 
                 }
-            } catch (e) {
-                console.warn("SDK não detectado corretamente");
-            }
+            } catch (e) {}
         }
         initCrazyGames();
 
@@ -540,371 +500,194 @@
             document.documentElement.style.setProperty('--neon-red', skin.corX);
             document.documentElement.style.setProperty('--neon-cyan', skin.corO);
         }
-
         function carregarSkins() {
             const salvas = JSON.parse(localStorage.getItem('ticTacSkinsUnlocked')) || ['default'];
             skinEquipada = localStorage.getItem('ticTacSkinEquipada') || 'default';
-
-            skinsDB.forEach(s => {
-                if (salvas.includes(s.id)) s.unlocked = true;
-            });
-            
-            aplicarCoresDaSkin();
-            renderizarMenuSkins();
-            atualizarDisplayElo(); 
+            skinsDB.forEach(s => { if (salvas.includes(s.id)) s.unlocked = true; });
+            aplicarCoresDaSkin(); renderizarMenuSkins(); atualizarDisplayElo(); 
         }
 
         function renderizarMenuSkins() {
-            const lista = document.getElementById('listaSkins');
-            if(!lista) return;
-            lista.innerHTML = '';
-
+            const lista = document.getElementById('listaSkins'); if(!lista) return; lista.innerHTML = '';
             skinsDB.forEach(skin => {
                 const btn = document.createElement('button');
-                let textoStatus = skinEquipada === skin.id ? 'ATIVO' : (skin.unlocked ? 'USAR' : 'ABRIR');
-                
-                let borderCor = skinEquipada === skin.id ? skin.corO : (skin.unlocked ? skin.corX : '#444');
-                let opacidade = skin.unlocked ? '1' : '0.6';
-
-                btn.style.cssText = `
-                    width: 100%; border: 2px solid ${borderCor}; box-shadow: 0 0 10px ${borderCor}; 
-                    background: rgba(0,0,0,0.6); color: white; display: flex; align-items: center; 
-                    padding: 12px 20px; border-radius: 30px; margin-bottom: 5px; cursor: pointer;
-                    opacity: ${opacidade}; font-family: inherit; transition: 0.3s;
-                `;
-
-                btn.innerHTML = `
-                    <span style="font-size: 1.5rem; width: 60px; text-align: left; text-shadow: 0 0 10px ${skin.corX};">${skin.x} ${skin.o}</span>
-                    <span style="flex-grow: 1; text-align: left; font-size: 0.95rem; font-weight: bold; text-transform: uppercase;">${skin.nome}</span>
-                    <span style="font-size: 0.75rem; font-weight: bold; color: ${borderCor};">${textoStatus}</span>
-                `;
-
-                btn.onclick = () => {
-                    if (skin.unlocked) {
-                        skinEquipada = skin.id;
-                        localStorage.setItem('ticTacSkinEquipada', skin.id);
-                        aplicarCoresDaSkin();
-                        renderizarMenuSkins();
-                        som(800, 0.1); 
-                    } else {
-                        assistirAnuncioSkin(skin.id);
-                    }
-                };
-                
-                btn.onmouseover = () => { btn.style.transform = 'scale(1.02)'; }
-                btn.onmouseout = () => { btn.style.transform = 'scale(1)'; }
-                
+                let tStatus = skinEquipada === skin.id ? 'ATIVO' : (skin.unlocked ? 'USAR' : 'ABRIR');
+                let bCor = skinEquipada === skin.id ? skin.corO : (skin.unlocked ? skin.corX : '#444');
+                btn.style.cssText = `width: 100%; border: 2px solid ${bCor}; box-shadow: 0 0 10px ${bCor}; background: rgba(0,0,0,0.6); color: white; display: flex; align-items: center; padding: 12px 20px; border-radius: 30px; margin-bottom: 5px; cursor: pointer; opacity: ${skin.unlocked?'1':'0.6'}; font-family: inherit; transition: 0.3s;`;
+                btn.innerHTML = `<span style="font-size: 1.5rem; width: 60px; text-align: left; text-shadow: 0 0 10px ${skin.corX};">${skin.x} ${skin.o}</span><span style="flex-grow: 1; text-align: left; font-size: 0.95rem; font-weight: bold; text-transform: uppercase;">${skin.nome}</span><span style="font-size: 0.75rem; font-weight: bold; color: ${bCor};">${tStatus}</span>`;
+                btn.onclick = () => { if (skin.unlocked) { skinEquipada = skin.id; localStorage.setItem('ticTacSkinEquipada', skin.id); aplicarCoresDaSkin(); renderizarMenuSkins(); som(800, 0.1); } else assistirAnuncioSkin(skin.id); };
                 lista.appendChild(btn);
             });
         }
-
         function assistirAnuncioSkin(id) {
-            const acionarFallback = () => {
-                let conf = confirm("Modo Teste: Simular visualização de anúncio e liberar a skin?");
-                if(conf) liberarSkin(id);
-                seMusicaTavaTocandoVolte();
-            };
-
-            try {
-                if (cgSdk && cgSdk.ad) {
-                    const callbacks = {
-                        adStarted: () => { pararMusicaImediatamente(); },
-                        adFinished: () => { liberarSkin(id); seMusicaTavaTocandoVolte(); },
-                        adError: (error) => { acionarFallback(); },
-                    };
-                    cgSdk.ad.requestAd('rewarded', callbacks);
-                } else {
-                    acionarFallback();
-                }
-            } catch (e) {
-                acionarFallback();
-            }
+            const fallback = () => { if(confirm("Modo Teste: Liberar skin?")) liberarSkin(id); seMusicaTavaTocandoVolte(); };
+            try { if (cgSdk && cgSdk.ad) cgSdk.ad.requestAd('rewarded', { adStarted: () => pararMusicaImediatamente(), adFinished: () => { liberarSkin(id); seMusicaTavaTocandoVolte(); }, adError: () => fallback() }); else fallback(); } catch (e) { fallback(); }
         }
-
-        function seMusicaTavaTocandoVolte() {
-            if(document.getElementById('iconeSomOn').style.display === 'block') {
-                elemMusica.play().catch(e=>{});
-            }
-        }
-
+        function seMusicaTavaTocandoVolte() { if(document.getElementById('iconeSomOn').style.display === 'block') elemMusica.play().catch(e=>{}); }
         function liberarSkin(id) {
             let skin = skinsDB.find(s => s.id === id);
-            if(skin) {
-                skin.unlocked = true;
-                let salvas = JSON.parse(localStorage.getItem('ticTacSkinsUnlocked')) || ['default'];
-                if(!salvas.includes(id)) salvas.push(id);
-                localStorage.setItem('ticTacSkinsUnlocked', JSON.stringify(salvas));
-                skinEquipada = id;
-                localStorage.setItem('ticTacSkinEquipada', id);
-                aplicarCoresDaSkin();
-                renderizarMenuSkins();
-                somVitoria(); 
-            }
+            if(skin) { skin.unlocked = true; let salvas = JSON.parse(localStorage.getItem('ticTacSkinsUnlocked')) || ['default']; if(!salvas.includes(id)) salvas.push(id); localStorage.setItem('ticTacSkinsUnlocked', JSON.stringify(salvas)); skinEquipada = id; localStorage.setItem('ticTacSkinEquipada', id); aplicarCoresDaSkin(); renderizarMenuSkins(); somVitoria(); }
         }
-
-        function getDisplaySkin(simbolo) {
-            let skin = skinsDB.find(s => s.id === skinEquipada) || skinsDB[0];
-            return simbolo === 'X' ? skin.x : skin.o;
-        }
-
+        function getDisplaySkin(simbolo) { let skin = skinsDB.find(s => s.id === skinEquipada) || skinsDB[0]; return simbolo === 'X' ? skin.x : skin.o; }
         carregarSkins();
 
-        // --- SISTEMA DE ÁUDIO ---
-        const elemMusica = document.getElementById('musicaFundo');
-        let musicaAtiva = false;
-
+        // ÁUDIO E EFEITOS
+        const elemMusica = document.getElementById('musicaFundo'); let musicaAtiva = false;
         function toggleAudio() {
-            if (musicaAtiva) {
-                elemMusica.pause();
-                document.getElementById('iconeSomOn').style.display = 'none';
-                document.getElementById('iconeSomOff').style.display = 'block';
-            } else {
-                elemMusica.volume = 0.35; 
-                elemMusica.play().catch(e => {});
-                document.getElementById('iconeSomOn').style.display = 'block';
-                document.getElementById('iconeSomOff').style.display = 'none';
-            }
+            if (musicaAtiva) { elemMusica.pause(); document.getElementById('iconeSomOn').style.display = 'none'; document.getElementById('iconeSomOff').style.display = 'block'; } 
+            else { elemMusica.volume = 0.35; elemMusica.play().catch(e => {}); document.getElementById('iconeSomOn').style.display = 'block'; document.getElementById('iconeSomOff').style.display = 'none'; }
             musicaAtiva = !musicaAtiva;
         }
+        function pararMusicaImediatamente() { if (!elemMusica.paused) { elemMusica.pause(); musicaAtiva = false; document.getElementById('iconeSomOn').style.display = 'none'; document.getElementById('iconeSomOff').style.display = 'block'; } }
+        document.body.addEventListener('click', function autoIniciaSom() { if (document.getElementById('telaJogo').style.display !== 'flex' && !musicaAtiva && elemMusica.paused) { toggleAudio(); document.body.removeEventListener('click', autoIniciaSom); } }, { once: true });
+        
+        function som(f, d) { try { if (ctxAudio.state === 'suspended') ctxAudio.resume(); const o = ctxAudio.createOscillator(), g = ctxAudio.createGain(); o.frequency.value = f; g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + d); o.connect(g); g.connect(ctxAudio.destination); o.start(); o.stop(ctxAudio.currentTime + d); } catch(e){} }
+        function somVitoria() { try { if (ctxAudio.state === 'suspended') ctxAudio.resume(); const o = ctxAudio.createOscillator(), g = ctxAudio.createGain(); o.type = 'square'; o.frequency.setValueAtTime(150, ctxAudio.currentTime); o.frequency.exponentialRampToValueAtTime(800, ctxAudio.currentTime + 0.4); g.gain.setValueAtTime(0, ctxAudio.currentTime); g.gain.linearRampToValueAtTime(0.15, ctxAudio.currentTime + 0.1); g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + 0.6); o.connect(g); g.connect(ctxAudio.destination); o.start(); o.stop(ctxAudio.currentTime + 0.6); } catch(e){} }
+        function somDerrota() { try { if (ctxAudio.state === 'suspended') ctxAudio.resume(); const o = ctxAudio.createOscillator(), g = ctxAudio.createGain(); o.type = 'sawtooth'; o.frequency.setValueAtTime(250, ctxAudio.currentTime); o.frequency.exponentialRampToValueAtTime(50, ctxAudio.currentTime + 0.6); g.gain.setValueAtTime(0.3, ctxAudio.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + 0.6); o.connect(g); g.connect(ctxAudio.destination); o.start(); o.stop(ctxAudio.currentTime + 0.6); } catch(e){} }
+        
+        function enviarReacao(emoji) { mostrarReacao(emoji, meuSimbolo); if(online && conn) conn.send({t: 'react', e: emoji}); }
+        function mostrarReacao(emoji, origem) { const el = document.createElement('div'); el.innerText = emoji; el.className = 'reacao-flutuante'; const container = origem === 'X' ? document.querySelector('.x-player') : document.querySelector('.o-player'); if (container) container.appendChild(el); else document.body.appendChild(el); setTimeout(() => el.remove(), 2000); }
 
-        function pararMusicaImediatamente() {
-            if (!elemMusica.paused) {
-                elemMusica.pause();
-                musicaAtiva = false;
-                document.getElementById('iconeSomOn').style.display = 'none';
-                document.getElementById('iconeSomOff').style.display = 'block';
-            }
-        }
-
-        document.body.addEventListener('click', function autoIniciaSom() {
-            if (document.getElementById('telaJogo').style.display !== 'flex' && !musicaAtiva && elemMusica.paused) {
-                toggleAudio();
-                document.body.removeEventListener('click', autoIniciaSom);
-            }
-        }, { once: true });
-
-        // --- OS EFEITOS SONOROS ---
-        function som(f, d) {
-            try {
-                if (ctxAudio.state === 'suspended') ctxAudio.resume(); 
-                const o = ctxAudio.createOscillator();
-                const g = ctxAudio.createGain();
-                o.frequency.value = f;
-                g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + d);
-                o.connect(g);
-                g.connect(ctxAudio.destination);
-                o.start();
-                o.stop(ctxAudio.currentTime + d);
-            } catch(e){}
-        }
-
-        function somVitoria() {
-            try {
-                if (ctxAudio.state === 'suspended') ctxAudio.resume();
-                const o = ctxAudio.createOscillator();
-                const g = ctxAudio.createGain();
-                o.type = 'square';
-                o.frequency.setValueAtTime(150, ctxAudio.currentTime);
-                o.frequency.exponentialRampToValueAtTime(800, ctxAudio.currentTime + 0.4);
-                g.gain.setValueAtTime(0, ctxAudio.currentTime);
-                g.gain.linearRampToValueAtTime(0.15, ctxAudio.currentTime + 0.1);
-                g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + 0.6);
-                o.connect(g);
-                g.connect(ctxAudio.destination);
-                o.start();
-                o.stop(ctxAudio.currentTime + 0.6);
-            } catch(e){}
-        }
-
-        function somDerrota() {
-            try {
-                if (ctxAudio.state === 'suspended') ctxAudio.resume();
-                const o = ctxAudio.createOscillator();
-                const g = ctxAudio.createGain();
-                o.type = 'sawtooth';
-                o.frequency.setValueAtTime(250, ctxAudio.currentTime);
-                o.frequency.exponentialRampToValueAtTime(50, ctxAudio.currentTime + 0.6);
-                g.gain.setValueAtTime(0.3, ctxAudio.currentTime);
-                g.gain.exponentialRampToValueAtTime(0.0001, ctxAudio.currentTime + 0.6);
-                o.connect(g);
-                g.connect(ctxAudio.destination);
-                o.start();
-                o.stop(ctxAudio.currentTime + 0.6);
-            } catch(e){}
-        }
-
-        function enviarReacao(emoji) {
-            mostrarReacao(emoji, meuSimbolo);
-            if(online && conn) conn.send({t: 'react', e: emoji});
-        }
-
-        function mostrarReacao(emoji, origem) {
-            const el = document.createElement('div');
-            el.innerText = emoji;
-            el.className = 'reacao-flutuante';
-            const container = origem === 'X' ? document.querySelector('.x-player') : document.querySelector('.o-player');
-            if (container) { container.appendChild(el); } else { document.body.appendChild(el); }
-            setTimeout(() => el.remove(), 2000);
-        }
-
-        // --- LÓGICA DO JOGO E PEERJS ---
+        // JOGO E PEERJS
         let nomeX = "X", nomeO = "O", jAtual = "X", quemComeca = "X", ativo = true, estado = ["","","","","","","","",""];
         let pX = 0, pO = 0, online = false, minhaVez = true, meuSimbolo = "X", conn;
-        let contraIA = false;
-        let dificuldadeIA = 'ultra';
-        
-        let meuStream = null;
-        let micAtivo = false;
-        let amigoMutado = false;
-        
-        let heartbeatTimer;
-        let lastPong = Date.now();
+        let contraIA = false, dificuldadeIA = 'ultra';
+        let meuStream = null, micAtivo = false, amigoMutado = false;
+        let heartbeatTimer, lastPong = Date.now();
 
         function iniciarPeer(idToUse) {
             peer = new Peer(idToUse);
-            
-            peer.on('open', currentId => {
-                if(buscandoGlobal && currentId.startsWith("NeonGlb")) {
-                    document.getElementById('statusGlobal').innerText = "AGUARDANDO JOGADOR...";
-                }
-            });
-            
+            peer.on('open', currentId => { if(buscandoGlobal && currentId.startsWith("NeonGlb")) document.getElementById('statusGlobal').innerText = "AGUARDANDO JOGADOR..."; });
             peer.on('connection', c => {
                 c.on('open', () => {
                     let isBusy = online || contraIA || document.getElementById('modalConvite').style.display === 'flex';
-                    
-                    if (isBusy || (buscandoGlobal && !peer.id.startsWith("NeonGlb"))) {
-                        c.send({t: 'rej_ocupado'});
-                        setTimeout(() => c.close(), 500);
-                        return;
-                    }
+                    if (isBusy || (buscandoGlobal && !peer.id.startsWith("NeonGlb"))) { c.send({t: 'rej_ocupado'}); setTimeout(() => c.close(), 500); return; }
                 });
-
                 c.on('data', d => {
-                    if(d.t === 'req') {
-                        connProvisoria = c;
-                        document.getElementById('textoConvite').innerText = `O jogador ${d.nome || 'Desconhecido'} quer entrar na sua sala!`;
-                        document.getElementById('modalConvite').style.display = 'flex';
-                        nomeX = d.nome || "Adversário"; 
-                    } else if(d.t === 'req_global') {
+                    if(d.t === 'req') { connProvisoria = c; document.getElementById('textoConvite').innerText = `O jogador ${d.nome || 'Desconhecido'} quer entrar!`; document.getElementById('modalConvite').style.display = 'flex'; nomeX = d.nome || "Adversário"; } 
+                    else if(d.t === 'req_global') {
                         if (buscandoGlobal) {
-                            conn = c;
-                            nomeO = d.nome || "Oponente";
-                            nomeX = document.getElementById('nomeOnlineGeral').value.trim();
+                            conn = c; nomeO = d.nome || "Oponente"; nomeX = document.getElementById('nomeOnlineGeral').value.trim();
                             conn.send({t: 'acc_global', nome: nomeX});
-                            
-                            online = true;
-                            contraIA = false;
-                            meuSimbolo = "X";
-                            minhaVez = true; 
-                            buscandoGlobal = false;
-                            
-                            document.getElementById('statusGlobal').innerText = "PARTIDA ENCONTRADA!";
-                            document.getElementById('statusGlobal').style.color = "var(--neon-green)";
-                            document.getElementById('statusGlobal').style.textShadow = "0 0 10px var(--neon-green)";
-                            
-                            setTimeout(() => {
-                                document.getElementById('statusGlobal').style.color = "var(--neon-cyan)";
-                                document.getElementById('statusGlobal').style.textShadow = "0 0 10px var(--neon-cyan)";
-                                setupConn();
-                                iniciarJogo('online');
-                            }, 800);
-                        } else {
-                            c.send({t: 'rej_ocupado'});
-                        }
+                            online = true; contraIA = false; meuSimbolo = "X"; minhaVez = true; buscandoGlobal = false;
+                            document.getElementById('statusGlobal').innerText = "PARTIDA ENCONTRADA!"; document.getElementById('statusGlobal').style.color = "var(--neon-green)";
+                            setTimeout(() => { setupConn(); iniciarJogo('online'); }, 800);
+                        } else c.send({t: 'rej_ocupado'});
                     }
                 });
             });
-
-            peer.on('call', call => {
-                call.answer(meuStream);
-                call.on('stream', streamRemoto => {
-                    document.getElementById('vozAmigo').srcObject = streamRemoto;
-                });
-            });
-
+            peer.on('call', call => { call.answer(meuStream); call.on('stream', streamRemoto => { document.getElementById('vozAmigo').srcObject = streamRemoto; }); });
             peer.on('error', err => {
                 if(err.type === 'peer-unavailable') {
-                    if(buscandoGlobal) {
-                        document.getElementById('statusGlobal').innerText = "Procurando Partida...";
-                        peer.destroy();
-                        setTimeout(() => { iniciarPeer(salaGlobalAlvo); }, 500);
-                    } else {
-                        const btn = document.getElementById('btnConectar');
-                        const erroOnline = document.getElementById('erroOnlineAmigo');
-                        if (btn) btn.innerText = "Conectar";
-                        if (erroOnline) {
-                            erroOnline.innerText = "Jogador não encontrado!";
-                            erroOnline.style.display = 'block';
-                        }
-                    }
-                } else if (err.type === 'unavailable-id') {
-                    if(buscandoGlobal) {
-                        buscarOponenteGlobal();
-                    }
-                }
+                    if(buscandoGlobal) { peer.destroy(); setTimeout(() => { iniciarPeer(salaGlobalAlvo); }, 500); } 
+                    else { document.getElementById('statusCentralAmigos').innerText = "Jogador não encontrado!"; document.getElementById('statusCentralAmigos').style.color = "var(--neon-red)"; document.getElementById('statusCentralAmigos').style.display = 'block'; }
+                } else if (err.type === 'unavailable-id' && buscandoGlobal) buscarOponenteGlobal();
             });
         }
 
         async function toggleMic() {
             if (!meuStream) {
-                try {
-                    meuStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-                    micAtivo = true;
-                    document.getElementById('iconeMicOn').style.display = 'block';
-                    document.getElementById('iconeMicOff').style.display = 'none';
-                    
-                    if (online && conn && conn.peer) {
-                        const call = peer.call(conn.peer, meuStream);
-                        call.on('stream', streamRemoto => {
-                            document.getElementById('vozAmigo').srcObject = streamRemoto;
-                        });
-                    }
-                } catch(err) {
-                    alert("Você precisa permitir o microfone para usar o chat de voz.");
-                }
-            } else {
-                micAtivo = !micAtivo;
-                meuStream.getAudioTracks()[0].enabled = micAtivo;
-                document.getElementById('iconeMicOn').style.display = micAtivo ? 'block' : 'none';
-                document.getElementById('iconeMicOff').style.display = micAtivo ? 'none' : 'block';
+                try { meuStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false }); micAtivo = true; document.getElementById('iconeMicOn').style.display = 'block'; document.getElementById('iconeMicOff').style.display = 'none'; if (online && conn && conn.peer) { const call = peer.call(conn.peer, meuStream); call.on('stream', streamRemoto => { document.getElementById('vozAmigo').srcObject = streamRemoto; }); } } 
+                catch(err) { alert("Permita o microfone para usar o chat."); }
+            } else { micAtivo = !micAtivo; meuStream.getAudioTracks()[0].enabled = micAtivo; document.getElementById('iconeMicOn').style.display = micAtivo ? 'block' : 'none'; document.getElementById('iconeMicOff').style.display = micAtivo ? 'none' : 'block'; }
+        }
+        function toggleMuteAmigo() { amigoMutado = !amigoMutado; document.getElementById('vozAmigo').muted = amigoMutado; document.getElementById('iconeSpkOn').style.display = amigoMutado ? 'none' : 'block'; document.getElementById('iconeSpkOff').style.display = amigoMutado ? 'block' : 'none'; }
+
+        // --- SOCIAL HUB & AMIGOS ---
+        function abrirAmigosHub() {
+            if(!validarNomeGeral()) return;
+            renderizarAmigos();
+            mostrarSetup('amigos');
+        }
+
+        function adicionarAmigo() {
+            const idInput = document.getElementById('inputAddAmigo');
+            const id = idInput.value.trim();
+            const statusCentral = document.getElementById('statusCentralAmigos');
+            
+            if(!id || id.length < 5) { statusCentral.innerText = "ID Inválido!"; statusCentral.style.display = 'block'; statusCentral.style.color = "var(--neon-red)"; return; }
+            if(id === meuIDOriginal) { statusCentral.innerText = "Você não pode adicionar a si mesmo!"; statusCentral.style.display = 'block'; statusCentral.style.color = "var(--neon-red)"; return; }
+
+            let amigos = JSON.parse(localStorage.getItem('ticTacAmigos')) || [];
+            if(amigos.some(a => a.id === id)) { statusCentral.innerText = "Já está na lista!"; statusCentral.style.display = 'block'; statusCentral.style.color = "var(--neon-yellow)"; return; }
+
+            amigos.push({ id: id });
+            localStorage.setItem('ticTacAmigos', JSON.stringify(amigos));
+            
+            idInput.value = "";
+            statusCentral.style.display = 'none';
+            renderizarAmigos();
+        }
+
+        function renderizarAmigos() {
+            const lista = document.getElementById('listaDeAmigosContainer');
+            let amigos = JSON.parse(localStorage.getItem('ticTacAmigos')) || [];
+            lista.innerHTML = '';
+            
+            if(amigos.length === 0) {
+                lista.innerHTML = '<p style="color:#aaa; font-size:0.85rem; margin-top:10px;">Nenhum contato adicionado.</p>';
+                return;
             }
+
+            amigos.forEach(amigo => {
+                const div = document.createElement('div');
+                div.className = 'friend-card';
+                div.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <button class="btn-remover-amigo" onclick="removerAmigo('${amigo.id}')" title="Remover">×</button>
+                        <div class="friend-info">
+                            <span class="friend-name">ID: ${amigo.id}</span>
+                        </div>
+                    </div>
+                    <button class="btn-desafiar" onclick="desafiarAmigo('${amigo.id}')">Desafiar</button>
+                `;
+                lista.appendChild(div);
+            });
         }
 
-        function toggleMuteAmigo() {
-            const audioAmigo = document.getElementById('vozAmigo');
-            amigoMutado = !amigoMutado;
-            audioAmigo.muted = amigoMutado;
-            document.getElementById('iconeSpkOn').style.display = amigoMutado ? 'none' : 'block';
-            document.getElementById('iconeSpkOff').style.display = amigoMutado ? 'block' : 'none';
+        function removerAmigo(id) {
+            let amigos = JSON.parse(localStorage.getItem('ticTacAmigos')) || [];
+            amigos = amigos.filter(a => a.id !== id);
+            localStorage.setItem('ticTacAmigos', JSON.stringify(amigos));
+            renderizarAmigos();
         }
 
-        // --- SISTEMA DE LINK E LOBBY ---
+        function desafiarAmigo(id) {
+            const meuNome = document.getElementById('nomeOnlineGeral').value.trim();
+            const statusCentral = document.getElementById('statusCentralAmigos');
+            
+            statusCentral.innerText = "Conectando ao ID " + id + "...";
+            statusCentral.style.color = "var(--neon-yellow)";
+            statusCentral.style.display = 'block';
+
+            conn = peer.connect(id);
+            const timeout = setTimeout(() => { statusCentral.innerText = "Jogador offline ou não encontrado!"; statusCentral.style.color = "var(--neon-red)"; }, 6000);
+
+            conn.on('open', () => {
+                clearTimeout(timeout);
+                statusCentral.innerText = "Aguardando Resposta...";
+                conn.send({t: 'req', nome: meuNome});
+                conn.on('data', d => {
+                    if (d.t === 'acc') {
+                        nomeX = meuNome; nomeO = d.nome || "Adversário";
+                        online = true; contraIA = false; meuSimbolo = "X"; minhaVez = true;
+                        statusCentral.style.display = 'none'; setupConn(); iniciarJogo('online');
+                    } else if (d.t === 'rej' || d.t === 'rej_ocupado') {
+                        statusCentral.innerText = d.t === 'rej_ocupado' ? "Jogador Ocupado!" : "Pedido Recusado!";
+                        statusCentral.style.color = "var(--neon-red)"; conn.close();
+                    }
+                });
+            });
+            conn.on('error', () => { clearTimeout(timeout); statusCentral.innerText = "Erro de Conexão!"; statusCentral.style.color = "var(--neon-red)"; });
+        }
+
         function gerarLinkConvite() {
             let link = window.location.href.split('?')[0] + "?roomId=" + meuIDOriginal;
-            try {
-                if (cgSdk && cgSdk.game && cgSdk.game.inviteLink) {
-                    link = cgSdk.game.inviteLink({ roomId: meuIDOriginal });
-                }
-            } catch(e) {}
+            try { if (cgSdk && cgSdk.game && cgSdk.game.inviteLink) link = cgSdk.game.inviteLink({ roomId: meuIDOriginal }); } catch(e) {}
             navigator.clipboard.writeText(link).catch(e=>{});
-            
             const btn = document.getElementById('btnConvidarLink');
-            btn.innerHTML = "⏳ Aguardando Amigo...";
-            btn.style.borderColor = "var(--neon-yellow)";
-            btn.style.color = "var(--neon-yellow)";
-            btn.style.boxShadow = "0 0 15px rgba(241, 196, 15, 0.4)";
-            btn.classList.add("status-vitoria"); 
-            
-            document.getElementById('idAmigo').style.display = 'none';
-            document.getElementById('btnConectar').style.display = 'none';
-            document.getElementById('divisoriaAmigo').style.display = 'none'; 
-            
-            const msg = document.getElementById('erroOnlineAmigo');
-            msg.innerText = "Link copiado! Envie para o amigo e aguarde nesta tela.";
-            msg.style.color = "var(--neon-cyan)";
-            msg.style.textShadow = "0 0 10px var(--neon-cyan)";
-            msg.style.display = 'block';
+            btn.innerHTML = "⏳ Link Copiado!"; btn.classList.add("status-vitoria"); 
+            setTimeout(() => { btn.innerHTML = "🔗 Enviar Link de Convite"; btn.classList.remove("status-vitoria"); }, 3000);
         }
 
         window.addEventListener('load', () => {
@@ -914,178 +697,55 @@
                 setTimeout(() => {
                     mostrarSetup('onlineMenu'); 
                     document.getElementById('nomeOnlineGeral').placeholder = "Seu Apelido para entrar...";
-                    const btnAmigo = document.querySelector('button[onclick="abrirAmigo()"]');
-                    btnAmigo.innerHTML = "🚀 Entrar na Sala do Link";
-                    btnAmigo.style.background = "linear-gradient(90deg, #004d26, #00ff7f, #004d26)";
-                    btnAmigo.style.borderColor = "var(--neon-green)";
-                    btnAmigo.style.boxShadow = "0 0 20px var(--neon-green)";
-                    btnAmigo.onclick = () => {
-                        if(!validarNomeGeral()) return;
-                        mostrarSetup('onlineAmigo');
-                        document.getElementById('idAmigo').value = rId;
-                        conectarAmigo();
-                    };
-                }, 1500); // Dá tempo do Firebase fazer o login primeiro
+                    const statusCentral = document.getElementById('statusCentralAmigos');
+                    abrirAmigosHub();
+                    document.getElementById('inputAddAmigo').value = rId;
+                    statusCentral.innerText = "Link Detectado! Adicione aos contatos ou clique em Desafiar.";
+                    statusCentral.style.color = "var(--neon-cyan)"; statusCentral.style.display = 'block';
+                }, 1500); 
             }
         });
 
         function aceitarConvite() {
-            let meuNome = document.getElementById('nomeOnlineGeral').value.trim();
-            if(!meuNome) meuNome = "Host";
-            
+            let meuNome = document.getElementById('nomeOnlineGeral').value.trim() || "Host";
             document.getElementById('modalConvite').style.display = 'none';
-            
-            conn = connProvisoria;
-            nomeO = meuNome;
-            conn.send({t: 'acc', nome: nomeO});
-            
-            online = true;
-            contraIA = false;
-            meuSimbolo = "O";
-            minhaVez = false;
-            
-            setupConn();
-            iniciarJogo('online');
+            conn = connProvisoria; nomeO = meuNome; conn.send({t: 'acc', nome: nomeO});
+            online = true; contraIA = false; meuSimbolo = "O"; minhaVez = false;
+            setupConn(); iniciarJogo('online');
         }
+        function recusarConvite() { document.getElementById('modalConvite').style.display = 'none'; if(connProvisoria) { connProvisoria.send({t: 'rej'}); setTimeout(() => connProvisoria.close(), 500); } }
 
-        function recusarConvite() {
-            document.getElementById('modalConvite').style.display = 'none';
-            if(connProvisoria) {
-                connProvisoria.send({t: 'rej'});
-                setTimeout(() => connProvisoria.close(), 500);
-            }
-        }
-
-        function conectarAmigo() {
-            const id = document.getElementById('idAmigo').value.trim();
-            const btn = document.getElementById('btnConectar');
-            const erroOnline = document.getElementById('erroOnlineAmigo');
-            const meuNome = document.getElementById('nomeOnlineGeral').value.trim();
-            
-            if(!id) return;
-
-            erroOnline.style.display = 'none';
-            btn.innerText = "Enviando Convite...";
-
-            conn = peer.connect(id);
-            const timeout = setTimeout(() => {
-                btn.innerText = "Conectar";
-                erroOnline.innerText = "Jogador não encontrado!";
-                erroOnline.style.display = 'block';
-            }, 6000);
-
-            conn.on('open', () => {
-                clearTimeout(timeout);
-                btn.innerText = "Aguardando Resposta...";
-                conn.send({t: 'req', nome: meuNome});
-                
-                conn.on('data', d => {
-                    if (d.t === 'acc') {
-                        nomeX = meuNome;
-                        nomeO = d.nome || "Adversário";
-                        online = true;
-                        contraIA = false;
-                        meuSimbolo = "X";
-                        minhaVez = true;
-                        
-                        setupConn();
-                        iniciarJogo('online');
-                    } else if (d.t === 'rej' || d.t === 'rej_ocupado') {
-                        btn.innerText = "Conectar";
-                        erroOnline.innerText = d.t === 'rej_ocupado' ? "Jogador Ocupado!" : "Pedido Recusado!";
-                        erroOnline.style.display = 'block';
-                        conn.close();
-                    }
-                });
-            });
-            conn.on('error', () => {
-                clearTimeout(timeout);
-                btn.innerText = "Conectar";
-                erroOnline.style.display = 'block';
-            });
-        }
-
-        function abrirGlobal() {
-            if(!validarNomeGeral()) return;
-            buscandoGlobal = true;
-            globalRoomIndex = 1;
-            mostrarSetup('global');
-            buscarOponenteGlobal();
-        }
-
+        function abrirGlobal() { if(!validarNomeGeral()) return; buscandoGlobal = true; globalRoomIndex = 1; mostrarSetup('global'); buscarOponenteGlobal(); }
         function buscarOponenteGlobal() {
             if(!buscandoGlobal) return;
             document.getElementById('statusGlobal').innerText = "Procurando Partida... (" + globalRoomIndex + ")";
             salaGlobalAlvo = "NeonGlb_" + globalRoomIndex;
-
             let tempConn = peer.connect(salaGlobalAlvo);
             tempConn.on('open', () => {
-                conn = tempConn;
-                const meuNome = document.getElementById('nomeOnlineGeral').value.trim();
+                conn = tempConn; const meuNome = document.getElementById('nomeOnlineGeral').value.trim();
                 conn.send({t: 'req_global', nome: meuNome});
-                
                 conn.on('data', d => {
                     if (d.t === 'acc_global') {
-                        nomeO = meuNome;
-                        nomeX = d.nome || "Adversário";
-                        online = true;
-                        contraIA = false;
-                        meuSimbolo = "O";
-                        minhaVez = false; 
-                        buscandoGlobal = false;
-                        
-                        document.getElementById('statusGlobal').innerText = "PARTIDA ENCONTRADA!";
-                        document.getElementById('statusGlobal').style.color = "var(--neon-green)";
-                        document.getElementById('statusGlobal').style.textShadow = "0 0 10px var(--neon-green)";
-                        
-                        setTimeout(() => {
-                            document.getElementById('statusGlobal').style.color = "var(--neon-cyan)";
-                            document.getElementById('statusGlobal').style.textShadow = "0 0 10px var(--neon-cyan)";
-                            setupConn();
-                            iniciarJogo('online');
-                        }, 800);
-                        
-                    } else if (d.t === 'rej_ocupado') {
-                        globalRoomIndex++;
-                        if(globalRoomIndex > 20) globalRoomIndex = 1; 
-                        buscarOponenteGlobal();
-                    }
+                        nomeO = meuNome; nomeX = d.nome || "Adversário";
+                        online = true; contraIA = false; meuSimbolo = "O"; minhaVez = false; buscandoGlobal = false;
+                        document.getElementById('statusGlobal').innerText = "PARTIDA ENCONTRADA!"; document.getElementById('statusGlobal').style.color = "var(--neon-green)";
+                        setTimeout(() => { setupConn(); iniciarJogo('online'); }, 800);
+                    } else if (d.t === 'rej_ocupado') { globalRoomIndex++; if(globalRoomIndex > 20) globalRoomIndex = 1; buscarOponenteGlobal(); }
                 });
             });
         }
-
-        function cancelarGlobal() {
-            buscandoGlobal = false;
-            if(peer && peer.id && peer.id.startsWith("NeonGlb_")) {
-                peer.destroy(); 
-                setTimeout(() => { iniciarPeer(meuIDOriginal); }, 500);
-            }
-            mostrarSetup('onlineMenu');
-        }
+        function cancelarGlobal() { buscandoGlobal = false; if(peer && peer.id && peer.id.startsWith("NeonGlb_")) { peer.destroy(); setTimeout(() => { iniciarPeer(meuIDOriginal); }, 500); } mostrarSetup('onlineMenu'); }
 
         function setupConn() {
             conn.on('data', d => {
-                if(d.t === 'j') { 
-                    marcar(d.i, meuSimbolo === 'X' ? 'O' : 'X'); 
-                    minhaVez = true; 
-                    atualizarStatus(); 
-                }
+                if(d.t === 'j') { marcar(d.i, meuSimbolo === 'X' ? 'O' : 'X'); minhaVez = true; atualizarStatus(); }
                 if(d.t === 'r') resetLocal(); 
                 if(d.t === 'react') mostrarReacao(d.e, meuSimbolo === 'X' ? 'O' : 'X');
-                
-                if(d.t === 'ping') {
-                    try { conn.send({t: 'pong'}); } catch(e) {}
-                }
-                if(d.t === 'pong') { 
-                    lastPong = Date.now(); 
-                    document.getElementById('alertaWifi').style.display = 'none'; 
-                }
+                if(d.t === 'ping') { try { conn.send({t: 'pong'}); } catch(e) {} }
+                if(d.t === 'pong') { lastPong = Date.now(); document.getElementById('alertaWifi').style.display = 'none'; }
                 if(d.t === 'left') lidandoComFuga();
             });
-
-            conn.on('close', () => {
-                if(ativo && online) lidandoComFuga();
-            });
+            conn.on('close', () => { if(ativo && online) lidandoComFuga(); });
         }
 
         function iniciarMonitoramento() {
@@ -1093,500 +753,147 @@
             if(online) {
                 lastPong = Date.now();
                 heartbeatTimer = setInterval(() => {
-                    if(!online || !ativo) {
-                        clearInterval(heartbeatTimer);
-                        return;
-                    }
-                    
-                    try {
-                        if(conn && conn.open) {
-                            conn.send({t: 'ping'});
-                        }
-                    } catch(e) {} 
-                    
-                    let tempoSemResposta = Date.now() - lastPong;
-                    
-                    if(tempoSemResposta > 4000 && tempoSemResposta <= 10000) {
-                        document.getElementById('alertaWifi').style.display = 'block';
-                    }
-                    
-                    if(tempoSemResposta > 10000) {
-                        lidandoComFuga();
-                    }
+                    if(!online || !ativo) { clearInterval(heartbeatTimer); return; }
+                    try { if(conn && conn.open) conn.send({t: 'ping'}); } catch(e) {} 
+                    let t = Date.now() - lastPong;
+                    if(t > 4000 && t <= 10000) document.getElementById('alertaWifi').style.display = 'block';
+                    if(t > 10000) lidandoComFuga();
                 }, 2000);
             }
         }
 
         function lidandoComFuga() {
-            clearInterval(heartbeatTimer);
-            if(!ativo || !online) return; 
-            
-            ativo = false;
-            online = false; 
-            document.getElementById('alertaWifi').style.display = 'none';
-            
-            document.body.style.animation = "none";
-            void document.body.offsetWidth;
-            document.body.style.animation = "flashWinX 0.6s ease-out"; 
+            clearInterval(heartbeatTimer); if(!ativo || !online) return; 
+            ativo = false; online = false; document.getElementById('alertaWifi').style.display = 'none';
+            document.body.style.animation = "none"; void document.body.offsetWidth; document.body.style.animation = "flashWinX 0.6s ease-out"; 
             document.getElementById('tabuleiro').classList.add(meuSimbolo === 'X' ? 'board-win-x' : 'board-win-o');
-            
-            meuSimbolo === 'X' ? pX++ : pO++;
-            document.getElementById('sX').innerText = pX; 
-            document.getElementById('sO').innerText = pO;
-            
-            somVitoria();
-            updateElo('vitoria'); 
-            document.getElementById('btnNovaPartida').style.display = 'none'; 
-            
-            const statusEl = document.getElementById('status');
-            statusEl.style.color = "var(--neon-green)";
-            statusEl.classList.add('status-vitoria');
-            
-            let segundos = 5;
-            statusEl.innerText = `FUGIU! VITÓRIA!\nSAINDO EM ${segundos}...`;
-            
-            let contagem = setInterval(() => {
-                segundos--;
-                if(segundos > 0) {
-                    statusEl.innerText = `FUGIU! VITÓRIA!\nSAINDO EM ${segundos}...`;
-                } else {
-                    clearInterval(contagem);
-                    sairDaPartida(); 
-                }
-            }, 1000);
+            meuSimbolo === 'X' ? pX++ : pO++; document.getElementById('sX').innerText = pX; document.getElementById('sO').innerText = pO;
+            somVitoria(); updateElo('vitoria'); document.getElementById('btnNovaPartida').style.display = 'none'; 
+            const s = document.getElementById('status'); s.style.color = "var(--neon-green)"; s.classList.add('status-vitoria');
+            let seg = 5; s.innerText = `FUGIU! VITÓRIA!\nSAINDO EM ${seg}...`;
+            let c = setInterval(() => { seg--; if(seg > 0) s.innerText = `FUGIU! VITÓRIA!\nSAINDO EM ${seg}...`; else { clearInterval(c); sairDaPartida(); } }, 1000);
         }
 
         function sairDaPartida() {
-            clearInterval(heartbeatTimer);
-            if (online && conn && conn.open) {
-                try { conn.send({t: 'left'}); } catch(e) {}
-            }
-            
-            document.getElementById('telaJogo').style.display = 'none';
-            document.getElementById('telaInicial').style.display = 'flex';
-            
+            clearInterval(heartbeatTimer); if (online && conn && conn.open) try { conn.send({t: 'left'}); } catch(e) {}
+            document.getElementById('telaJogo').style.display = 'none'; document.getElementById('telaInicial').style.display = 'flex';
             try { if(cgSdk && cgSdk.game) cgSdk.game.gameplayStop(); } catch(e){}
-
             mostrarSetup('menuPrincipal');
-            
-            document.getElementById('btnAudio').style.display = 'flex';
-            document.getElementById('btnMic').style.display = 'none';
-            document.getElementById('btnMutarAmigo').style.display = 'none';
-
-            if (musicaAtiva) {
-                elemMusica.play().catch(e=>{});
-            }
-
-            if (document.getElementById('btnConectar').innerText !== "Conectar") {
-                document.getElementById('btnConectar').innerText = "Conectar";
-            }
-            
-            buscandoGlobal = false;
-            if(conn) { conn.close(); }
-            online = false;
-            ativo = false;
-            
-            if(peer) {
-                peer.destroy();
-                setTimeout(() => { iniciarPeer(meuIDOriginal); }, 500); 
-            }
-            
-            if(meuStream) {
-                meuStream.getTracks().forEach(t => t.stop());
-                meuStream = null;
-                micAtivo = false;
-                document.getElementById('iconeMicOn').style.display = 'none';
-                document.getElementById('iconeMicOff').style.display = 'block';
-            }
-
-            document.body.style.animation = "";
-            document.body.classList.remove('flash-red', 'flash-win-x', 'flash-win-o');
-            document.getElementById('tabuleiro').classList.remove('shake-empate', 'board-win-x', 'board-win-o', 'shake-vitoria');
-            const statusEl = document.getElementById('status');
-            statusEl.style.color = "#fff";
-            statusEl.classList.remove('status-vitoria');
-            statusEl.innerText = "SUA VEZ!";
-            
-            resetLocal(); 
-            pX = 0; pO = 0;
-            document.getElementById('sX').innerText = pX; 
-            document.getElementById('sO').innerText = pO;
+            document.getElementById('btnAudio').style.display = 'flex'; document.getElementById('btnMic').style.display = 'none'; document.getElementById('btnMutarAmigo').style.display = 'none';
+            if (musicaAtiva) elemMusica.play().catch(e=>{});
+            buscandoGlobal = false; if(conn) conn.close(); online = false; ativo = false;
+            if(peer) { peer.destroy(); setTimeout(() => { iniciarPeer(meuIDOriginal); }, 500); }
+            if(meuStream) { meuStream.getTracks().forEach(t => t.stop()); meuStream = null; micAtivo = false; document.getElementById('iconeMicOn').style.display = 'none'; document.getElementById('iconeMicOff').style.display = 'block'; }
+            document.body.style.animation = ""; document.body.classList.remove('flash-red', 'flash-win-x', 'flash-win-o'); document.getElementById('tabuleiro').classList.remove('shake-empate', 'board-win-x', 'board-win-o', 'shake-vitoria');
+            const s = document.getElementById('status'); s.style.color = "#fff"; s.classList.remove('status-vitoria'); s.innerText = "SUA VEZ!";
+            resetLocal(); pX = 0; pO = 0; document.getElementById('sX').innerText = pX; document.getElementById('sO').innerText = pO;
         }
 
-        function validarNomeGeral() {
-            const n = document.getElementById('nomeOnlineGeral').value.trim();
-            if(!n) { document.getElementById('erroNomeGeral').style.display = 'block'; return false; }
-            document.getElementById('erroNomeGeral').style.display = 'none'; return true;
-        }
-
-        function abrirAmigo() {
-            if(validarNomeGeral()) mostrarSetup('onlineAmigo');
-        }
+        function validarNomeGeral() { const n = document.getElementById('nomeOnlineGeral').value.trim(); if(!n) { document.getElementById('erroNomeGeral').style.display = 'block'; return false; } document.getElementById('erroNomeGeral').style.display = 'none'; return true; }
 
         function mostrarSetup(m) {
-            document.getElementById('botoesMenu').style.display = 'none';
-            document.getElementById('setupLocal').style.display = 'none';
-            document.getElementById('setupOnlineMenu').style.display = 'none';
-            document.getElementById('setupOnlineAmigo').style.display = 'none';
-            document.getElementById('setupGlobal').style.display = 'none';
-            document.getElementById('setupIA').style.display = 'none';
-            document.getElementById('setupSkins').style.display = 'none';
-            document.getElementById('erroIA').style.display = 'none';
-            document.getElementById('erroLocal').style.display = 'none';
-            document.getElementById('erroNomeGeral').style.display = 'none';
-            
-            document.getElementById('creditosRodape').style.display = 'none'; 
+            ['botoesMenu','setupLocal','setupOnlineMenu','setupAmigos','setupGlobal','setupIA','setupSkins','creditosRodape'].forEach(id => document.getElementById(id).style.display = 'none');
+            document.getElementById('erroIA').style.display = 'none'; document.getElementById('erroLocal').style.display = 'none'; document.getElementById('erroNomeGeral').style.display = 'none';
             
             if(m === 'local') document.getElementById('setupLocal').style.display = 'flex';
             else if(m === 'onlineMenu') document.getElementById('setupOnlineMenu').style.display = 'flex';
-            else if(m === 'onlineAmigo') {
-                const btn = document.getElementById('btnConvidarLink');
-                btn.innerHTML = "🔗 Enviar Convite (Link)";
-                btn.style.borderColor = "var(--neon-green)";
-                btn.style.color = "var(--neon-green)";
-                btn.style.boxShadow = "none";
-                btn.classList.remove("status-vitoria");
-                document.getElementById('idAmigo').style.display = 'inline-block';
-                document.getElementById('btnConectar').style.display = 'inline-block';
-                document.getElementById('divisoriaAmigo').style.display = 'block';
-                document.getElementById('erroOnlineAmigo').style.display = 'none';
-                document.getElementById('erroOnlineAmigo').style.color = "var(--neon-red)";
-                document.getElementById('erroOnlineAmigo').style.textShadow = "0 0 10px var(--neon-red)";
-                
-                document.getElementById('setupOnlineAmigo').style.display = 'flex';
-            }
+            else if(m === 'amigos') document.getElementById('setupAmigos').style.display = 'flex';
             else if(m === 'global') document.getElementById('setupGlobal').style.display = 'flex';
             else if(m === 'ia') document.getElementById('setupIA').style.display = 'flex';
             else if(m === 'skins') document.getElementById('setupSkins').style.display = 'flex';
-            else if(m === 'menuPrincipal') {
-                document.getElementById('botoesMenu').style.display = 'flex';
-                document.getElementById('creditosRodape').style.display = 'flex'; 
-            }
+            else if(m === 'menuPrincipal') { document.getElementById('botoesMenu').style.display = 'flex'; document.getElementById('creditosRodape').style.display = 'flex'; }
         }
 
-        function voltarMenu() {
-            mostrarSetup('menuPrincipal');
-        }
-        
-        function setDificuldade(d) {
-            const nome = document.getElementById('nomeJogadorIA').value.trim();
-            const erroIA = document.getElementById('erroIA');
-            if(!nome) {
-                erroIA.style.display = 'block';
-                return;
-            }
-            erroIA.style.display = 'none';
-            dificuldadeIA = d;
-            iniciarJogo('ia');
-        }
+        function voltarMenu() { mostrarSetup('menuPrincipal'); }
+        function setDificuldade(d) { const nome = document.getElementById('nomeJogadorIA').value.trim(); if(!nome) return document.getElementById('erroIA').style.display = 'block'; document.getElementById('erroIA').style.display = 'none'; dificuldadeIA = d; iniciarJogo('ia'); }
 
         function iniciarJogo(m) {
-            if(m === 'local') {
-                nomeX = document.getElementById('nomeLocalX').value.trim();
-                nomeO = document.getElementById('nomeLocalO').value.trim();
-                const erroLocal = document.getElementById('erroLocal');
-                if(!nomeX || !nomeO) {
-                    erroLocal.style.display = 'block';
-                    return;
-                }
-                erroLocal.style.display = 'none';
-                online = false;
-                contraIA = false;
-            } else if (m === 'ia') {
-                nomeX = document.getElementById('nomeJogadorIA').value.trim();
-                if(!nomeX) {
-                    document.getElementById('erroIA').style.display = 'block';
-                    return;
-                }
-                nomeO = "MÁQUINA";
-                online = false;
-                contraIA = true;
-            }
+            if(m === 'local') { nomeX = document.getElementById('nomeLocalX').value.trim(); nomeO = document.getElementById('nomeLocalO').value.trim(); if(!nomeX || !nomeO) return document.getElementById('erroLocal').style.display = 'block'; document.getElementById('erroLocal').style.display = 'none'; online = false; contraIA = false; } 
+            else if (m === 'ia') { nomeX = document.getElementById('nomeJogadorIA').value.trim(); if(!nomeX) return document.getElementById('erroIA').style.display = 'block'; nomeO = "MÁQUINA"; online = false; contraIA = true; }
 
             try { if(cgSdk && cgSdk.game) cgSdk.game.gameplayStart(); } catch(e){}
-
             pararMusicaImediatamente(); 
-            document.getElementById('btnAudio').style.display = 'none';
-            
-            document.getElementById('btnMic').style.display = 'none';
-            document.getElementById('btnMutarAmigo').style.display = 'none';
-            document.getElementById('barraReacoes').style.display = 'none';
+            document.getElementById('btnAudio').style.display = 'none'; document.getElementById('btnMic').style.display = 'none'; document.getElementById('btnMutarAmigo').style.display = 'none'; document.getElementById('barraReacoes').style.display = 'none';
 
-            if (m === 'online') {
-                document.getElementById('btnMic').style.display = 'flex';
-                document.getElementById('btnMutarAmigo').style.display = 'flex';
-                document.getElementById('barraReacoes').style.display = 'flex';
-                iniciarMonitoramento();
-            }
+            if (m === 'online') { document.getElementById('btnMic').style.display = 'flex'; document.getElementById('btnMutarAmigo').style.display = 'flex'; document.getElementById('barraReacoes').style.display = 'flex'; iniciarMonitoramento(); }
             
-            document.getElementById('telaInicial').style.display = 'none';
-            document.getElementById('telaJogo').style.display = 'flex';
-            
-            document.getElementById('txtNomeX').innerText = nomeX.toUpperCase();
-            document.getElementById('txtNomeO').innerText = nomeO.toUpperCase();
-            
-            document.getElementById('sX').innerText = pX; 
-            document.getElementById('sO').innerText = pO;
-
-            atualizarStatus();
-
-            if (contraIA && jAtual === 'O') {
-                jogadaIA();
-            }
+            document.getElementById('telaInicial').style.display = 'none'; document.getElementById('telaJogo').style.display = 'flex';
+            document.getElementById('txtNomeX').innerText = nomeX.toUpperCase(); document.getElementById('txtNomeO').innerText = nomeO.toUpperCase();
+            document.getElementById('sX').innerText = pX; document.getElementById('sO').innerText = pO;
+            atualizarStatus(); if (contraIA && jAtual === 'O') jogadaIA();
         }
 
-        function achaMovimentoCritico(jogador) {
-            for(let i = 0; i < 9; i++) {
-                if(estado[i] === "") {
-                    estado[i] = jogador;
-                    let venceu = checarVitoriaSimples(estado) === jogador;
-                    estado[i] = "";
-                    if(venceu) return i;
-                }
-            }
-            return -1;
-        }
-
+        // IA
+        function achaMovimentoCritico(jogador) { for(let i = 0; i < 9; i++) { if(estado[i] === "") { estado[i] = jogador; let v = checarVitoriaSimples(estado) === jogador; estado[i] = ""; if(v) return i; } } return -1; }
         function jogadaIA() {
             if (!ativo || !contraIA) return;
-            const s = document.getElementById('status');
-            s.innerText = "MÁQUINA PENSANDO...";
-            
+            document.getElementById('status').innerText = "MÁQUINA PENSANDO...";
             setTimeout(() => {
-                let index;
-                let vazios = estado.filter(x => x === "").length;
-                let disponiveis = estado.map((v, i) => v === "" ? i : null).filter(v => v !== null);
-
-                if (dificuldadeIA === 'noob') {
-                    index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
-                } else if (dificuldadeIA === 'mestre') {
-                    let winMove = achaMovimentoCritico('O');
-                    let blockMove = achaMovimentoCritico('X');
-                    
-                    if (winMove !== -1) {
-                        index = winMove;
-                    } else if (blockMove !== -1) {
-                        index = blockMove;
-                    } else {
-                        if (Math.random() > 0.75) {
-                            index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
-                        } else {
-                            if (vazios === 9) index = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
-                            else index = minimax(estado, 'O').index;
-                        }
-                    }
-                } else {
-                    if (vazios === 9) index = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
-                    else if (vazios === 8 && estado[4] === "") index = 4;
-                    else index = minimax(estado, 'O').index;
-                }
-
-                marcar(index, 'O');
-                if (ativo) { jAtual = 'X'; atualizarStatus(); }
+                let index, vazios = estado.filter(x => x === "").length, disponiveis = estado.map((v, i) => v === "" ? i : null).filter(v => v !== null);
+                if (dificuldadeIA === 'noob') index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
+                else if (dificuldadeIA === 'mestre') {
+                    let win = achaMovimentoCritico('O'), block = achaMovimentoCritico('X');
+                    if (win !== -1) index = win; else if (block !== -1) index = block;
+                    else { if (Math.random() > 0.75) index = disponiveis[Math.floor(Math.random() * disponiveis.length)]; else index = vazios === 9 ? [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)] : minimax(estado, 'O').index; }
+                } else { if (vazios === 9) index = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)]; else if (vazios === 8 && estado[4] === "") index = 4; else index = minimax(estado, 'O').index; }
+                marcar(index, 'O'); if (ativo) { jAtual = 'X'; atualizarStatus(); }
             }, 600);
         }
-
-        function checarVitoriaSimples(b) {
-            const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-            for(let p of w) {
-                if(b[p[0]] !== "" && b[p[0]] === b[p[1]] && b[p[0]] === b[p[2]]) return b[p[0]];
-            }
-            return null;
+        function checarVitoriaSimples(b) { const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; for(let p of w) if(b[p[0]] !== "" && b[p[0]] === b[p[1]] && b[p[0]] === b[p[2]]) return b[p[0]]; return null; }
+        function minimax(nE, jAI) {
+            let v = checarVitoriaSimples(nE); if (v === 'X') return { score: -10 }; if (v === 'O') return { score: 10 }; if (!nE.includes("")) return { score: 0 }; 
+            let movs = [];
+            for (let i = 0; i < 9; i++) { if (nE[i] === "") { let mov = { index: i }; nE[i] = jAI; mov.score = minimax(nE, jAI === 'O' ? 'X' : 'O').score; nE[i] = ""; movs.push(mov); } }
+            let bestMov;
+            if (jAI === 'O') { let bestScore = -Infinity; for (let i = 0; i < movs.length; i++) { if (movs[i].score > bestScore) { bestScore = movs[i].score; bestMov = i; } } } 
+            else { let bestScore = Infinity; for (let i = 0; i < movs.length; i++) { if (movs[i].score < bestScore) { bestScore = movs[i].score; bestMov = i; } } }
+            return movs[bestMov];
         }
 
-        function minimax(novoEstado, jogadorAI) {
-            let v = checarVitoriaSimples(novoEstado);
-            if (v === 'X') return { score: -10 }; 
-            if (v === 'O') return { score: 10 };  
-            if (!novoEstado.includes("")) return { score: 0 }; 
-
-            let movimentos = [];
-            for (let i = 0; i < 9; i++) {
-                if (novoEstado[i] === "") {
-                    let mov = { index: i };
-                    novoEstado[i] = jogadorAI;
-                    mov.score = minimax(novoEstado, jogadorAI === 'O' ? 'X' : 'O').score;
-                    novoEstado[i] = "";
-                    movimentos.push(mov);
-                }
-            }
-            
-            let melhorMovimento;
-            if (jogadorAI === 'O') {
-                let bestScore = -Infinity;
-                for (let i = 0; i < movimentos.length; i++) {
-                    if (movimentos[i].score > bestScore) {
-                        bestScore = movimentos[i].score;
-                        melhorMovimento = i;
-                    }
-                }
-            } else {
-                let bestScore = Infinity;
-                for (let i = 0; i < movimentos.length; i++) {
-                    if (movimentos[i].score < bestScore) {
-                        bestScore = movimentos[i].score;
-                        melhorMovimento = i;
-                    }
-                }
-            }
-            return movimentos[melhorMovimento];
-        }
-
+        // TABULEIRO
         document.querySelectorAll('.celula').forEach(c => {
             c.addEventListener('click', e => {
-                const i = e.target.dataset.index;
-                if(estado[i] !== "" || !ativo || (online && !minhaVez) || (contraIA && jAtual === 'O')) return;
-                
+                const i = e.target.dataset.index; if(estado[i] !== "" || !ativo || (online && !minhaVez) || (contraIA && jAtual === 'O')) return;
                 marcar(i, online ? meuSimbolo : jAtual);
-                
-                if(online) { 
-                    conn.send({t:'j', i:i}); 
-                    minhaVez = false; 
-                    atualizarStatus(); 
-                } else { 
-                    jAtual = jAtual === 'X' ? 'O' : 'X'; 
-                    atualizarStatus(); 
-                    if (contraIA && ativo && jAtual === 'O') {
-                        jogadaIA();
-                    }
-                }
+                if(online) { conn.send({t:'j', i:i}); minhaVez = false; atualizarStatus(); } else { jAtual = jAtual === 'X' ? 'O' : 'X'; atualizarStatus(); if (contraIA && ativo && jAtual === 'O') jogadaIA(); }
             });
         });
         
-        function marcar(i, s) {
-            som(600, 0.1);
-            estado[i] = s;
-            const el = document.querySelectorAll('.celula')[i];
-            
-            el.innerText = getDisplaySkin(s); 
-            
-            el.classList.add(s === 'X' ? 'x-player' : 'o-player');
-            checar();
-        }
-        
-        function atualizarStatus() {
-            if(!ativo) return;
-            const s = document.getElementById('status');
-            s.style.color = "#fff"; 
-            s.classList.remove('status-vitoria');
-            if(online) {
-                s.innerText = minhaVez ? "SUA VEZ!" : "AGUARDE O ADVERSÁRIO...";
-            } else {
-                s.innerText = `VEZ DE ${jAtual === 'X' ? nomeX : nomeO}`;
-            }
-        }
+        function marcar(i, s) { som(600, 0.1); estado[i] = s; const el = document.querySelectorAll('.celula')[i]; el.innerText = getDisplaySkin(s); el.classList.add(s === 'X' ? 'x-player' : 'o-player'); checar(); }
+        function atualizarStatus() { if(!ativo) return; const s = document.getElementById('status'); s.style.color = "#fff"; s.classList.remove('status-vitoria'); if(online) s.innerText = minhaVez ? "SUA VEZ!" : "AGUARDE O ADVERSÁRIO..."; else s.innerText = `VEZ DE ${jAtual === 'X' ? nomeX : nomeO}`; }
         
         function checar() {
-            const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-            let temVencedor = false;
-
+            const w = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; let temVenc = false;
             for(let p of w) {
                 if(estado[p[0]] !== "" && estado[p[0]] === estado[p[1]] && estado[p[0]] === estado[p[2]]) {
-                    temVencedor = true;
-                    ativo = false; 
-                    
-                    const vencedor = estado[p[0]];
-                    const nomeVencedor = vencedor === 'X' ? nomeX : nomeO;
-                    
-                    if (online) {
-                        if (vencedor === meuSimbolo) updateElo('vitoria');
-                        else updateElo('derrota');
-                    }
-                    
-                    const statusEl = document.getElementById('status');
-                    statusEl.innerText = `${nomeVencedor} VENCEU!`;
-                    statusEl.style.color = vencedor === 'X' ? 'var(--neon-red)' : 'var(--neon-cyan)';
-                    statusEl.classList.add('status-vitoria');
-                    
-                    vencedor === 'X' ? pX++ : pO++;
-                    document.getElementById('sX').innerText = pX; 
-                    document.getElementById('sO').innerText = pO;
-                    
-                    const tabuleiro = document.getElementById('tabuleiro');
-                    if(vencedor === 'X') {
-                        document.body.classList.add('flash-win-x');
-                        tabuleiro.classList.add('board-win-x');
-                    } else {
-                        document.body.classList.add('flash-win-o');
-                        tabuleiro.classList.add('board-win-o');
-                    }
-                    tabuleiro.classList.add('shake-vitoria');
-
-                    const celulas = document.querySelectorAll('.celula');
-                    celulas[p[0]].classList.add('celula-vencedora');
-                    celulas[p[1]].classList.add('celula-vencedora');
-                    celulas[p[2]].classList.add('celula-vencedora');
-
-                    somVitoria(); 
-                    
-                    try { if(cgSdk && cgSdk.game) cgSdk.game.happytime(); } catch(e){}
-                    
-                    if (navigator.vibrate) { navigator.vibrate([100, 50, 100, 50, 200]); }
-                    
-                    document.getElementById('btnNovaPartida').style.display = 'block';
-                    return; 
+                    temVenc = true; ativo = false; const v = estado[p[0]], n = v === 'X' ? nomeX : nomeO;
+                    if (online) updateElo(v === meuSimbolo ? 'vitoria' : 'derrota');
+                    const s = document.getElementById('status'); s.innerText = `${n} VENCEU!`; s.style.color = v === 'X' ? 'var(--neon-red)' : 'var(--neon-cyan)'; s.classList.add('status-vitoria');
+                    v === 'X' ? pX++ : pO++; document.getElementById('sX').innerText = pX; document.getElementById('sO').innerText = pO;
+                    const t = document.getElementById('tabuleiro');
+                    if(v === 'X') { document.body.classList.add('flash-win-x'); t.classList.add('board-win-x'); } else { document.body.classList.add('flash-win-o'); t.classList.add('board-win-o'); }
+                    t.classList.add('shake-vitoria');
+                    const c = document.querySelectorAll('.celula'); c[p[0]].classList.add('celula-vencedora'); c[p[1]].classList.add('celula-vencedora'); c[p[2]].classList.add('celula-vencedora');
+                    somVitoria(); try { if(cgSdk && cgSdk.game) cgSdk.game.happytime(); } catch(e){} if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]);
+                    document.getElementById('btnNovaPartida').style.display = 'block'; return; 
                 }
             }
-
-            if(!temVencedor && !estado.includes("")) { 
-                ativo = false; 
-                
-                if (online) updateElo('empate');
-                
-                const statusEl = document.getElementById('status');
-                statusEl.innerText = "DEU VELHA!";
-                statusEl.style.color = "#fff"; 
-                statusEl.classList.remove('status-vitoria');
-                
-                document.getElementById('tabuleiro').classList.add('shake-empate');
-                document.body.classList.add('flash-red');
-                
-                somDerrota();
-                if (navigator.vibrate) { navigator.vibrate([100, 50, 100, 50, 200]); }
-                
-                document.getElementById('btnNovaPartida').style.display = 'block'; 
+            if(!temVenc && !estado.includes("")) { 
+                ativo = false; if (online) updateElo('empate');
+                const s = document.getElementById('status'); s.innerText = "DEU VELHA!"; s.style.color = "#fff"; s.classList.remove('status-vitoria');
+                document.getElementById('tabuleiro').classList.add('shake-empate'); document.body.classList.add('flash-red');
+                somDerrota(); if (navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 200]); document.getElementById('btnNovaPartida').style.display = 'block'; 
             }
         }
         
-        function reset() { 
-            if(!ativo) {
-                if(online) {
-                    try { conn.send({t:'r'}); } catch(e){}
-                }
-                resetLocal(); 
-            }
-        }
-        
+        function reset() { if(!ativo) { if(online) try { conn.send({t:'r'}); } catch(e){} resetLocal(); } }
         function resetLocal() {
-            estado.fill(""); 
-            ativo = true; 
-            
-            quemComeca = quemComeca === "X" ? "O" : "X";
-            jAtual = quemComeca;
-            
-            if(online) {
-                minhaVez = (meuSimbolo === quemComeca);
-            }
-            
-            document.querySelectorAll('.celula').forEach(c => { 
-                c.innerText = ""; 
-                c.className = "celula"; 
-            });
-            
-            const tabuleiro = document.getElementById('tabuleiro');
-            tabuleiro.classList.remove('shake-empate', 'board-win-x', 'board-win-o', 'shake-vitoria');
-            document.body.classList.remove('flash-red', 'flash-win-x', 'flash-win-o');
-            
-            const statusEl = document.getElementById('status');
-            statusEl.style.color = "#fff";
-            statusEl.classList.remove('status-vitoria');
-            
-            document.getElementById('btnNovaPartida').style.display = 'none';
-            atualizarStatus(); 
-
-            if (contraIA && jAtual === 'O') {
-                jogadaIA();
-            }
+            estado.fill(""); ativo = true; quemComeca = quemComeca === "X" ? "O" : "X"; jAtual = quemComeca;
+            if(online) minhaVez = (meuSimbolo === quemComeca);
+            document.querySelectorAll('.celula').forEach(c => { c.innerText = ""; c.className = "celula"; });
+            const t = document.getElementById('tabuleiro'); t.classList.remove('shake-empate', 'board-win-x', 'board-win-o', 'shake-vitoria'); document.body.classList.remove('flash-red', 'flash-win-x', 'flash-win-o');
+            const s = document.getElementById('status'); s.style.color = "#fff"; s.classList.remove('status-vitoria');
+            document.getElementById('btnNovaPartida').style.display = 'none'; atualizarStatus(); if (contraIA && jAtual === 'O') jogadaIA();
         }
     </script>
 </body>
