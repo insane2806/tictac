@@ -210,7 +210,7 @@
         .pdl-value { font-size: 0.8rem; color: #ddd; font-weight: bold; background: rgba(255,255,255,0.1); padding: 4px 10px; border-radius: 15px; align-self: center; border: 1px solid rgba(255,255,255,0.2); }
 
         /* =========================================
-           LISTA DE AMIGOS E SOLICITAÇÕES (NOVO LAYOUT)
+           LISTA DE AMIGOS E SOLICITAÇÕES
         ========================================= */
         .friend-card, .pedido-card { 
             background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.15); border-radius: 15px; 
@@ -293,9 +293,29 @@
         .btn-ia { background: linear-gradient(90deg, #002244, #05d9e8, #002244); border: 2px solid var(--neon-cyan); box-shadow: 0 0 20px var(--neon-cyan), inset 0 0 12px rgba(5, 217, 232, 0.6); }
         .btn-loja { background: rgba(241, 196, 15, 0.1); border: 2px solid var(--neon-yellow); color: var(--neon-yellow); box-shadow: 0 0 15px rgba(241, 196, 15, 0.3); }
         
-        .btn-noob { background: rgba(0, 255, 127, 0.1); border: 2px solid var(--neon-green); color: var(--neon-green); margin-bottom: 10px; width: 260px; }
-        .btn-mestre { background: rgba(241, 196, 15, 0.1); border: 2px solid var(--neon-yellow); color: var(--neon-yellow); margin-bottom: 10px; width: 260px; }
-        .btn-ultra { background: rgba(255, 42, 109, 0.1); border: 2px solid var(--neon-red); color: var(--neon-red); margin-bottom: 10px; width: 260px; }
+        /* CORES CORRIGIDAS DOS NÍVEIS DE IA */
+        .btn-noob { 
+            background: rgba(0, 255, 127, 0.1); 
+            border: 2px solid var(--neon-green); 
+            color: var(--neon-green); 
+            margin-bottom: 10px; width: 260px; 
+        }
+        
+        .btn-mestre { 
+            background: rgba(255, 42, 109, 0.1); 
+            border: 2px solid var(--neon-red); 
+            color: var(--neon-red); 
+            margin-bottom: 10px; width: 260px; 
+        }
+        
+        .btn-ultra { 
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(200,200,255,0.15)); 
+            border: 2px solid #ffffff; 
+            color: #ffffff; 
+            box-shadow: 0 0 15px rgba(255,255,255,0.4), inset 0 0 10px rgba(255,255,255,0.2); 
+            text-shadow: 0 0 8px #ffffff; 
+            margin-bottom: 10px; width: 260px; 
+        }
         
         .btn-acao { width: auto; padding: 18px 50px; margin-top: 30px; }
 
@@ -388,7 +408,7 @@
         @keyframes floatUpAndFade { 0% { opacity: 0; transform: translate(-50%, 10px) scale(0.5); } 15% { opacity: 1; transform: translate(-50%, -10px) scale(1.2); } 100% { opacity: 0; transform: translate(-50%, -60px) scale(1); } }
 
         /* =========================================
-           FOOTER (CORRIGIDO)
+           FOOTER 
         ========================================= */
         .credito-footer { 
             margin-top: 30px; margin-bottom: 20px; display: flex; flex-direction: column; 
@@ -520,8 +540,11 @@
         <div id="setupAmigos">
             <h3 style="color:var(--neon-purple); margin-bottom: 20px; text-transform:uppercase; letter-spacing:2px; text-shadow: 0 0 10px var(--neon-purple);">Central de Amigos</h3>
             
-            <input type="number" id="inputAddAmigo" class="input-nome" placeholder="Digite o ID do Amigo" inputmode="numeric" style="margin-bottom: 10px;">
-            <button class="btn-menu btn-online" onclick="enviarPedidoAmizade()" style="margin-bottom: 20px;">➕ Adicionar Amigo</button>
+            <div style="display:flex; flex-direction: column; align-items: center; width: 320px; margin-bottom: 10px;">
+                <input type="number" id="inputAddAmigo" class="input-nome" placeholder="Digite o ID do Amigo" inputmode="numeric" style="width: 100%; margin-bottom: 10px;">
+                <button class="btn-menu btn-online" onclick="enviarPedidoAmizade()" style="width: 100%; margin-bottom: 5px;">➕ Adicionar Amigo</button>
+                <p id="msgFeedbackAmigo" style="font-size: 0.85rem; font-weight: bold; margin-bottom: 15px; display: none;"></p>
+            </div>
             
             <button class="btn-texto" onclick="gerarLinkConvite()" style="margin-top:0; margin-bottom:20px; color:var(--neon-green);">🔗 ou Enviar Link de Convite</button>
             
@@ -632,28 +655,30 @@
         let minhaVez = false;
         let meuSimbolo = "X";
         let estado = ["","","","","","","","",""];
-        let ativo = true; // Essencial para o clique funcionar
+        let ativo = true; 
         let pX = 0;
         let pO = 0;
         let nomeX = "X";
         let nomeO = "O";
         let jAtual = "X";
         let quemComeca = "X";
+        
+        // Variáveis da IA
         let contraIA = false;
         let dificuldadeIA = 'ultra';
+        let timeoutIA = null;
+        let iaPensando = false;
         
+        // Variáveis Globais e Social
         let buscandoGlobal = false;
         let globalRoomIndex = 1;
         let salaGlobalAlvo = "";
-        
         let tempOpData = null; 
         let tempOpConn = null; 
         let currentChatId = null;
-        
         let meuStream = null;
         let micAtivo = false;
         let amigoMutado = false;
-        
         let heartbeatTimer;
         let lastPong = Date.now();
         let listenerPedidos = null; 
@@ -726,6 +751,7 @@
 
         // --- RANK / ELO ONLINE ---
         let meuElo = parseInt(localStorage.getItem('ticTacElo')) || 1000;
+        
         function getRankObj(elo) {
             if(elo < 1100) return { nome: "🥉 BRONZE", cor: "#cd7f32" };
             if(elo < 1300) return { nome: "🥈 PRATA", cor: "#bdc3c7" };
@@ -733,6 +759,7 @@
             if(elo < 1800) return { nome: "💎 DIAMANTE", cor: "#05d9e8" };
             return { nome: "👑 MESTRE", cor: "#9d4edd" };
         }
+        
         function atualizarDisplayElo() {
             const r = getRankObj(meuElo);
             const elRank = document.getElementById('txtRank');
@@ -743,6 +770,7 @@
                 elElo.innerText = `${meuElo} PDL`; 
             }
         }
+        
         function updateElo(resultado) {
             if(!online) return;
             if(resultado === 'vitoria') meuElo += 25; 
@@ -1160,14 +1188,19 @@
             const idInput = document.getElementById('inputAddAmigo');
             const idAlvo = idInput.value.trim();
             const meuNome = document.getElementById('nomeOnlineGeral').value.trim();
+            const feedback = document.getElementById('msgFeedbackAmigo');
             
             if(idAlvo.length < 5 || idAlvo === meuIDOriginal) {
-                mostrarAviso("ID Inválido ou é o seu próprio ID!");
+                feedback.innerText = "ID Inválido ou é o seu próprio ID!";
+                feedback.style.color = "var(--neon-red)";
+                feedback.style.display = "block";
                 return;
             }
             
             if(getAmigosDB().some(a => a.id === idAlvo)) {
-                mostrarAviso("Jogador já está na sua Lista de Amigos!");
+                feedback.innerText = "Este jogador já está na sua Lista de Amigos!";
+                feedback.style.color = "var(--neon-yellow)";
+                feedback.style.display = "block";
                 return;
             }
             
@@ -1175,10 +1208,18 @@
                 nome: meuNome, 
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             }).then(() => {
-                mostrarAviso("Pedido enviado com sucesso! O jogador verá nas Solicitações.");
+                // Feedback Verdinho e apaga o input
+                feedback.innerText = "Pedido de amizade enviado com sucesso!";
+                feedback.style.color = "var(--neon-green)";
+                feedback.style.display = "block";
                 idInput.value = "";
+                
+                // Apaga a mensagem depois de 4 segundos
+                setTimeout(() => { feedback.style.display = "none"; }, 4000);
             }).catch(e => {
-                mostrarAviso("Erro ao conectar com a nuvem.");
+                feedback.innerText = "Erro ao conectar com a nuvem.";
+                feedback.style.color = "var(--neon-red)";
+                feedback.style.display = "block";
             });
         }
 
@@ -1237,7 +1278,7 @@
             container.innerHTML = '';
             
             if(amigos.length === 0) {
-                container.innerHTML = '<p style="color:#aaa; font-size:0.85rem; margin-top:10px;">Você não tem amigos adicionados ainda.</p>';
+                container.innerHTML = '<p style="color:#aaa; font-size:0.85rem; margin-top:10px;">Sua lista está vazia. Adicione amigos acima!</p>';
                 return;
             }
             
@@ -1584,7 +1625,7 @@
                 contraIA = true;
             }
 
-            // LIMPA E DESTRAVA O TABULEIRO
+            // LIMPA E DESTRAVA O TABULEIRO ANTES DE INICIAR
             resetLocal();
 
             try { if(cgSdk && cgSdk.game) cgSdk.game.gameplayStart(); } catch(e){}
@@ -1620,8 +1661,8 @@
             c.addEventListener('click', e => {
                 const i = e.target.dataset.index;
                 
-                // Travas de segurança
-                if (estado[i] !== "" || !ativo) return;
+                // Travas de segurança (Impede clique se a IA está pensando)
+                if (estado[i] !== "" || !ativo || iaPensando) return;
                 if (online && !minhaVez) return;
                 if (contraIA && jAtual === 'O') return;
                 
@@ -1741,6 +1782,8 @@
         function resetLocal() {
             estado.fill(""); 
             ativo = true; 
+            iaPensando = false;
+            clearTimeout(timeoutIA); // Garante que a IA não jogue no susto
             
             quemComeca = quemComeca === "X" ? "O" : "X";
             jAtual = quemComeca;
@@ -1852,7 +1895,7 @@
             document.getElementById('sO').innerText = pO;
         }
 
-        // --- INTELIGÊNCIA ARTIFICIAL (MINIMAX ABERTO E LEGÍVEL) ---
+        // --- INTELIGÊNCIA ARTIFICIAL (COM TRAVA DE BUG DUPLO) ---
         function achaMovimentoCritico(jogador) {
             for(let i = 0; i < 9; i++) {
                 if(estado[i] === "") {
@@ -1866,22 +1909,24 @@
         }
 
         function jogadaIA() {
-            if (!ativo || !contraIA) return;
+            clearTimeout(timeoutIA); // Limpa chamadas fantasmas antigas
             
+            if (!ativo || !contraIA || iaPensando) return;
+            
+            iaPensando = true; // Trava o tabuleiro pra IA pensar em paz
             const s = document.getElementById('status');
             s.innerText = "MÁQUINA PENSANDO...";
             
-            setTimeout(() => {
+            timeoutIA = setTimeout(() => {
+                iaPensando = false; // Destrava
                 let index;
                 let vazios = estado.filter(x => x === "").length;
                 let disponiveis = estado.map((v, i) => v === "" ? i : null).filter(v => v !== null);
 
                 if (dificuldadeIA === 'noob') {
-                    // IA Boba (Sorteia qualquer lugar)
                     index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
                 } 
                 else if (dificuldadeIA === 'mestre') {
-                    // IA Média (Tenta ganhar e tenta bloquear, mas as vezes erra)
                     let winMove = achaMovimentoCritico('O');
                     let blockMove = achaMovimentoCritico('X');
                     
@@ -1899,7 +1944,6 @@
                     }
                 } 
                 else {
-                    // IA Impossível (Minimax)
                     if (vazios === 9) {
                         index = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
                     } else if (vazios === 8 && estado[4] === "") {
