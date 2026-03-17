@@ -311,7 +311,7 @@
         }
         .btn-mestre:hover { transform: scale(1.05); box-shadow: 0 0 20px rgba(255, 42, 109, 0.6); }
         
-        /* ULTRA INSTINTO COM BRILHO BRANCO/PRATEADO PURO */
+        /* ULTRA INSTINTO COM BRILHO BRANCO/PRATEADO PURO E PULSANTE */
         .btn-ultra { 
             background: rgba(255, 255, 255, 0.05); 
             border: 2px solid #ffffff; 
@@ -678,13 +678,14 @@
         let pO = 0;
         let nomeX = "X";
         let nomeO = "O";
-        let jAtual = "X";
-        let quemComeca = "X";
+        
+        // Configuração original para o X (Humano) começar primeiro contra a IA
+        let quemComeca = "O"; 
+        let jAtual = "X"; 
         
         // Variáveis da IA
         let contraIA = false;
         let dificuldadeIA = 'ultra';
-        let timeoutIA = null;
         
         // Variáveis Globais e Social
         let buscandoGlobal = false;
@@ -1200,7 +1201,7 @@
             mostrarSetup('amigos');
         }
 
-        // 1. Enviar Pedido com Feedback Verde Exclusivo
+        // 1. Enviar Pedido (Vai pro Firestore do Amigo) COM TIMEOUT ANTI-TRAVAMENTO
         function enviarPedidoAmizade() {
             const idInput = document.getElementById('inputAddAmigo');
             const idAlvo = idInput.value.trim();
@@ -1208,7 +1209,7 @@
             const feedback = document.getElementById('msgFeedbackAmigo');
             
             if(!db) {
-                feedback.innerText = "Erro: Firestore do Firebase não ativado! Crie o banco de dados no painel do seu Firebase.";
+                feedback.innerText = "Erro: Banco de Dados não ativado no Firebase!";
                 feedback.style.color = "var(--neon-red)";
                 feedback.style.display = "block";
                 return;
@@ -1228,21 +1229,33 @@
                 return;
             }
 
-            feedback.innerText = "Enviando pedido para a nuvem...";
+            feedback.innerText = "Enviando pedido de amizade...";
             feedback.style.color = "var(--neon-cyan)";
             feedback.style.display = "block";
             
-            db.collection('users').doc(idAlvo).collection('pedidos').doc(meuIDOriginal).set({
+            // TIMEOUT ANTI-TRAVAMENTO (Cancela em 8 segundos se a nuvem falhar)
+            const timeoutPromise = new Promise((_, reject) => 
+                setTimeout(() => reject(new Error("Timeout")), 8000)
+            );
+            
+            const firebasePromise = db.collection('users').doc(idAlvo).collection('pedidos').doc(meuIDOriginal).set({
                 nome: meuNome, 
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            }).then(() => {
+            });
+
+            Promise.race([firebasePromise, timeoutPromise])
+            .then(() => {
                 feedback.innerText = "Pedido de amizade enviado com sucesso!";
                 feedback.style.color = "var(--neon-green)";
                 idInput.value = "";
                 
                 setTimeout(() => { feedback.style.display = "none"; }, 4000);
             }).catch(e => {
-                feedback.innerText = "Erro ao conectar. O Firestore do Firebase está bloqueando.";
+                if (e.message === "Timeout") {
+                    feedback.innerText = "Falha! O Firestore Database (Modo Teste) não está ativo.";
+                } else {
+                    feedback.innerText = "Erro de permissão no Firebase.";
+                }
                 feedback.style.color = "var(--neon-red)";
                 console.error("Erro Firebase:", e);
             });
@@ -1628,7 +1641,7 @@
             iniciarJogo('ia');
         }
 
-        // INICIA JOGO
+        // FUNÇÃO DE INÍCIO COM RESET SEGURO
         function iniciarJogo(m) {
             if(m === 'local') {
                 nomeX = document.getElementById('nomeLocalX').value.trim();
@@ -1678,20 +1691,16 @@
             document.getElementById('sO').innerText = pO;
 
             atualizarStatus();
-
-            if (contraIA && jAtual === 'O') {
-                jogadaIA();
-            }
         }
 
         document.querySelectorAll('.celula').forEach(c => {
             c.addEventListener('click', e => {
                 const i = e.target.dataset.index;
                 
-                // TRAVA BLINDADA PARA IMPEDIR CLIQUE DUPLO DO BOT
+                // TRAVAS DE SEGURANÇA BLINDADAS
                 if (estado[i] !== "" || !ativo) return;
                 if (online && !minhaVez) return;
-                if (contraIA && jAtual === 'O') return; // Bloqueia seu clique enquanto for a vez da IA
+                if (contraIA && jAtual === 'O') return;
                 
                 marcar(i, online ? meuSimbolo : jAtual);
                 
@@ -1810,8 +1819,7 @@
             estado.fill(""); 
             ativo = true; 
             
-            clearTimeout(timeoutIA); // Limpa travadas da IA
-            
+            // Revezamento de quem começa a partida
             quemComeca = quemComeca === "X" ? "O" : "X";
             jAtual = quemComeca;
             
@@ -1835,6 +1843,7 @@
             document.getElementById('btnNovaPartida').style.display = 'none';
             atualizarStatus(); 
 
+            // Se a máquina começa, ela joga agora!
             if (contraIA && jAtual === 'O') {
                 jogadaIA();
             }
@@ -1916,13 +1925,16 @@
             statusEl.style.color = "#fff";
             statusEl.classList.remove('status-vitoria');
             
-            resetLocal(); 
+            // Zera o placar ao sair
             pX = 0; pO = 0;
             document.getElementById('sX').innerText = pX; 
             document.getElementById('sO').innerText = pO;
+            
+            // Garante que a próxima partida o Humano comece
+            quemComeca = "O"; 
         }
 
-        // --- INTELIGÊNCIA ARTIFICIAL (CÉREBRO RESTAURADO E BLINDADO) ---
+        // --- INTELIGÊNCIA ARTIFICIAL PERFEITA E ORIGINAL ---
         function achaMovimentoCritico(jogador) {
             for(let i = 0; i < 9; i++) {
                 if(estado[i] === "") {
@@ -1936,16 +1948,12 @@
         }
 
         function jogadaIA() {
-            // Trava de segurança total contra clique duplo ou bug de loop
-            if (!ativo || !contraIA || jAtual !== 'O') return;
+            if (!ativo || !contraIA) return;
             
             const s = document.getElementById('status');
             s.innerText = "MÁQUINA PENSANDO...";
             
-            timeoutIA = setTimeout(() => {
-                // Checagem de segurança dentro do timer
-                if (!ativo || jAtual !== 'O') return;
-
+            setTimeout(() => {
                 let index;
                 let vazios = estado.filter(x => x === "").length;
                 let disponiveis = estado.map((v, i) => v === "" ? i : null).filter(v => v !== null);
@@ -1962,33 +1970,23 @@
                     } else if (blockMove !== -1) {
                         index = blockMove;
                     } else {
-                        // Faz uma jogada aleatória 25% das vezes pra errar propositalmente
                         if (Math.random() > 0.75) {
                             index = disponiveis[Math.floor(Math.random() * disponiveis.length)];
                         } else {
                             if (vazios === 9) index = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
-                            else {
-                                let estadoCopia = [...estado];
-                                index = minimax(estadoCopia, 'O').index;
-                            }
+                            else index = minimax(estado, 'O').index;
                         }
                     }
                 } 
                 else {
-                    // Ultra Instinto: Nunca erra
+                    // ULTRA INSTINTO (Minimax perfeito original)
                     if (vazios === 9) {
                         index = [0, 2, 4, 6, 8][Math.floor(Math.random() * 5)];
                     } else if (vazios === 8 && estado[4] === "") {
                         index = 4;
                     } else {
-                        let estadoCopia = [...estado];
-                        index = minimax(estadoCopia, 'O').index;
+                        index = minimax(estado, 'O').index;
                     }
-                }
-
-                // Fallback de segurança máxima
-                if (index === undefined || index === null) {
-                    index = disponiveis[0];
                 }
 
                 marcar(index, 'O');
@@ -2022,19 +2020,13 @@
                 if (novoEstado[i] === "") {
                     let mov = { index: i };
                     novoEstado[i] = jogadorAI;
-                    
-                    if (jogadorAI === 'O') {
-                        mov.score = minimax(novoEstado, 'X').score;
-                    } else {
-                        mov.score = minimax(novoEstado, 'O').score;
-                    }
-                    
+                    mov.score = minimax(novoEstado, jogadorAI === 'O' ? 'X' : 'O').score;
                     novoEstado[i] = "";
                     movimentos.push(mov);
                 }
             }
             
-            let melhorMovimento = 0;
+            let melhorMovimento;
             if (jogadorAI === 'O') {
                 let bestScore = -Infinity;
                 for (let i = 0; i < movimentos.length; i++) {
